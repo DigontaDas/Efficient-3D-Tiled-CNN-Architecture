@@ -1,0 +1,30 @@
+# Private data / model weights
+*.pth
+*.nii.gz
+*.pt
+*.nrrd
+archive/
+persistent_cache/
+cache_128/
+
+# Agent / skills folders (not thesis code)
+.agents/
+SKILLS_Main_Added/
+Skills Added Main/
+brain and context for thesis/
+mingit/
+temp-repo/
+
+# Python environment
+.venv_cuda/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db

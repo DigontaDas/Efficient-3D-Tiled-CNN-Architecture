@@ -1,0 +1,2 @@
+Case,Dice,HD95,IoU,Precision,Recall,Model,Original_ID,DataSource
+Case_0,0.0313,266.1391,0.0159,0.0294,0.0335,3D_U-Net,851,Validation_701_Estimate

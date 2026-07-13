@@ -1,0 +1,10 @@
+3D U-Net Evaluation Gap Report
+============================================================
+
+Total test cases in split          : 150
+Predictions found on disk          : 150
+GT labels found                    : 150
+Cases evaluated successfully       : 150
+
+Root cause / Resolution status:
+  All ground truth labels were found successfully. Gap resolved!

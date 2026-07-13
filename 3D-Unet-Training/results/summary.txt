@@ -1,0 +1,25 @@
+
+3D U-Net Training Summary
+========================
+Dataset: c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Dataset_Main
+Model: 3D U-Net with 16 base filters
+Device: cuda
+
+Training Configuration:
+- Epochs trained: 73
+- Initial learning rate: 0.0001
+- Batch size: 8
+- Loss function: Combined Dice + BCE
+- Optimizer: AdamW
+
+Best Results:
+- Best validation Dice: 0.7941
+- Best validation IoU: 0.6597
+- Best epoch: 7
+
+Training was resumed.
+
+Files Generated:
+- Checkpoints: c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\3D-Unet-Training\results\checkpoints
+- Training log: c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\3D-Unet-Training\results\logs\training_log.csv
+- Plots: c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\3D-Unet-Training\results\plots

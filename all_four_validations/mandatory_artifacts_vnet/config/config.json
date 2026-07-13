@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-02-04T13:47:29.764269",
+  "python_version": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3060 Ti",
+  "gpu_memory_gb": 8.589410304,
+  "dataset_root": "H:\\Thesis_Trainings\\Dataset_Main",
+  "dataset_size": 1000,
+  "dataset_stats": {
+    "total_samples": 1000,
+    "sample_shapes": {
+      "min_depth": 206,
+      "max_depth": 275,
+      "height": 512,
+      "width": 512
+    },
+    "voxel_sizes": {
+      "min": [
+        "0.31835938",
+        "0.31835938",
+        "0.5"
+      ],
+      "max": [
+        "0.4296875",
+        "0.4296875",
+        "0.5"
+      ],
+      "mean": [
+        "0.34433594",
+        "0.34433594",
+        "0.5"
+      ]
+    },
+    "label_values": [
+      0.0,
+      1.0
+    ]
+  },
+  "batch_size": 1,
+  "patch_size": [
+    128,
+    128,
+    64
+  ],
+  "learning_rate": 0.0001,
+  "num_epochs": 30,
+  "random_seed": 42,
+  "pytorch_version": "2.6.0+cu124"
+}

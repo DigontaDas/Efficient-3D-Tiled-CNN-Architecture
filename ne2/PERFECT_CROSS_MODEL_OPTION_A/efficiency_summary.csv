@@ -1,0 +1,4 @@
+model,params_millions,gflops,peak_vram_gb,inference_time_mean,inference_time_std
+3D U-Net,101.937,15.2,4.3,2.1,0.3
+V-Net,45.8,8.7,2.1,1.2,0.2
+SegResNet,23.4,5.3,1.8,0.8,0.1
