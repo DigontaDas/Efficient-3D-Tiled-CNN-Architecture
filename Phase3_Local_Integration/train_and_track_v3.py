@@ -246,7 +246,7 @@ def main():
     model = model.to(DEVICE, memory_format=torch.channels_last_3d)
     
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LR)
-    loss_fn = StenosisAwareLoss(alpha=0.5, beta=0.3, delta=0.2, gamma=2.5)
+    loss_fn = StenosisAwareLoss()  # Uses verified defaults: α=0.4, γ=2.5
     scaler = torch.amp.GradScaler('cuda')
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30 * len(loader), eta_min=1e-6)
     

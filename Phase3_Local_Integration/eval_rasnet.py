@@ -12,7 +12,7 @@ Supports:
   (Otherwise evaluates all 150 test cases).
 
 Saves outputs to:
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development\
+e:\Thesis\Code\Efficient-3D-Tiled-CNN-Architecture-main\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development\
 """
 import os
 import sys
@@ -40,7 +40,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATCH_SIZE = (96, 96, 96)
 
 # Paths
-OUTPUT_DIR = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development"
+OUTPUT_DIR = r"e:\Thesis\Code\Efficient-3D-Tiled-CNN-Architecture-main\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development"
 CKPT_PATH = os.path.join(OUTPUT_DIR, "rasnet_best.pth")
 PRED_DIR = os.path.join(OUTPUT_DIR, "predictions")
 SPLITS_FILE = os.path.join(os.path.dirname(__file__), "splits_final.json")

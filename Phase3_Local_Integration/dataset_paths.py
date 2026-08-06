@@ -21,7 +21,7 @@ from __future__ import annotations
 import os
 
 # ── Root of the ImageCAS dataset ─────────────────────────────────────────────
-IMGCAS_BASE = r"c:\Thesis_RASNET\archive"
+IMGCAS_BASE = r"F:\All 3d tile cnn dataset\ImageCas with V-net"
 
 # Range-subdir mapping for format B (inclusive ranges)
 _RANGE_SUBDIRS: list[tuple[int, int, str]] = [
