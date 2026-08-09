@@ -6,7 +6,7 @@ It validates that all files have compatible spacing, orientation, and label form
 import SimpleITK as sitk, os, json
 import numpy as np
 
-LOCAL_DATA_DIR = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Phase3_Local_Integration\local_data"
+LOCAL_DATA_DIR = os.path.join(os.path.dirname(__file__), "local_data")
 EXPECTED_LABEL_VALUES = {0, 1}   # Binary mask: 0=background, 1=vessel
 
 def main() -> None:

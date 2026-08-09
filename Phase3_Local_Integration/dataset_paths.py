@@ -21,7 +21,8 @@ from __future__ import annotations
 import os
 
 # ── Root of the ImageCAS dataset ─────────────────────────────────────────────
-IMGCAS_BASE = r"F:\All 3d tile cnn dataset\ImageCas with V-net"
+LOCAL_ARCHIVE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "archive"))
+IMGCAS_BASE = LOCAL_ARCHIVE_PATH if os.path.exists(LOCAL_ARCHIVE_PATH) else r"C:\Thesis_RASNET\archive"
 
 # Range-subdir mapping for format B (inclusive ranges)
 _RANGE_SUBDIRS: list[tuple[int, int, str]] = [

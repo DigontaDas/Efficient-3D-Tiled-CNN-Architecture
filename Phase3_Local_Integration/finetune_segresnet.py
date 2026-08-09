@@ -31,8 +31,8 @@ except ImportError:
     dataset_paths = None
 
 # ── CONFIG ───────────────────────────────────────────────────────────────────
-PRETRAINED_CKPT = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\all_four_validations\mandatory_artifacts_segresnet\best_resumed.pt"
-LOCAL_DATA_DIR  = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Phase3_Local_Integration\local_data"
+PRETRAINED_CKPT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "all_four_validations", "mandatory_artifacts_segresnet", "best_resumed.pt"))
+LOCAL_DATA_DIR  = os.path.join(os.path.dirname(__file__), "local_data")
 DEVICE          = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATCH_SIZE      = (96, 96, 96)
 LR              = 1e-4

@@ -238,7 +238,9 @@ def main():
     print("=" * 60)
     
     # Paths
-    project_root = "E:\\Thesis\\3D-Unet_Segmentation_IMGcas"
+    primary_root = "E:\\Thesis\\3D-Unet_Segmentation_IMGcas"
+    local_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    project_root = primary_root if os.path.exists(primary_root) else local_root
     checkpoint_dir = os.path.join(project_root, "experiments", "exp02_strong_baseline", "checkpoints")
     log_dir = os.path.join(project_root, "experiments", "exp02_strong_baseline")
     output_dir = os.path.join(project_root, "upload_models_check")

@@ -1,13 +1,8 @@
-# c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Phase3_Local_Integration\train_rasnet.py
-"""
-Training Pipeline for the Custom RASNet Model.
-1. Implements nnU-Net adaptive preprocessing (0.5mm isotropic resampling, [-200, 700] HU windowing).
-2. Loads pre-trained SegResNet weights into RASNet using strict=False.
-3. Optimizes using StenosisAwareLoss (Dice + Focal) and Deep Supervision.
-4. Activates the 5 GPU speedup layers (AMP, TF32, Pinned Memory, Channels-Last 3D, and OneCycleLR).
-
-Saves model weights and loss curves to:
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development\
+# c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Phase3_Local_Integration\run_training_after_fix.py
+r"""
+RASNet Training Runner (Post-Hallucination Fix).
+Outputs all checkpoints, persistent cache, and loss plots directly into:
+c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\results-after-hallucin-fix\
 """
 import torch
 import torch.nn as nn
@@ -37,14 +32,16 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATCH_SIZE = (96, 96, 96)
 BATCH_SIZE = 4
 LR = 2e-4
-EPOCHS = 70  # 70 epochs for full-scale training on secondary dataset
+EPOCHS = 70  # 70 epochs for full-scale training
 
-# Output Paths
-OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Final_Generated_assets", "imagecas_pipeline_validation", "rasnet_development"))
+# Target Output Directory
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+OUTPUT_DIR = os.path.join(BASE_DIR, "results-after-hallucin-fix")
+CKPT_DIR = os.path.join(OUTPUT_DIR, "checkpoints")
 BEST_MODEL_PATH = os.path.join(OUTPUT_DIR, "rasnet_best.pth")
+BEST_MODEL_CKPT_PATH = os.path.join(CKPT_DIR, "rasnet_best.pth")
 PLOT_PATH = os.path.join(OUTPUT_DIR, "loss_curves.png")
 
-# Custom transform to prevent PyTorch/MONAI collate crashes due to MetaTensor metadata
 class ConvertToPlainTensor:
     def __call__(self, data):
         if isinstance(data, dict):
@@ -57,22 +54,17 @@ class ConvertToPlainTensor:
             return cleaned
         return data
 
-# ── nnU-Net ADAPTIVE PREPROCESSING TRANSFORMS ─────────────────────────────────
+# Preprocessing transforms (nnU-Net style isotropic resampling and intensity clipping)
 train_transforms = Compose([
     LoadImaged(keys=["image", "label"]),
     EnsureChannelFirstd(keys=["image", "label"]),
-    # Crop empty background air before resampling to shrink spatial size
     CropForegroundd(keys=["image", "label"], source_key="image"),
-    # nnU-Net Spacing Normalization: 0.5mm isotropic grid
     Spacingd(keys=["image", "label"], pixdim=(0.5, 0.5, 0.5), mode=("bilinear", "nearest")),
-    # nnU-Net Coronary Artery HU Intensity Clipping
     ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
-    # Patch Cropping: 4 patches containing target vessels per volume
     RandCropByPosNegLabeld(
         keys=["image", "label"], label_key="label",
         spatial_size=PATCH_SIZE, pos=2, neg=1, num_samples=2
     ),
-    # Patch-level dynamic data augmentations (flips)
     RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=0),
     RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=1),
     RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=2),
@@ -82,16 +74,19 @@ train_transforms = Compose([
 
 def train_model():
     print("==================================================")
-    print("      RASNET CUSTOM MODEL TRAINING RUN            ")
+    print("  RASNET TRAINING (RESULTS-AFTER-HALLUCIN-FIX)   ")
     print("==================================================")
+    print(f"Device: {DEVICE}")
+    print(f"Target Output Directory: {OUTPUT_DIR}")
     
     if not torch.cuda.is_available():
         print("[ERROR] CUDA is not available. This script must run on a GPU.")
         return
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(CKPT_DIR, exist_ok=True)
     
-    # 1. Resolve dataset files (take 50 cases from splits_final.json training split)
+    # 1. Resolve dataset files from splits_final.json
     splits_file = os.path.join(os.path.dirname(__file__), "splits_final.json")
     if not os.path.exists(splits_file):
         raise FileNotFoundError(f"Splits file not found: {splits_file}")
@@ -99,22 +94,25 @@ def train_model():
     with open(splits_file) as f:
         splits = json.load(f)
     train_ids = splits.get("train", [])
+    
     if "--dry-run" in sys.argv:
         train_ids = train_ids[:5]
         epochs = 1
+        print(f"Running Dry-Run mode with {len(train_ids)} cases, {epochs} epoch.")
     else:
-        train_ids = train_ids
         epochs = EPOCHS
-    print(f"Loading {len(train_ids)} ImageCAS scans for training: {train_ids}")
+        print(f"Loading {len(train_ids)} ImageCAS scans for full training ({epochs} epochs)...")
     
     data_files = []
     for cid in train_ids:
-        data_files.append({
-            "image": dataset_paths.find_image(cid),
-            "label": dataset_paths.find_label(cid)
-        })
+        img_p = dataset_paths.find_image(cid)
+        lbl_p = dataset_paths.find_label(cid)
+        if img_p and lbl_p:
+            data_files.append({"image": img_p, "label": lbl_p})
 
-    # Caching preprocessed volumes on disk using PersistentDataset to prevent RAM paging
+    print(f"Valid dataset files found: {len(data_files)}")
+
+    # Caching preprocessed volumes on disk
     cache_dir = os.path.join(OUTPUT_DIR, "persistent_cache")
     os.makedirs(cache_dir, exist_ok=True)
     dataset = PersistentDataset(data=data_files, transform=train_transforms, cache_dir=cache_dir)
@@ -136,12 +134,21 @@ def train_model():
         dropout_prob=0.1
     )
     
-    pretrained_ckpt = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "all_four_validations", "mandatory_artifacts_segresnet", "best_resumed.pt"))
-    if os.path.exists(pretrained_ckpt):
+    pretrained_candidates = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Final_Generated_assets", "imagecas_pipeline_validation", "rasnet_development", "rasnet_best.pth")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Final_Generated_assets", "imagecas_pipeline_validation", "finetune_dry_run", "finetuned_segresnet_best.pth")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "all_four_validations", "mandatory_artifacts_segresnet", "best_resumed.pt"))
+    ]
+    pretrained_ckpt = None
+    for p in pretrained_candidates:
+        if os.path.exists(p):
+            pretrained_ckpt = p
+            break
+
+    if pretrained_ckpt:
         print(f"Transferring pre-trained weights from {pretrained_ckpt} (strict=False)...")
         state = torch.load(pretrained_ckpt, map_location=DEVICE)
-        state_dict = state["model_state_dict"] if "model_state_dict" in state else state
-        # load encoder/decoder weights, ignoring attention layers which initialize randomly
+        state_dict = state["model_state_dict"] if isinstance(state, dict) and "model_state_dict" in state else state
         model.load_state_dict(state_dict, strict=False)
     else:
         print("[WARNING] Pre-trained checkpoint not found. Training from scratch.")
@@ -149,9 +156,8 @@ def train_model():
     model = model.to(DEVICE, memory_format=torch.channels_last_3d)
 
     # 3. Setup optimizer, loss function, and scheduler
-    # We only train parameters that require grad (decoder + attention layers)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LR)
-    loss_fn = StenosisAwareLoss()  # Uses verified defaults: α=0.4, γ=2.5
+    loss_fn = StenosisAwareLoss()  # α=0.4, γ=2.5
     scaler = torch.amp.GradScaler('cuda')
     
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -177,21 +183,15 @@ def train_model():
             optimizer.zero_grad()
             
             with torch.amp.autocast('cuda'):
-                # Forward pass returns final output and auxiliary outputs for Deep Supervision
                 preds, ds_preds = model(imgs)
                 
-                # Compute main loss
                 main_loss = loss_fn(preds, labels)
-                
-                # Upsample auxiliary predictions to full resolution and compute loss
-                # ds_preds[0] = decoder level 2 (half-res), ds_preds[1] = decoder level 3 (quarter-res)
                 aux2_pred = F.interpolate(ds_preds[0], size=labels.shape[2:], mode='trilinear', align_corners=True)
                 aux3_pred = F.interpolate(ds_preds[1], size=labels.shape[2:], mode='trilinear', align_corners=True)
                 
                 aux2_loss = loss_fn(aux2_pred, labels)
                 aux3_loss = loss_fn(aux3_pred, labels)
                 
-                # Weighted total loss: 1.0 * main_loss + 0.4 * aux2_loss + 0.2 * aux3_loss
                 loss = main_loss + 0.4 * aux2_loss + 0.2 * aux3_loss
 
             scaler.scale(loss).backward()
@@ -212,10 +212,10 @@ def train_model():
         if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), BEST_MODEL_PATH)
+            torch.save(model.state_dict(), BEST_MODEL_CKPT_PATH)
             
-        # Save checkpoints every 5 epochs
-        if epoch % 5 == 0:
-            ckpt_path = os.path.join(OUTPUT_DIR, f"rasnet_epoch_{epoch}.pth")
+        if epoch % 5 == 0 or epoch == epochs:
+            ckpt_path = os.path.join(CKPT_DIR, f"rasnet_epoch_{epoch}.pth")
             torch.save(model.state_dict(), ckpt_path)
             print(f" -> Saved Checkpoint: {ckpt_path}")
 
@@ -226,7 +226,7 @@ def train_model():
     plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
     plt.figure(figsize=(7, 4.5), dpi=300)
     plt.plot(range(1, epochs + 1), losses, color='#10b981', marker='o', linewidth=2, label='RASNet Training Loss')
-    plt.title('RASNet Custom Model Training Curve (StenosisAwareLoss)', fontsize=11, fontweight='bold', pad=12)
+    plt.title('RASNet Training Curve (Post-Hallucination Fix)', fontsize=11, fontweight='bold', pad=12)
     plt.xlabel('Epoch', fontweight='semibold')
     plt.ylabel('Loss (Dice + Focal + Deep Supervision)', fontweight='semibold')
     plt.legend()
@@ -234,7 +234,7 @@ def train_model():
     plt.savefig(PLOT_PATH, bbox_inches='tight')
     plt.close()
     
-    print(f"[OK] Saved Model: {BEST_MODEL_PATH}")
+    print(f"[OK] Saved Best Model: {BEST_MODEL_PATH}")
     print(f"[OK] Saved Plot: {PLOT_PATH}")
     print("==================================================")
 
