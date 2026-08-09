@@ -7,7 +7,7 @@ Training Pipeline for the Custom RASNet Model.
 4. Activates the 5 GPU speedup layers (AMP, TF32, Pinned Memory, Channels-Last 3D, and OneCycleLR).
 
 Saves model weights and loss curves to:
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development\
+e:\Thesis\Code\Efficient-3D-Tiled-CNN-Architecture-main\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development\
 """
 import torch
 import torch.nn as nn
@@ -40,7 +40,7 @@ LR = 2e-4
 EPOCHS = 70  # 70 epochs for full-scale training on secondary dataset
 
 # Output Paths
-OUTPUT_DIR = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development"
+OUTPUT_DIR = r"e:\Thesis\Code\Efficient-3D-Tiled-CNN-Architecture-main\Final_Generated_assets\imagecas_pipeline_validation\rasnet_development"
 BEST_MODEL_PATH = os.path.join(OUTPUT_DIR, "rasnet_best.pth")
 PLOT_PATH = os.path.join(OUTPUT_DIR, "loss_curves.png")
 
@@ -136,7 +136,7 @@ def train_model():
         dropout_prob=0.1
     )
     
-    pretrained_ckpt = r"c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\all_four_validations\mandatory_artifacts_segresnet\best_resumed.pt"
+    pretrained_ckpt = r"e:\Thesis\Code\Efficient-3D-Tiled-CNN-Architecture-main\all_four_validations\mandatory_artifacts_segresnet\best_resumed.pt"
     if os.path.exists(pretrained_ckpt):
         print(f"Transferring pre-trained weights from {pretrained_ckpt} (strict=False)...")
         state = torch.load(pretrained_ckpt, map_location=DEVICE)
@@ -151,7 +151,7 @@ def train_model():
     # 3. Setup optimizer, loss function, and scheduler
     # We only train parameters that require grad (decoder + attention layers)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LR)
-    loss_fn = StenosisAwareLoss(gamma=2.5)
+    loss_fn = StenosisAwareLoss()  # Uses verified defaults: α=0.4, γ=2.5
     scaler = torch.amp.GradScaler('cuda')
     
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
