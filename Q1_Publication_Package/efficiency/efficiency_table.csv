@@ -1,0 +1,6 @@
+Model,Parameters (M),Trainable Params (M),GFLOPs (96³ Patch),Patch Latency (ms),Full-Volume Inference (s),Peak VRAM (MB),Dice (DSC),Architecture Note
+RASNet (Ours),4.707,4.707,123.39,19.23,1.85,751.2,0.7862,Custom Attention + Deep Sup
+SegResNet,4.701,4.701,122.56,16.58,0.42,642.2,0.7637,Standard Baseline
+3D U-Net,4.806,4.806,22.96,3.13,0.58,337.6,0.6087,Standard Baseline
+nnU-Net V2,16.544,16.544,445.11,21.84,2.45,1083.6,0.6003,Standard Baseline
+V-Net,45.598,45.598,640.22,36.24,3.12,777.9,,Standard Baseline

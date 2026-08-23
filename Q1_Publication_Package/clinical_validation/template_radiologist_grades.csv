@@ -1,0 +1,6 @@
+case_id,rasnet_stenosis_pct,radiologist_1_stenosis_pct,radiologist_2_stenosis_pct,cad_rads_grade,lesion_location
+851,0.0,,,,e.g. Proximal LAD / Mid RCA
+860,0.0,,,,e.g. Proximal LAD / Mid RCA
+900,0.0,,,,e.g. Proximal LAD / Mid RCA
+920,0.0,,,,e.g. Proximal LAD / Mid RCA
+934,0.0,,,,e.g. Proximal LAD / Mid RCA
