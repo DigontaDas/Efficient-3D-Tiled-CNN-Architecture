@@ -1,6 +1,6 @@
 # 📌 Upto-What's-Done: Complete Thesis Project Progress & Status Report
 
-This document compiles the exhaustive progress of the **RASNet (Residual Attention Segmentation Network)** 3D Coronary Artery Segmentation Thesis project up until now. It documents all completed engineering milestones, pipeline implementations, benchmark comparisons, bug fixes, generalization tests, clinical post-processing, storage optimizations, and Git repository synchronizations.
+This document compiles the exhaustive progress of the **RASNet (Residual Attention Segmentation Network)** 3D Coronary Artery Segmentation Thesis project up until now. It documents all completed engineering milestones, pipeline implementations, benchmark comparisons, bug fixes, generalization tests, clinical post-processing, storage optimizations, statistical significance evaluations, and Q1 publication deliverables across both GitHub repositories.
 
 ---
 
@@ -14,13 +14,14 @@ flowchart TD
     D --> E["Phase 4: RASNet Post-Hallucination Fix Training & Evaluation"]
     E --> F["Phase 5: Out-of-Distribution Generalization & Clinical Reports"]
     F --> G["Phase 6: Storage Optimization & Dual GitHub Sync"]
+    G --> H["Phase 7: Q1 Publication Package, Statistical Significance & CLAIM 2024 Compliance"]
 ```
 
 ---
 
 ### ⚙️ Phase 0: Environment & Hardware Acceleration Setup
-* **Python Environment Setup**: Formulated a dedicated virtual environment (`.venv_cuda`) equipped with `torch 2.6.0+cu124`, `monai 1.4.0`, `simpleitk`, `cc3d`, `scikit-image`, `scipy`, and `matplotlib`.
-* **GPU Hardware Optimization**: Configured training pipelines for local **NVIDIA GeForce RTX 3060 Ti (8 GB VRAM)**:
+* **Python Environment Setup**: Formulated a dedicated virtual environment (`.venv_cuda`) equipped with `torch 2.6.0+cu124`, `monai 1.5.2`, `simpleitk`, `cc3d`, `scikit-image`, `scipy`, `seaborn`, and `matplotlib`.
+* **GPU Hardware Optimization**: Configured training and inference pipelines for local **NVIDIA GeForce RTX 4080 SUPER (16 GB VRAM)**:
   * Automatic Mixed Precision (`torch.amp.autocast`)
   * TensorFloat-32 (`TF32`) matrix multiplication execution
   * Non-blocking Pinned Memory transfers
@@ -63,11 +64,11 @@ Configured, ran, and evaluated all baseline models across the **150 reserved tes
 ### 🧠 Phase 4: Custom RASNet Architecture & Post-Hallucination Fix Champion Run
 * **Custom Architecture ([`rasnet_model.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/rasnet_model.py))**: Subclassed `SegResNet` to inject `AttentionGate3D` additive spatial/channel skip connection gates and intermediate decoder **Deep Supervision** outputs (`aux2`, `aux3`).
 * **Calibrated Loss Function ([`rasnet_loss.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/rasnet_loss.py))**: Formulated `StenosisAwareLoss` ($\alpha = 0.4 \cdot \mathcal{L}_{\text{Dice}} + 0.6 \cdot \mathcal{L}_{\text{Focal}}$, $\gamma = 2.5$) to eliminate background false-positive hallucinations while preserving thin distal vessel gradients.
-* **70-Epoch Training Completion ([`run_training_after_fix.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/run_training_after_fix.py))**: Successfully trained RASNet on 690 ImageCAS training scans, reaching a minimal loss of **`0.1099`**. Saved champion weights in [`rasnet_best.pth`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/rasnet_best.pth).
+* **70-Epoch Training Completion ([`run_training_after_fix.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/run_training_after_fix.py))**: Successfully trained RASNet on 690 ImageCAS training scans, reaching a minimal loss of **`0.1099`**. Saved champion weights in [`rasnet_best.pth`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/checkpoints/rasnet_best.pth).
 * **Full 150-Case Test Evaluation ([`run_evaluation_after_fix.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/run_evaluation_after_fix.py), $N=150$)**: Evaluated champion weights across all 150 reserved test cases applying 4-pass TTA, MONAI `Invertd` coordinate restoration, $0.6$ thresholding, and `cc3d` top-2 connected component topology filtering:
   * **Mean Dice (DSC)**: **`0.7862 ± 0.0721`** (Highest overlap score, outperforming SegResNet's `0.7637` and nnU-Net's `0.6003`)
   * **Mean IoU**: **`0.6530 ± 0.0898`** (Highest IoU match)
-  * **Mean Precision**: **`0.8585 ± 0.0701`** (**World-class precision**, confirming 100% removal of background false-positive hallucinations)
+  * **Mean Precision**: **`0.8585 ± 0.0701`** (World-class precision, substantially eliminating floating false-positive artifacts)
   * **Mean Recall**: **`0.7319 ± 0.0970`**
   * **Mean HD95**: **`9.74 ± 11.44 mm`** (Slashed boundary error from baseline $36.27\text{ mm}$ down to $9.74\text{ mm}$)
 
@@ -82,9 +83,41 @@ Configured, ran, and evaluated all baseline models across the **150 reserved tes
 
 ### 🧹 Phase 6: Storage Optimization & Dual GitHub Repository Sync
 * **Storage Optimization**: Safely cleaned **`554.87 GB`** of temporary MONAI `persistent_cache` folders while preserving all code, models, CSVs, overlays, and reports.
-* **Author Identity & Dual Git Sync**: Configured Git user identity to **`Rytnix786 <nafismehedi37@gmail.com>`** and synchronized/pushed all code, reports, figures, and artifacts directly to the root of both GitHub repositories:
-  1. 🔗 [`https://github.com/DigontaDas/Efficient-3D-Tiled-CNN-Architecture`](https://github.com/DigontaDas/Efficient-3D-Tiled-CNN-Architecture)
-  2. 🔗 [`https://github.com/Rytnix786/thesis_3dcnn-arch`](https://github.com/Rytnix786/thesis_3dcnn-arch)
+* **Author Identity & Dual Git Sync**: Configured Git user identity to **`Rytnix786 <nafismehedi37@gmail.com>`** and synchronized/pushed all code, reports, figures, and artifacts directly to both GitHub repositories.
+
+---
+
+### 🏛️ Phase 7: Complete Q1 Publication Package & Statistical Rigor
+Generated all statistical tests, progressive ablation tables, Pareto efficiency curves, attention map extractions, failure mode analyses, and compliance documents under [`Q1_Publication_Package/`](file:///c:/Thesis_RASNET/Q1_Publication_Package/):
+
+1. **Statistical Significance Testing ([`01_significance_testing.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/stats/01_significance_testing.py))**:
+   * Paired two-sided Wilcoxon signed-rank tests across $N=150$ test cases with step-down Holm-Bonferroni correction:
+     * RASNet vs. SegResNet: Dice **$p = 3.09 \times 10^{-15}$ ($***$)**, IoU **$p = 1.76 \times 10^{-15}$ ($***$)**, Precision **$p = 2.70 \times 10^{-20}$ ($***$)**.
+     * RASNet vs. nnU-Net V2: Dice **$p = 8.57 \times 10^{-25}$ ($***$)**, HD95 **$p = 3.66 \times 10^{-25}$ ($***$)**.
+     * RASNet vs. 3D U-Net: Dice **$p = 2.80 \times 10^{-24}$ ($***$)**, Recall **$p = 1.97 \times 10^{-22}$ ($***$)**.
+   * Non-parametric percentile bootstrap 95% confidence intervals ($B=2000$ iterations, seed 42):
+     * Dice: `0.7862 [0.7744, 0.7972]` | IoU: `0.6530 [0.6384, 0.6668]` | Precision: `0.8585 [0.8475, 0.8693]`.
+2. **Component-Wise Ablation Study ([`02_ablation_study.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/ablation/02_ablation_study.py))**:
+   * Quantified progressive 6-row contributions: SegResNet Baseline ($0.7637$) $\rightarrow$ + AttentionGates ($0.7712$) $\rightarrow$ + Deep Supervision ($0.7758$) $\rightarrow$ + StenosisAwareLoss ($0.7795$) $\rightarrow$ + 4-Pass TTA ($0.7830$) $\rightarrow$ + cc3d ($0.7862$).
+   * Generated 300 DPI grouped bar chart ([`ablation_bar_chart.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/ablation/ablation_bar_chart.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/ablation/ablation_bar_chart.svg)).
+3. **Computational Efficiency Profiling ([`03_efficiency_benchmark.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/efficiency/03_efficiency_benchmark.py))**:
+   * Hardware-profiled on **NVIDIA GeForce RTX 4080 SUPER (16 GB VRAM)**:
+     * Parameters: **4.71M** (+0.2% over SegResNet 4.70M; 71% fewer than nnU-Net 16.54M).
+     * Computational Complexity: **123.39 GFLOPs** (72% fewer than nnU-Net 445.11 GFLOPs; 81% fewer than V-Net 640.22 GFLOPs).
+     * Single-Volume Inference Latency: **1.85s/case** (including 4-pass TTA and cc3d).
+     * Generated Pareto frontier scatter plots ([`efficiency_vs_dice_scatter.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/efficiency/efficiency_vs_dice_scatter.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/efficiency/efficiency_vs_dice_scatter.svg)).
+4. **Publication Distribution Figures ([`04_distribution_figures.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/04_distribution_figures.py))**:
+   * 1×3 publication panel with boxplots + jittered strip plots ($N=150$) and Holm-corrected significance brackets ([`dice_iou_hd95_distributions.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/dice_iou_hd95_distributions.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/dice_iou_hd95_distributions.svg)).
+5. **Vector Architecture Schematic ([`05_architecture_diagram.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/05_architecture_diagram.py))**:
+   * Journal double-column vector diagram detailing ResNet encoder, AttentionGate3D internal operations, deep supervision auxiliary heads, and loss formulation ([`architecture_diagram.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/architecture_diagram.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/architecture_diagram.svg)).
+6. **3D Attention Map Heatmaps ([`06_attention_visualization.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/06_attention_visualization.py))**:
+   * Captured forward hook attention coefficients ($\psi$) across Axial, Coronal, Sagittal CT slices for representative Cases 851 & 934 ([`attention_maps_case851.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/attention_maps_case851.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/attention_maps_case851.svg) and [`attention_maps_case934.png`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/attention_maps_case934.png) / [`.svg`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/attention_maps_case934.svg)).
+7. **Quantitative Failure Mode Analysis ([`09_failure_cases.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/09_failure_cases.py))**:
+   * 3-View MIP overlay gallery and clinical breakdown in [`failure_analysis.md`](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/failure_analysis.md) analyzing the Top-2 connected-component ranking blindspot on contiguous non-coronary over-segmentations (Cases 930, 941) and distal vessel tapering (Case 978).
+8. **Clinical Stenosis Validation & Compliance Checklist**:
+   * Stenosis validation pipeline ([`07_stenosis_agreement.py`](file:///c:/Thesis_RASNET/Q1_Publication_Package/clinical_validation/07_stenosis_agreement.py)) and radiologist grading template ([`template_radiologist_grades.csv`](file:///c:/Thesis_RASNET/Q1_Publication_Package/clinical_validation/template_radiologist_grades.csv)).
+   * Filled RSNA CLAIM 2024 42-Item Checklist ([`08_claim_checklist.md`](file:///c:/Thesis_RASNET/Q1_Publication_Package/checklist/08_claim_checklist.md)).
+   * Academic integrity gap tracking log ([`MISSING_INPUTS.md`](file:///c:/Thesis_RASNET/Q1_Publication_Package/MISSING_INPUTS.md)).
 
 ---
 
@@ -104,7 +137,7 @@ Configured, ran, and evaluated all baseline models across the **150 reserved tes
 
 | Metric | RASNet Before Fix (v1 Baseline) | RASNet After Fix (Post-Fix Champion) | Absolute Improvement | Relative Gain (%) | Clinical Benefit |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Precision** | `0.8410` | **`0.8585`** | **`+0.0175`** | **`+2.1%`** | 🛡️ Total removal of false-positive floating background blobs |
+| **Precision** | `0.8410` | **`0.8585`** | **`+0.0175`** | **`+2.1%`** | 🛡️ Substantial suppression of false-positive floating background blobs |
 | **Dice (DSC)** | `0.7369` | **`0.7862`** | **`+0.0493`** | **`+6.7%`** | 📈 Major overall overlap accuracy jump (+4.9 Dice points) |
 | **IoU** | `0.5888` | **`0.6530`** | **`+0.0642`** | **`+10.9%`** | 📐 Significantly tighter 3D vessel volume matching |
 | **Recall** | `0.6494` | **`0.7319`** | **`+0.0825`** | **`+12.7%`** | 🌿 Recovered thin distal arterial branches & side vessels |
@@ -114,14 +147,16 @@ Configured, ran, and evaluated all baseline models across the **150 reserved tes
 
 ## 📂 Active Dedicated Artifacts Registry
 
-* **Results Folder**: [results-after-hallucin-fix/](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/)
-* **Best Model Checkpoint**: [rasnet_best.pth](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/rasnet_best.pth)
-* **Test Metrics CSV**: [metrics_rasnet.csv](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/metrics_rasnet.csv)
-* **Full Evaluation Report**: [rasnet_evaluation_report.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/rasnet_evaluation_report.md)
+* **Q1 Publication Package Root**: [Q1_Publication_Package/](file:///c:/Thesis_RASNET/Q1_Publication_Package/)
+* **Statistical Significance Table**: [stats_significance_table.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/stats/stats_significance_table.md)
+* **Bootstrap 95% CIs**: [bootstrap_CI_table.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/stats/bootstrap_CI_table.md)
+* **Progressive Ablation Table**: [ablation_table.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/ablation/ablation_table.md)
+* **Computational Efficiency Benchmark**: [efficiency_table.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/efficiency/efficiency_table.md)
+* **CLAIM 2024 Checklist**: [08_claim_checklist.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/checklist/08_claim_checklist.md)
+* **Failure Analysis Report**: [failure_analysis.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/figures/failure_analysis.md)
+* **Missing Inputs Academic Integrity Log**: [MISSING_INPUTS.md](file:///c:/Thesis_RASNET/Q1_Publication_Package/MISSING_INPUTS.md)
+* **Champion Model Checkpoint**: [rasnet_best.pth](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/checkpoints/rasnet_best.pth)
 * **Post-Fix Walkthrough**: [walkthrough.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/walkthrough.md)
 * **Final Comparison Report**: [comparison_report_final.md](file:///c:/Thesis_RASNET/comparison_report_final.md)
 * **Problems & Adaptations Document**: [RASNet_Problems_and_Adaptations_Documentation.md](file:///c:/Thesis_RASNET/RASNet_Problems_and_Adaptations_Documentation.md)
-* **Qualitative & 3D MIP Overlays**: [qualitative_overlays/](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/)
-* **Clinical Vessel & Stenosis Reports**: [clinical_postprocess/](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/)
-* **Generalization Outputs**: [generalization_outputs/](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/generalization_outputs/)
 * **Enriched README**: [README.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/README.md)
