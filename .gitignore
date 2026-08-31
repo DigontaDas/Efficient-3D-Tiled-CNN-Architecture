@@ -3,6 +3,9 @@
 *.nii.gz
 *.pt
 *.nrrd
+
+# Explicitly track the champion RASNet model weights
+!results-after-hallucin-fix/checkpoints/rasnet_best.pth
 archive/
 persistent_cache/
 cache_128/
