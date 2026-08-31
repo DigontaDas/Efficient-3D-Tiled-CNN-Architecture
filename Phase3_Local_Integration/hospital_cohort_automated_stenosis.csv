@@ -1,0 +1,8 @@
+case_id,centerline_points,mean_diameter_mm,std_diameter_mm,min_diameter_mm,ref_diameter_mm,rasnet_stenosis_pct,cad_rads_grade,plot_path
+CT61,900,2.688,0.969,0.528,3.964,86.7,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT61\vessel_centerline_overlay_CT61.png
+CT62,904,3.016,1.58,0.384,5.398,92.9,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT62\vessel_centerline_overlay_CT62.png
+CT63,1224,2.167,0.678,0.391,2.875,86.4,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT63\vessel_centerline_overlay_CT63.png
+CT64,1213,2.649,1.124,0.555,4.135,86.6,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT64\vessel_centerline_overlay_CT64.png
+CT65,820,2.445,0.869,0.38,3.516,89.2,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT65\vessel_centerline_overlay_CT65.png
+CT66,461,1.858,0.627,0.371,2.586,85.7,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT66\vessel_centerline_overlay_CT66.png
+CT67,2244,2.733,0.737,0.313,3.585,91.3,4,H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT67\vessel_centerline_overlay_CT67.png
