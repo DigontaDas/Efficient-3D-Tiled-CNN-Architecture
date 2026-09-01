@@ -89,8 +89,9 @@ def topological_postprocess(pred_mask: np.ndarray, min_size=50) -> np.ndarray:
 def run_gpu_inference(model: RASNet, img_path: str, pred_path: str):
     """Executes 4-Pass TTA 3D Inference with MONAI Invertd coordinate restoration."""
     start_t = time.time()
+    torch.cuda.empty_cache()
     batch = pre_trans({"image": img_path})
-    input_tensor = batch["image"].unsqueeze(0).to(DEVICE, memory_format=torch.channels_last_3d)
+    input_tensor = batch["image"].unsqueeze(0).to(DEVICE)
 
     with torch.no_grad():
         with torch.amp.autocast('cuda'):
@@ -101,18 +102,22 @@ def run_gpu_inference(model: RASNet, img_path: str, pred_path: str):
             prob_avg = torch.softmax(logits, dim=1)
 
             for flip_dim in (2, 3, 4):
-                input_flip = torch.flip(input_tensor, dims=[flip_dim])
+                input_flip = torch.flip(input_tensor, dims=[flip_dim]).contiguous()
                 logits_flip = sliding_window_inference(
                     input_flip, roi_size=PATCH_SIZE, sw_batch_size=SW_BATCH_SIZE,
                     predictor=model, overlap=0.5
                 )
-                prob_avg += torch.softmax(torch.flip(logits_flip, dims=[flip_dim]), dim=1)
+                prob_avg += torch.softmax(torch.flip(logits_flip, dims=[flip_dim]).contiguous(), dim=1)
 
             prob_avg /= 4.0
 
     # Invert transforms to restore original physical coordinate grid
     batch["pred"] = prob_avg.squeeze(0)
     batch = post_trans(batch)
+
+    # Free GPU VRAM
+    del input_tensor, logits, prob_avg
+    torch.cuda.empty_cache()
 
     # Threshold foreground confidence at 0.55
     pred_probs = batch["pred"]
@@ -346,8 +351,8 @@ def main():
     model.eval()
     print("RASNet loaded successfully on RTX 3060 Ti GPU!\n", flush=True)
 
-    # Process remaining cohort cases: CT68 to CT90
-    target_ids = list(range(68, 91))
+    # Process remaining cohort cases: CT78 to CT90
+    target_ids = list(range(78, 91))
     success_count = 0
 
     for cid in target_ids:
