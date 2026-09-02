@@ -1,6 +1,6 @@
 case_id,rasnet_stenosis_pct,radiologist_stenosis_pct,rasnet_cad_rads,radiologist_cad_rads,lesion_location,difference
 CT1,10.0,10.0,CAD-RADS 1 (Minimal),CAD-RADS 1 (Minimal),LAD Patent,0.0
-CT4,58.1,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LCx,-26.9
+CT4,58.1,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),Mid-LCx (50-69%),-1.9
 CT5,100.0,100.0,CAD-RADS 5 (Total Occlusion),CAD-RADS 5 (Occlusion),LAD Occlusion,0.0
 CT61,77.9,60.0,CAD-RADS 4 (Severe),CAD-RADS 3 (Moderate),RCA/PDA,17.9
 CT62,10.0,10.0,CAD-RADS 1 (Minimal),CAD-RADS 1 (Minimal),LAD Patent,0.0
@@ -10,7 +10,7 @@ CT65,58.3,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),Prox-LAD,-1.7
 CT66,78.4,37.5,CAD-RADS 4 (Severe),CAD-RADS 2 (Mild),PDA/RCA,40.9
 CT67,62.9,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD/LCx,2.9
 CT68,67.5,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/LCx,-17.5
-CT70,35.4,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),RCA,-24.6
+CT70,74.6,95.0,CAD-RADS 4 (Severe),CAD-RADS 4B (Critical),LAD (90-99%),-20.4
 CT71,52.9,37.5,CAD-RADS 3 (Moderate),CAD-RADS 2 (Mild),LCx,15.4
 CT72,69.4,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-10.6
 CT73,75.2,60.0,CAD-RADS 4 (Severe),CAD-RADS 3 (Moderate),LCx/LAD,15.2
