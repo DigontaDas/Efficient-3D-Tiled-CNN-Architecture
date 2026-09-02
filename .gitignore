@@ -35,3 +35,6 @@ Thumbs.db
 # Intermediate inspection crops
 Phase3_Local_Integration/extracted_badges/
 Phase3_Clinical_Audit/
+
+# Handoff packages
+Q1_Publication_Package/handoff_for_digonto/
