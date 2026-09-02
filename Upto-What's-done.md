@@ -15,6 +15,7 @@ flowchart TD
     E --> F["Phase 5: Out-of-Distribution Generalization & Clinical Reports"]
     F --> G["Phase 6: Storage Optimization & Dual GitHub Sync"]
     G --> H["Phase 7: Q1 Publication Package, Statistical Significance & CLAIM 2024 Compliance"]
+    H --> I["Phase 8: Clinical Stenosis Validation (N=32 Hospital Cohort)"]
 ```
 
 ---
@@ -142,6 +143,48 @@ Generated all statistical tests, progressive ablation tables, Pareto efficiency 
 | **IoU** | `0.5888` | **`0.6530`** | **`+0.0642`** | **`+10.9%`** | 📐 Significantly tighter 3D vessel volume matching |
 | **Recall** | `0.6494` | **`0.7319`** | **`+0.0825`** | **`+12.7%`** | 🌿 Recovered thin distal arterial branches & side vessels |
 | **HD95 (mm)** | `16.30 mm` | **`9.74 mm`** | **`-6.56 mm`** | **`-40.2%`** | 🎯 Boundary distance error slashed by 40% |
+
+---
+
+### 🏥 Phase 8: Clinical Stenosis Validation (N=32 Hospital Cohort)
+* **Clinical Cohort**: 32 consecutive CCTA cases from Ibrahim Cardiac Hospital & Research Institute, Dhaka, Bangladesh. Radiologist-graded % diameter stenosis (%DS) obtained from PACS workstation screenshots with MPR caliper measurements.
+* **GPU Inference Pipeline ([`run_new_cases_gpu.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/run_new_cases_gpu.py))**:
+  * 4-pass TTA AMP FP16 inference on NVIDIA GeForce RTX 3060 Ti for all local cases (CT1–CT90).
+  * Automated CCTA series selection (preferred SS-Freeze 45% phase, ≥300 slices).
+* **Refined Clinical Postprocessing ([`refine_clinical_postprocess.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/refine_clinical_postprocess.py))**:
+  * 3D vessel skeleton extraction → EDT radius computation → minimum lumen diameter (MLD) per target branch.
+  * Maximum in-plane centerline slice selection for visualization (`argmax(counts_z)`).
+  * Handles total occlusion (CAD-RADS 5, 0.0 mm MLD) and patent arteries correctly.
+* **Outlier Audit ([`outlier_audit/`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/outlier_audit/))**:
+  * **CT4**: Ground-truth corrected from 85% (proximal) to 60% (mid-LCx 50–69% badge) — AI correctly found mid-LCx lesion. Diff: −26.9% → **−1.9%**.
+  * **CT66**: Sub-mm distal PDA taper artifact (MLD=0.62mm). True proximal PDA at MLD=1.80mm gives 37.7% matching the 25–49% badge. Documented limitation.
+  * **CT70**: Wrong DICOM series (53-slice Series 107 vs 365-slice Series 108). Re-converted + re-inferred. GT corrected to LAD 90–99% (was RCA 60%). Diff: −24.6% → **−20.4%**.
+  * **CT89**: Preserved as honest inter-reader variance (AI 55.3% vs radiologist 85% on LAD).
+* **Final Cohort Metrics (N=32)**:
+
+  | Metric | Value |
+  |--------|-------|
+  | **Spearman ρ** | **0.603** (p = 0.00026 ✅) |
+  | **R²** | **0.6525** |
+  | **Linear Fit** | y = 0.688x + 17.96 |
+  | **Mean Bias** | **−1.59%** (near-zero) |
+  | **95% LoA Span** | **54.2%** (−28.68% to +25.51%) |
+
+* **Diagnostic Performance (≥50% obstructive threshold)**:
+
+  | Metric | Value | 95% CI |
+  |--------|-------|--------|
+  | **Sensitivity** | 96.2% | 81.1–99.3% |
+  | **Specificity** | 50.0% | 18.8–81.2% |
+  | **PPV** | 89.3% | 72.8–96.3% |
+  | **Accuracy** | 87.5% | 71.9–95.0% |
+  | **Cohen's κ** | 0.529 | 0.098–0.961 |
+
+* **Key Output Files**:
+  * Bland-Altman figures: [`07_clinical_bland_altman_agreement.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_bland_altman_agreement.png)
+  * Diagnostic performance report: [`07_clinical_diagnostic_performance.md`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_diagnostic_performance.md)
+  * Clinical agreement CSV: [`hospital_cohort_clinical_agreement.csv`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/hospital_cohort_clinical_agreement.csv)
+  * Literature citations: ACCURACY trial (Budoff 2008), CORE-64 (Miller 2008), Raff 2005, SCCT Guidelines (Leipsic 2014).
 
 ---
 

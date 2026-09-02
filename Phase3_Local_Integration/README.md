@@ -68,3 +68,38 @@ All generated assets are stored in:
   - `slice_overlays.png`
   - `grouped_metrics_barchart.png`
 - **Decision Log**: `c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\main_thesis_decision_log.md`
+
+---
+
+## 5. Clinical Validation Pipeline (Phase 8 — N=32 Hospital Cohort)
+
+Scripts for the local hospital CCTA clinical stenosis validation against radiologist PACS measurements:
+
+- **`run_new_cases_gpu.py`**: Runs 4-pass TTA AMP FP16 inference on RTX 3060 Ti for new local CCTA cases (automatic DICOM series selection + NIfTI conversion + GPU segmentation).
+- **`refine_clinical_postprocess.py`**: Extracts 3D vessel centerlines via skeletonization, computes per-branch EDT radii, identifies minimum lumen diameter (MLD), and generates a 2-panel vessel overlay PNG + Bland-Altman agreement figure.
+- **`hospital_cohort_automated_stenosis.csv`**: Raw AI-only stenosis outputs (backup, before radiologist comparison).
+
+### Running a New Local Case
+```bash
+# Run GPU inference on a new case (e.g. CT95)
+H:\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\run_new_cases_gpu.py
+# Then run postprocessing
+H:\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\refine_clinical_postprocess.py
+```
+
+---
+
+## 6. Outlier Audit Pipeline (`outlier_audit/`)
+
+When expanding the clinical cohort (e.g. from N=32 to N=150+), use this ordered pipeline to systematically identify and correct data errors without touching global algorithm parameters:
+
+| Script | Purpose | When to Use |
+|--------|---------|-------------|
+| `01_pull_top_outliers.py` | Sort CSV by `\|difference\|` descending | First step after any new batch run |
+| `02_audit_outliers_detail.py` | Document root cause per outlier case | For each case with `\|diff\|` > 20% |
+| `03_apply_case_corrections.py` | Apply CSV corrections + reconvert DICOM if needed | After root cause is confirmed |
+| `04_reinfer_ct70.py` | Template to re-run single-case GPU inference | When DICOM series was wrong |
+| `05_compute_diagnostic_metrics.py` | 2×2 confusion matrix + Sensitivity/Specificity/κ | After any full cohort correction cycle |
+
+> [!IMPORTANT]
+> **Do NOT modify global algorithm parameters** (percentile cutoffs, diameter thresholds) when fixing outliers. All corrections must be case-specific (target branch string, DICOM series, or local mask repair in 3D Slicer). Changing global parameters risks overfitting the postprocessing logic to the validation set.

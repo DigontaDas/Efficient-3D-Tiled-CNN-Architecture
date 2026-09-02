@@ -18,7 +18,7 @@
 - [📈 Before-Fix vs. Post-Fix Performance Gain](#-before-fix-vs-post-fix-performance-gain)
 - [🌐 Out-of-Distribution Generalization (Unseen Patient Scans)](#-out-of-distribution-generalization-unseen-patient-scans)
 - [🖼️ Qualitative 3D MIP Overlays & Visual Gallery](#️-qualitative-3d-mip-overlays--visual-gallery)
-- [🏥 Clinical Centerline & Stenosis Quantification](#-clinical-centerline--stenosis-quantification)
+- [🏥 Clinical Hospital Validation (N=32)](#-clinical-hospital-validation-n32)
 - [🚀 Quickstart & Script Execution](#-quickstart--script-execution)
 - [📂 File Directory & Artifact Registry](#-file-directory--artifact-registry)
 
@@ -193,6 +193,30 @@ python Phase3_Local_Integration/run_postprocess_after_fix.py
 python Phase3_Local_Integration/run_generalization_after_fix.py
 ```
 
+## 🏥 Clinical Hospital Validation (N=32)
+
+RASNet was independently validated against **board-certified cardiologist caliper measurements** from the PACS workstation at **Ibrahim Cardiac Hospital & Research Institute, Dhaka, Bangladesh** on N=32 consecutive clinical CCTA cases.
+
+### Continuous Agreement (Bland-Altman)
+| Metric | Value |
+|--------|-------|
+| **Spearman ρ** | **0.603** (p = 0.00026) |
+| **Mean Bias** | **−1.59%** *(near-zero systematic bias)* |
+| **95% LoA Span** | **54.2%** (−28.68% to +25.51%) |
+| **Cases Within LoA** | 31 / 32 (96.9%) |
+
+### Binary Obstructive CAD Detection (≥50% Threshold)
+| Metric | Value | 95% CI |
+|--------|-------|--------|
+| **Sensitivity** | **96.2%** | 81.1–99.3% |
+| **Specificity** | 50.0% | 18.8–81.2% |
+| **Accuracy** | **87.5%** | 71.9–95.0% |
+| **Cohen's κ** | **0.529** | 0.098–0.961 |
+
+> The **96.2% sensitivity** means RASNet misses only 1 in 26 obstructive lesions — critical for a screening-oriented pipeline. Low specificity (50%) reflects the referral-biased cohort (only 6/32 cases are non-obstructive, as expected in a catheterisation-referral setting).
+
+Full results: [`Q1_Publication_Package/clinical_validation/07_clinical_validation_summary.md`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_validation_summary.md)
+
 ---
 
 ## 📂 File Directory & Artifact Registry
@@ -202,26 +226,35 @@ Thesis_Trainings/
 ├── Phase3_Local_Integration/
 │   ├── rasnet_model.py                # RASNet architecture + AttentionGate3D
 │   ├── rasnet_loss.py                 # StenosisAwareLoss (Dice + Focal γ=2.5)
+│   ├── refine_clinical_postprocess.py # Vessel centerline + EDT stenosis quantification
+│   ├── run_new_cases_gpu.py           # GPU inference pipeline for local cases
 │   ├── dataset_paths.py               # Shared path resolver
 │   ├── run_training_after_fix.py      # 70-epoch training runner
 │   ├── run_evaluation_after_fix.py    # 150-case evaluation runner (TTA + cc3d)
 │   ├── run_postprocess_after_fix.py   # Slice overlays, 3D MIPs & clinical reports
-│   └── run_generalization_after_fix.py# Unseen patient generalization runner
+│   ├── run_generalization_after_fix.py# Unseen patient generalization runner
+│   └── outlier_audit/                 # Case-level audit & correction scripts
+│       ├── 01_pull_top_outliers.py    # Rank cases by |difference|
+│       ├── 02_audit_outliers_detail.py# Root cause documentation per case
+│       ├── 03_apply_case_corrections.py # Apply case-specific data corrections
+│       ├── 04_reinfer_ct70.py         # Template for single-case re-inference
+│       └── 05_compute_diagnostic_metrics.py # 2×2 matrix + Sensitivity/Specificity/κ
+├── Q1_Publication_Package/
+│   ├── clinical_validation/
+│   │   ├── hospital_cohort_clinical_agreement.csv  # N=32 case-level agreement data
+│   │   ├── 07_clinical_bland_altman_agreement.png  # Publication Bland-Altman figure
+│   │   ├── 07_clinical_diagnostic_performance.md   # 2×2 matrix + citations
+│   │   └── 07_clinical_validation_summary.md       # Full results summary
+│   └── checklist/08_claim_checklist.md             # 42-item CLAIM 2024 compliance
 ├── results-after-hallucin-fix/
 │   ├── rasnet_best.pth                # Champion model weights (Minimal Loss: 0.1099)
-│   ├── loss_curves.png                # 70-epoch training loss convergence plot
 │   ├── metrics_rasnet.csv             # Per-case CSV metrics for all 150 test cases
-│   ├── rasnet_evaluation_report.md    # Full test evaluation report
-│   ├── walkthrough.md                 # Complete execution walkthrough
-│   ├── qualitative_overlays/          # Single-slice & 3-panel 3D MIP overlays
-│   ├── clinical_postprocess/          # Centerline & stenosis reports
-│   └── generalization_outputs/        # Unseen patient predictions & overlays
+│   └── qualitative_overlays/          # Single-slice & 3-panel 3D MIP overlays
 ├── comparison_report_final.md         # Unified baseline benchmark report
-├── RASNet_Problems_and_Adaptations_Documentation.md # Problem postmortem & adaptations
-└── Upto-What's-done.md                 # Project roadmap & progress status
+└── Upto-What's-done.md               # Project roadmap & progress status (Phases 0-8)
 ```
 
 ---
 
-## 🏥 Partner Hospital Dataset Integration Readiness
-Automated DICOM series translation ([`dicom_to_nifti.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/dicom_to_nifti.py)), geometric quality control ([`07_local_data_qc.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/07_local_data_qc.py)), and fine-tuning ([`finetune_segresnet.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/finetune_segresnet.py)) pipelines are fully integrated and ready to ingest partner hospital CCTA datasets upon annotation delivery.
+## 🏥 Partner Hospital Dataset Integration
+N=32 cases fully validated. The inference and postprocessing pipeline ([`run_new_cases_gpu.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/run_new_cases_gpu.py), [`refine_clinical_postprocess.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/refine_clinical_postprocess.py)) is ready for scaling to the remaining ~120 local hospital cases. Use the [`outlier_audit/`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/outlier_audit/) pipeline for systematic quality control of each new batch.

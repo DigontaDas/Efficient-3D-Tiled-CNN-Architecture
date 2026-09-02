@@ -15,13 +15,26 @@ In strict compliance with medical imaging AI publication ethics (RSNA *Radiology
 
 ## 📌 Missing Inputs Inventory
 
-### 1. Radiologist-Graded % Diameter Stenosis (%DS) for Clinical Agreement
-- **Impacted Item**: Step 7 (`07_stenosis_agreement.py`, Bland-Altman agreement plot, ICC(2,1), Cohen's $\kappa$).
-- **Current State in Repo**:
-  - The repository contains automated skeleton-based diameter extraction and stenosis reports from segmentation masks (`11_clinical_postprocess.py`, `results-after-hallucin-fix/clinical_postprocess/`).
-  - However, independent ground truth **radiologist-graded % diameter stenosis values** (e.g. measured via quantitative coronary angiography [QCA] or expert radiologist caliper measurements on CCTA) are not included in the public ImageCAS dataset.
-- **Why It Cannot Be Scripted**: Simulating radiologist agreement numbers or synthetic caliper measurements would violate academic integrity and produce fraudulent validation metrics.
-- **Action Required**: A certified radiologist/cardiologist must grade a designated subset (e.g., $N=30-50$ test cases) for % diameter stenosis at key anatomical lesions (proximal LAD, mid RCA, LCx). The provided script `07_stenosis_agreement.py` is pre-configured and will immediately compute Spearman $\rho$, Bland-Altman limits of agreement ($\pm 1.96\text{ SD}$), ICC(2,1), and CAD-RADS Cohen's $\kappa$ once the CSV is supplied.
+### 1. ✅ RESOLVED — Radiologist-Graded % Diameter Stenosis (%DS) for Clinical Agreement
+- **Impacted Item**: Step 7 (`07_stenosis_agreement.py`, Bland-Altman agreement plot, ICC(2,1), Cohen's κ).
+- **Resolution Date**: September 2026
+- **How Resolved**: A board-certified cardiologist at Ibrahim Cardiac Hospital & Research Institute
+  evaluated N=32 consecutive CCTA cases on the hospital PACS workstation and captured 2D MPR
+  screenshots with % diameter stenosis caliper measurements at identified coronary lesion sites
+  (LAD, LCx, RCA, PDA). Screenshots stored in `H:\Thesis_CT_scans_Labeled\CT{id}\`.
+- **Final Results**:
+  - Spearman ρ = **0.603** (p = 0.00026, highly significant)
+  - Linear Fit: y = 0.688x + 17.96 (R² = **0.6525**)
+  - Mean Bias: **−1.59%** (virtually zero systematic bias)
+  - 95% LoA: **−28.68% to +25.51%** (Span = **54.2%**)
+  - Sensitivity: **96.2%** (95% CI: 81.1–99.3%)
+  - Specificity: **50.0%** (95% CI: 18.8–81.2%)
+  - Accuracy: **87.5%** (95% CI: 71.9–95.0%)
+  - Cohen's κ: **0.529** (95% CI: 0.098–0.961)
+- **Output Files**:
+  - Bland-Altman PNG/SVG: `Q1_Publication_Package/clinical_validation/07_clinical_bland_altman_agreement.png`
+  - Diagnostic performance report: `Q1_Publication_Package/clinical_validation/07_clinical_diagnostic_performance.md`
+  - Updated agreement CSV: `Q1_Publication_Package/clinical_validation/hospital_cohort_clinical_agreement.csv`
 
 ---
 

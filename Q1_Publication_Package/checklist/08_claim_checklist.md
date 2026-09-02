@@ -30,7 +30,7 @@
 | 12 | Data augmentation strategies | **Satisfied** | `run_training_after_fix.py:L70-85` | Spatial random flips (X, Y, Z axes), random spatial crops with 2:1 foreground bias. |
 | **METHODS — GROUND TRUTH REFERENCE STANDARD** | | | | |
 | 13 | Reference standard definition and annotation protocol | **Satisfied** | `all_four_validations/walkthrough.md`, ImageCAS Reference | Expert manual voxel-wise 3D coronary annotations from the ImageCAS benchmark. |
-| 14 | Annotator credentials and inter-rater reliability | *Pending Local Data* | `Q1_Publication_Package/MISSING_INPUTS.md` (Item 1) | ImageCAS public ground truth utilized. Local clinical cohort radiologist inter-observer study pending. |
+| 14 | Annotator credentials and inter-rater reliability | **Satisfied** | `Q1_Publication_Package/clinical_validation/07_clinical_diagnostic_performance.md` | Board-certified cardiologist at Ibrahim Cardiac Hospital graded N=32 CCTA cases via PACS MPR caliper screenshots. Bland-Altman agreement: Mean Bias −1.59%, LoA Span 54.2%, Spearman ρ=0.603 (p=0.00026), Sensitivity 96.2%, Cohen's κ=0.529. |
 | **METHODS — MODEL ARCHITECTURE & TRAINING** | | | | |
 | 15 | Complete neural network architecture specifications | **Satisfied** | `Q1_Publication_Package/figures/05_architecture_diagram.png`, `rasnet_model.py` | SegResNet backbone (16 init filters) + 3-level AttentionGate3D + 2 auxiliary deep supervision heads. |
 | 16 | Hardware and software environment | **Satisfied** | `requirements_cuda.txt`, `03_efficiency_benchmark.py` | NVIDIA RTX 4080 SUPER (16 GB), PyTorch 2.6.0+cu124, MONAI 1.5.2, CUDA 13.1. |
@@ -55,7 +55,7 @@
 | **DISCUSSION** | | | | |
 | 33 | Interpretation of findings in clinical context | **Satisfied** | `RASNet_Problems_and_Adaptations_Documentation.md`, `failure_analysis.md` | Clinical relevance of substantial precision gain (85.85% vs 81.40%, p < 10^-19) and disclosure of topological pruning limitations. |
 | 34 | Anatomical branch limitation disclosure | **Disclosed** | `Q1_Publication_Package/MISSING_INPUTS.md` (Item 2) | ImageCAS whole-tree ground truth lacks separate LAD/LCx/RCA branch labels (stated limitation). |
-| 35 | External clinical cohort generalization status | **Disclosed** | `Q1_Publication_Package/MISSING_INPUTS.md` (Item 3) | Local hospital cohort pipeline built; multi-center validation pending local scan annotations. |
+| 35 | External clinical cohort generalization status | **Partially Satisfied** | `Q1_Publication_Package/clinical_validation/`, `hospital_cohort_clinical_agreement.csv` | N=32 consecutive clinical CCTA cases validated at Ibrahim Cardiac Hospital (Dhaka). Sensitivity 96.2%, Accuracy 87.5%. Pipeline ready for scaling to 120+ cases. Full multi-center annotation pending. |
 | 36 | Comparison with recent literature & benchmarks | **Satisfied** | `Main_Thesis_p3_plan_1.md`, `all_four_validations/walkthrough.md` | Benchmarked against standard MONAI SegResNet, nnU-Net V2, and 3D U-Net baselines. |
 | **OTHER INFORMATION** | | | | |
 | 37 | Code availability and reproducible repository | **Satisfied** | Root GitHub repository, `requirements_cuda.txt` | Complete execution scripts, virtual environment specifications, and configuration parameters. |
@@ -69,5 +69,7 @@
 
 ## 🎯 Summary of Open Items for Post-Submission / Revision Phase
 
-1. **Radiologist %DS Grading**: Once a radiologist grades the cases in [`template_radiologist_grades.csv`](file:///c:/Thesis_RASNET/Q1_Publication_Package/clinical_validation/template_radiologist_grades.csv), run `python 07_stenosis_agreement.py` to generate the Bland-Altman agreement plot and ICC statistics.
-2. **Local Hospital Fine-Tuning**: Run [`finetune_segresnet.py`](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/finetune_segresnet.py) on the local hospital cohort when scan annotations are finalized.
+1. ~~**Radiologist %DS Grading**~~ ✅ **COMPLETED (September 2026)**: N=32 hospital cohort validated. Bland-Altman LoA span 54.2%, Spearman ρ=0.603, Sensitivity 96.2%, Cohen's κ=0.529. See `07_clinical_diagnostic_performance.md`.
+2. **Scale to 120+ Cases**: Run the `Phase3_Local_Integration/outlier_audit/` pipeline for the remaining ~120 local hospital CCTA cases when radiologist PACS screenshots are available.
+3. **Local Hospital Fine-Tuning**: Run [`finetune_segresnet.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/finetune_segresnet.py) on the local hospital cohort when 3D Slicer-corrected segmentation labels are finalized.
+4. **Branch-Level Anatomical Labels** (Item 34): ImageCAS binary masks lack per-branch LAD/LCx/RCA separation — remains a stated limitation.

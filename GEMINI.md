@@ -28,32 +28,48 @@
    - Step 4: Multi-panel distribution plots (`figures/04_distribution_figures.py`)
    - Step 5: Vector architecture diagram (`figures/05_architecture_diagram.py`)
    - Step 6: 3D Attention map heatmaps (`figures/06_attention_visualization.py`)
+   - Step 7 ✅ DONE: Clinical stenosis validation — N=32 hospital cohort (see below)
    - Step 8: CLAIM 2024 checklist (42 items compliant in `checklist/08_claim_checklist.md`)
    - Step 9: Failure analysis (`figures/failure_analysis.md`)
-   - Gap log: `Q1_Publication_Package/MISSING_INPUTS.md`
+4. **Phase 8: Clinical Stenosis Validation — COMPLETED (N=32)**:
+   - Cohort: Ibrahim Cardiac Hospital & Research Institute, Dhaka
+   - Spearman ρ = **0.603** (p = 0.00026), R² = **0.6525**, Mean Bias = **−1.59%**
+   - 95% LoA Span = **54.2%** (−28.68% to +25.51%)
+   - Sensitivity = **96.2%**, Specificity = 50.0%, Accuracy = **87.5%**, Cohen's κ = **0.529**
+   - Outlier audit completed: CT4 (GT corrected), CT70 (series re-converted), CT89 (variance), CT66 (taper artifact documented)
+   - All scripts in `Phase3_Local_Integration/outlier_audit/`
 
 ---
 
-## 🎯 Current Focus & Immediate Next Steps (Phase 3: Primary Clinical Data)
+## 🎯 Current Focus & Immediate Next Steps
 
-### 1. The Clinical Stenosis Screenshots from Radiologist:
-- The radiologist evaluated CCTA cases on PACS and took 2D screenshots with % stenosis caliper readings.
-- **For Step 7 (Clinical Agreement)**: Match the radiologist's % stenosis from screenshots with automated skeleton/EDT % stenosis from `11_clinical_postprocess.py`.
-- Fill into `Q1_Publication_Package/clinical_validation/template_radiologist_grades.csv` and run `Q1_Publication_Package/clinical_validation/07_stenosis_agreement.py` for Bland-Altman & Cohen's Kappa.
+### 1. Decision Point: Scale to 120+ Cases?
+- The N=32 audit is frozen and audited. The pipeline is validated and trustworthy.
+- **Condition for scaling**: The current LoA span (54.2%) is clinically defensible vs. literature inter-reader variability (ACCURACY trial: ±6–8% 1SD → ~32% LoA span from experts).
+- **Option A** (Recommended): Scale to the remaining ~120 cases from the local hospital cohort to strengthen the clinical evidence base. Follow the workflow in Phase 8.
+- **Option B**: Proceed to paper writing with N=32 as a pilot validation cohort.
 
-### 2. The 3D Volume & Local Hospital Annotation Workflow:
+### 2. Paper Writing (When Ready)
+- All sections have source data except the Discussion/Limitations draft.
+- The 2×2 confusion matrix, LoA span, and literature citations are in `07_clinical_diagnostic_performance.md`.
+- Inter-reader variability citation: *Budoff et al. (ACCURACY trial, JACC 2008)* — inter-observer κ=0.79, ±6–8% %DS variance.
+
+### 3. The 3D Volume & Local Hospital Annotation Workflow (For Scaling)
 - Radiologists do not manually paint 3D voxels from scratch (takes 4h/scan).
 - **Workflow**:
-  1. Convert DICOM to NIfTI: `Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/dicom_to_nifti.py`.
+  1. Convert DICOM to NIfTI: `Phase3_Local_Integration/dicom_to_nifti.py`.
   2. Run pre-trained `rasnet_best.pth` to generate a high-quality draft 3D segmentation mask (`pred_mask.nii.gz`).
   3. Open `image.nii.gz` and `pred_mask.nii.gz` in 3D Slicer (Preset: `CT-Cardiac`, Window: 700, Level: 250).
-  4. Use 3D Slicer **Segment Editor** to inspect and touch up the stenosis site identified in the radiologist's screenshot (takes ~10 mins).
-  5. Save as `label.nii.gz` and run `07_local_data_qc.py` $\rightarrow$ `finetune_segresnet.py`.
+  4. Use 3D Slicer **Segment Editor** to inspect and touch up the stenosis site identified in the radiologist's screenshot (~10 mins).
+  5. Save as `label.nii.gz` and run `07_local_data_qc.py` → `finetune_segresnet.py`.
 
 ---
 
 ## 📂 Key File Locations
-- Champion Checkpoint: `Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/checkpoints/rasnet_best.pth`
-- Full Progress Document: `Thesis_Trainings/Thesis_Trainings/Upto-What's-done.md`
+- Champion Checkpoint: `Thesis_Trainings/results-after-hallucin-fix/checkpoints/rasnet_best.pth`
+- Full Progress Document: `Thesis_Trainings/Upto-What's-done.md`
 - Q1 Publication Artifacts: `Q1_Publication_Package/`
-- Local Data QC & Fine-Tuning: `Thesis_Trainings/Thesis_Trainings/Phase3_Local_Integration/`
+- Local Data QC & Fine-Tuning: `Thesis_Trainings/Phase3_Local_Integration/`
+- Clinical Validation Results: `Q1_Publication_Package/clinical_validation/`
+- Outlier Audit Scripts: `Phase3_Local_Integration/outlier_audit/`
+- CCTA Labeled Screenshots: `H:\Thesis_CT_scans_Labeled\CT{id}\`

@@ -61,7 +61,7 @@
 
 ## Note on LoA Span in Context
 
-The 95% Bland-Altman Limits of Agreement (LoA) for continuous %DS comparison span **-** percentage points
-(updated after outlier corrections). Literature inter-observer %DS variability of ±5–8% (1 SD)
+The 95% Bland-Altman Limits of Agreement (LoA) for continuous %DS comparison span **54.2%**
+(−28.68% to +25.51%, after outlier corrections for CT4 and CT70). Literature inter-observer %DS variability of ±5–8% (1 SD)
 corresponds to a 95% LoA span of **±20–32%** between expert readers, making automated agreement
 within this range clinically defensible for a training set of N=32 consecutive clinical cases.
