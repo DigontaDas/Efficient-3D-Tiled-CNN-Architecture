@@ -31,3 +31,6 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Intermediate inspection crops
+Phase3_Local_Integration/extracted_badges/
