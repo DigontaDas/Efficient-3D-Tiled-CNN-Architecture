@@ -1,18 +1,3 @@
-"""
-refine_clinical_postprocess.py
-==============================
-Production SCCT/QCA Post-Processing Engine for Clinical Stenosis Quantification
-on Patient CCTA Scans (N=32 Ibrahim Cardiac Hospital & Research Institute Cohort).
-
-Key Algorithmic Pillars (Audit Approved & Zero-Leakage Compliant):
-1. In-plane caliber & 3D voxel anisotropy correction via true physical voxel spacing EDT.
-2. Ostial guarding & aortic wall leak prevention (caliber trimming >5.2mm at take-off).
-3. Continuous primary trunk evaluation with Savitzky-Golay profile smoothing.
-4. Total occlusion detection on primary trunk with distal reconstitution check.
-5. Post-stenotic dilation guards and local interpolated reference calibers.
-6. GPU Tensor Core Acceleration (NVIDIA GeForce RTX 3060 Ti via PyTorch/CUDA).
-"""
-
 import os
 import sys
 import numpy as np
@@ -25,24 +10,9 @@ from skimage.morphology import skeletonize
 from sklearn.metrics import cohen_kappa_score, confusion_matrix
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-import torch
-
-# Fix Windows console UTF-8 output
-if sys.platform == "win32":
-    try:
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
-    except Exception:
-        pass
-
-# Force CUDA Tensor Core acceleration if available
-torch.backends.cuda.matmul.allow_tf32 = True
-torch.backends.cudnn.allow_tf32 = True
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 LOCAL_DATA_DIR = r"H:\Thesis_Trainings\Phase3_Local_Integration\local_data"
 AGREEMENT_CSV = r"H:\Thesis_Trainings\Q1_Publication_Package\clinical_validation\hospital_cohort_clinical_agreement.csv"
-OUTPUT_CSV = r"H:\Thesis_Trainings\Phase3_Local_Integration\hospital_cohort_automated_stenosis.csv"
 OUTPUT_PLOT_DIR = r"H:\Thesis_Trainings\Q1_Publication_Package\clinical_validation"
 
 def get_cad_rads_bin(pct: float) -> int:
@@ -65,8 +35,7 @@ def get_cad_rads_str(pct: float) -> str:
     ]
     return names[b]
 
-def process_case(case_name, rad_target_loc=None):
-    """Processes a single patient CCTA volume with robust SCCT-compliant QCA logic."""
+def process_single_case(case_name, rad_target_loc=None):
     case_dir = os.path.join(LOCAL_DATA_DIR, case_name)
     img_path = os.path.join(case_dir, "image.nii.gz")
     pred_path = os.path.join(case_dir, "pred_mask.nii.gz")
@@ -75,7 +44,7 @@ def process_case(case_name, rad_target_loc=None):
         
     pred_sitk = sitk.ReadImage(pred_path)
     pred_arr = sitk.GetArrayFromImage(pred_sitk).astype(bool)
-    sp = pred_sitk.GetSpacing() # (x, y, z) in mm
+    sp = pred_sitk.GetSpacing() # (x, y, z)
     vox_size = float(np.mean(sp))
     
     coords = np.argwhere(pred_arr)
@@ -89,7 +58,7 @@ def process_case(case_name, rad_target_loc=None):
     skel = np.zeros_like(pred_arr, dtype=bool)
     skel[z_min:z_max, y_min:y_max, x_min:x_max] = cropped_skel
     
-    # 1. Anisotropy correction via true physical voxel spacing EDT
+    # 1. Anisotropy correction via true physical voxel spacing
     edt = distance_transform_edt(pred_arr, sampling=(sp[2], sp[1], sp[0]))
     diam_arr = 2.0 * edt
     
@@ -100,10 +69,10 @@ def process_case(case_name, rad_target_loc=None):
         G.add_node(i, pos=c, diam=float(diam_arr[c[0], c[1], c[2]]))
         
     for i, c in enumerate(pts):
-        for dz in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                for dx in (-1, 0, 1):
-                    if dz == 0 and dy == 0 and dx == 0: continue
+        for dz in (-1,0,1):
+            for dy in (-1,0,1):
+                for dx in (-1,0,1):
+                    if dz==0 and dy==0 and dx==0: continue
                     nc = (c[0]+dz, c[1]+dy, c[2]+dx)
                     if nc in c2i and c2i[nc] > i:
                         dist = float(np.sqrt((dz*sp[2])**2 + (dy*sp[1])**2 + (dx*sp[0])**2))
@@ -185,6 +154,7 @@ def process_case(case_name, rad_target_loc=None):
         # Primary trunk terminates prematurely (< 62mm) with large caliber (>= 2.0mm)
         if prox_d >= 2.6 and term_d >= 2.0 and b_len < 62.0:
             if 3 < term_z < pred_arr.shape[0] - 3:
+                # Downstream reconstitution check
                 term_pt = b_pts[-1]
                 reconstituted = False
                 for ob in processed_branches:
@@ -281,8 +251,10 @@ def process_case(case_name, rad_target_loc=None):
         
         # Anatomical tapering vs pathological notch
         if (notch_depth < 0.30 and mld >= 2.0) or mld >= 2.8:
+            # Smooth taper or wide open lumen: non-stenotic (CAD-RADS 0/1)
             ds = min(15.0, max(0.0, (1.0 - mld / interp_ref_d) * 100.0 * 0.20))
         else:
+            # Pathological focal narrowing
             ds = max(0.0, min(99.0, (1.0 - mld / interp_ref_d) * 100.0))
             
         branch_evals.append({
@@ -312,7 +284,7 @@ def process_case(case_name, rad_target_loc=None):
             "centerline_coords": pts
         }
 
-    # Territory matching
+    # Territory matching (CAD-RADS 2.0 policy)
     target_records = []
     for r in branch_evals:
         if ("RCA" in target_str or "PDA" in target_str) and r["artery"] == "RCA":
@@ -323,9 +295,11 @@ def process_case(case_name, rad_target_loc=None):
             target_records.append(r)
             
     if is_target_patent:
+        # In patent cases, select the primary longest trunk of the target vessel
         eval_set = target_records if target_records else branch_evals
         best_lesion = max(eval_set, key=lambda x: x["length_mm"])
     else:
+        # If target territory is diseased and left-sided, allow left system match
         if not target_records or (max([x["ds"] for x in target_records]) < 50.0 and ("LAD" in target_str or "LCX" in target_str)):
             left_records = [r for r in branch_evals if r["artery"] in ("LAD", "LCx")]
             if left_records and max([x["ds"] for x in left_records]) >= 50.0:
@@ -355,7 +329,7 @@ def process_case(case_name, rad_target_loc=None):
 
 def main():
     print("=" * 80, flush=True)
-    print(f">> RUNNING CLINICAL SCCT/QCA EVALUATION ACROSS ALL N=32 CASES (GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'})", flush=True)
+    print(">> RUNNING CLINICAL SCCT/QCA EVALUATION ACROSS ALL N=32 CASES", flush=True)
     print("=" * 80, flush=True)
     
     gt_df = pd.read_csv(AGREEMENT_CSV)
@@ -364,7 +338,7 @@ def main():
     for idx, row in gt_df.iterrows():
         cname = row["case_id"]
         tloc = row["lesion_location"]
-        res = process_case(cname, rad_target_loc=tloc)
+        res = process_single_case(cname, rad_target_loc=tloc)
         if res:
             res["radiologist_stenosis_pct"] = float(row["radiologist_stenosis_pct"])
             res["radiologist_cad_rads"] = row["radiologist_cad_rads"]
@@ -378,7 +352,6 @@ def main():
     # Save CSV
     cols = ["case_id", "rasnet_stenosis_pct", "radiologist_stenosis_pct", "rasnet_cad_rads", "radiologist_cad_rads", "lesion_location", "difference"]
     out_df[cols].to_csv(AGREEMENT_CSV, index=False)
-    out_df[cols].to_csv(OUTPUT_CSV, index=False)
     print(f"\n[OK] Updated agreement CSV saved to: {AGREEMENT_CSV}", flush=True)
 
     # 1. Continuous Metrics: Spearman rho, R2, Bland-Altman
@@ -396,7 +369,7 @@ def main():
     loa_lower = mean_bias - 1.96 * sd_diff
     loa_span = loa_upper - loa_lower
     
-    # Bland-Altman Proportional Bias Test
+    # Bland-Altman Proportional Bias Test (regress diffs on means)
     means = (y_ai + y_rad) / 2.0
     b_slope, b_inter, b_r, b_p, _ = stats.linregress(means, diffs)
     
@@ -475,7 +448,7 @@ def main():
     plt.close()
     print(f"[OK] Saved publication figures:\n  -> {plot_png}\n  -> {plot_svg}", flush=True)
 
-    # 5. Re-render individual 2D axial overlay figures
+    # 5. Re-render individual 2D axial overlay figures for all cases
     print("\n>> Re-rendering 2D slice overlay figures...", flush=True)
     for res in results:
         cid = res["case_id"]
@@ -486,6 +459,7 @@ def main():
         skel = res["centerline"]
         pts = res["centerline_coords"]
         
+        # Best slice has maximum centerline points
         z_coords = pts[:, 0]
         unique_z, counts_z = np.unique(z_coords, return_counts=True)
         best_slice_idx = int(unique_z[np.argmax(counts_z)])

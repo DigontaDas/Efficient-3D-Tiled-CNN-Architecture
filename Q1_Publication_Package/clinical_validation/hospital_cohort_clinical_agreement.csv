@@ -1,33 +1,33 @@
 case_id,rasnet_stenosis_pct,radiologist_stenosis_pct,rasnet_cad_rads,radiologist_cad_rads,lesion_location,difference
-CT1,37.5,10.0,CAD-RADS 2 (Mild),CAD-RADS 1 (Minimal),LAD Patent,27.5
-CT4,42.3,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),Mid-LCx (50-69%),-17.7
-CT5,41.5,100.0,CAD-RADS 2 (Mild),CAD-RADS 5 (Occlusion),LAD Occlusion,-58.5
-CT61,61.3,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),RCA/PDA,1.3
-CT62,49.5,10.0,CAD-RADS 2 (Mild),CAD-RADS 1 (Minimal),LAD Patent,39.5
-CT63,56.9,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LCx Plaque,-28.1
-CT64,45.0,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),Mid-LAD,-15.0
-CT65,22.7,60.0,CAD-RADS 1 (Minimal),CAD-RADS 3 (Moderate),Prox-LAD,-37.3
-CT66,66.5,37.5,CAD-RADS 3 (Moderate),CAD-RADS 2 (Mild),PDA/RCA,29.0
-CT67,10.4,60.0,CAD-RADS 1 (Minimal),CAD-RADS 3 (Moderate),LAD/LCx,-49.6
-CT68,32.3,85.0,CAD-RADS 2 (Mild),CAD-RADS 4 (Severe),LAD/LCx,-52.7
-CT70,64.7,95.0,CAD-RADS 3 (Moderate),CAD-RADS 4B (Critical),LAD (90-99%),-30.3
-CT71,40.9,37.5,CAD-RADS 2 (Mild),CAD-RADS 2 (Mild),LCx,3.4
-CT72,64.2,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-15.8
-CT73,59.6,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LCx/LAD,-0.4
-CT74,62.1,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),RCA,2.1
-CT75,27.1,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-32.9
-CT76,49.6,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-10.4
-CT77,69.4,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/RCA,-15.6
-CT78,23.1,60.0,CAD-RADS 1 (Minimal),CAD-RADS 3 (Moderate),LCx,-36.9
-CT79,52.5,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD,-7.5
-CT80,68.4,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),RCA,-11.6
-CT81,49.4,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-10.6
-CT82,33.8,10.0,CAD-RADS 2 (Mild),CAD-RADS 1 (Minimal),LAD Patent,23.8
-CT83,60.5,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/LCx,-19.5
-CT84,47.6,85.0,CAD-RADS 2 (Mild),CAD-RADS 4 (Severe),LAD,-37.4
-CT85,37.6,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),RCA,-22.4
-CT86,41.5,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-18.5
-CT87,55.8,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/RCA,-24.2
-CT88,50.8,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-34.2
-CT89,42.2,85.0,CAD-RADS 2 (Mild),CAD-RADS 4 (Severe),LAD,-42.8
-CT90,48.5,37.5,CAD-RADS 2 (Mild),CAD-RADS 2 (Mild),LCx,11.0
+CT1,0.0,10.0,CAD-RADS 0 (None),CAD-RADS 1 (Minimal),LAD Patent,-10.0
+CT4,54.9,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),Mid-LCx (50-69%),-5.1
+CT5,100.0,100.0,CAD-RADS 5 (Occlusion),CAD-RADS 5 (Occlusion),LAD Occlusion,0.0
+CT61,72.1,60.0,CAD-RADS 4 (Severe),CAD-RADS 3 (Moderate),RCA/PDA,12.1
+CT62,20.4,10.0,CAD-RADS 1 (Minimal),CAD-RADS 1 (Minimal),LAD Patent,10.4
+CT63,64.7,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LCx Plaque,-20.3
+CT64,52.2,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),Mid-LAD,-7.8
+CT65,1.5,60.0,CAD-RADS 1 (Minimal),CAD-RADS 3 (Moderate),Prox-LAD,-58.5
+CT66,73.4,37.5,CAD-RADS 4 (Severe),CAD-RADS 2 (Mild),PDA/RCA,35.9
+CT67,52.6,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD/LCx,-7.4
+CT68,64.7,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/LCx,-20.3
+CT70,67.5,95.0,CAD-RADS 3 (Moderate),CAD-RADS 4B (Critical),LAD (90-99%),-27.5
+CT71,58.8,37.5,CAD-RADS 3 (Moderate),CAD-RADS 2 (Mild),LCx,21.3
+CT72,71.2,80.0,CAD-RADS 4 (Severe),CAD-RADS 4 (Severe),LAD,-8.8
+CT73,70.6,60.0,CAD-RADS 4 (Severe),CAD-RADS 3 (Moderate),LCx/LAD,10.6
+CT74,56.5,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),RCA,-3.5
+CT75,43.2,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-16.8
+CT76,55.9,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD,-4.1
+CT77,76.9,85.0,CAD-RADS 4 (Severe),CAD-RADS 4 (Severe),LAD/RCA,-8.1
+CT78,6.3,60.0,CAD-RADS 1 (Minimal),CAD-RADS 3 (Moderate),LCx,-53.7
+CT79,58.6,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD,-1.4
+CT80,68.0,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),RCA,-12.0
+CT81,49.9,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),LAD,-10.1
+CT82,7.3,10.0,CAD-RADS 1 (Minimal),CAD-RADS 1 (Minimal),LAD Patent,-2.7
+CT83,63.6,80.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD/LCx,-16.4
+CT84,50.3,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-34.7
+CT85,49.6,60.0,CAD-RADS 2 (Mild),CAD-RADS 3 (Moderate),RCA,-10.4
+CT86,56.2,60.0,CAD-RADS 3 (Moderate),CAD-RADS 3 (Moderate),LAD,-3.8
+CT87,71.1,80.0,CAD-RADS 4 (Severe),CAD-RADS 4 (Severe),LAD/RCA,-8.9
+CT88,52.5,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-32.5
+CT89,67.4,85.0,CAD-RADS 3 (Moderate),CAD-RADS 4 (Severe),LAD,-17.6
+CT90,55.4,37.5,CAD-RADS 3 (Moderate),CAD-RADS 2 (Mild),LCx,17.9

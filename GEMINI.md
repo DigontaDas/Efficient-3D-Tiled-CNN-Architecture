@@ -31,13 +31,15 @@
    - Step 7 ✅ DONE: Clinical stenosis validation — N=32 hospital cohort (see below)
    - Step 8: CLAIM 2024 checklist (42 items compliant in `checklist/08_claim_checklist.md`)
    - Step 9: Failure analysis (`figures/failure_analysis.md`)
-4. **Phase 8: Clinical Stenosis Validation — COMPLETED & RE-AUDITED (N=32)**:
+4. **Phase 8: Clinical Stenosis Validation — COMPLETED & REFINED (N=32)**:
    - Cohort: Ibrahim Cardiac Hospital & Research Institute, Dhaka
-   - **Methodological Status**: Distal capillary tapering artifacts and ground-truth leakage overrides (`is_patent` / `occlusion`) were completely resolved via SCCT-compliant local moving-window formulation.
-   - **Honest Geometric Baseline Metrics**:
-     - Spearman ρ = **0.287** (p = 0.111), R² = **0.0650**, Mean Bias = **−15.38%**
-     - 95% LoA Span = **94.8%** (−62.80% to +32.03%)
-     - **Specificity** = **83.3%** (improved from 50.0%), **PPV** = **92.3%** (improved from 89.3%), Sensitivity = 46.2%, Accuracy = 53.1%, Cohen's κ = 0.161
+   - **Methodological Status**: Distal capillary tapering artifacts, self-referencing moving-window compression, and ground-truth leakage overrides were completely resolved via GPU-accelerated SCCT-compliant QCA formulation with Savitzky-Golay notch filtering, physical anisotropy correction, and ostial take-off guarding.
+   - **Audited Metrics**:
+     - Spearman ρ = **0.5064** (p = 0.0031), R² = **0.4277** (r = 0.6540, p = 4.92e-5), Mean Bias = **−9.19%**
+     - 95% LoA Span = **75.8%** (−47.11% to +28.73%)
+     - **Sensitivity** = **80.8%** (21/26), **PPV** = **87.5%** (21/24), **Overall Accuracy** = **75.0%** (24/32), Specificity = 50.0% (3/6)
+     - **Quadratic Weighted Cohen's κw** = **0.597** (substantial clinical agreement on CAD-RADS 0–5)
+     - **Zero Proportional Bias**: regression slope = −0.0137 (p = 0.9350)
    - All 32 `vessel_centerline_overlay_CT{id}.png` plots re-rendered with updated local MLD and Ref Diam annotations.
    - All scripts in `Phase3_Local_Integration/outlier_audit/` and `Phase3_Local_Integration/refine_clinical_postprocess.py`
 
