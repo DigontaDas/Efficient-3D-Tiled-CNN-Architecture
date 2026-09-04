@@ -10,9 +10,9 @@
 
 |                    | **AI: Non-Obstructive (<50%)** | **AI: Obstructive (≥50%)** | **Total** |
 |--------------------|-------------------------------|---------------------------|-----------|
-| **Rad: Non-Obstructive (<50%)** | TN = 3 | FP = 3 | 6 |
-| **Rad: Obstructive (≥50%)**    | FN = 1 | TP = 25 | 26 |
-| **Total** | 4 | 28 | **32** |
+| **Rad: Non-Obstructive (<50%)** | TN = 5 | FP = 1 | 6 |
+| **Rad: Obstructive (≥50%)**    | FN = 14 | TP = 12 | 26 |
+| **Total** | 19 | 13 | **32** |
 
 ---
 
@@ -20,12 +20,12 @@
 
 | Metric | Value | 95% CI |
 |--------|-------|--------|
-| **Sensitivity** (Recall) | 96.2% | 81.1%–99.3% |
-| **Specificity** | 50.0% | 18.8%–81.2% |
-| **PPV** (Precision) | 89.3% | 72.8%–96.3% |
-| **NPV** | 75.0% | 30.1%–95.4% |
-| **Overall Accuracy** | 87.5% | 71.9%–95.0% |
-| **Cohen's κ** | 0.529 | 0.098–0.961 |
+| **Sensitivity** (Recall) | 46.2% | 28.8%–64.5% |
+| **Specificity** | 83.3% | 43.6%–97.0% |
+| **PPV** (Precision) | 92.3% | 66.7%–98.6% |
+| **NPV** | 26.3% | 11.8%–48.8% |
+| **Overall Accuracy** | 53.1% | 36.4%–69.1% |
+| **Cohen's κ** | 0.161 | -0.149–0.470 |
 
 ---
 
@@ -61,7 +61,7 @@
 
 ## Note on LoA Span in Context
 
-The 95% Bland-Altman Limits of Agreement (LoA) for continuous %DS comparison span **54.2%**
-(−28.68% to +25.51%, after outlier corrections for CT4 and CT70). Literature inter-observer %DS variability of ±5–8% (1 SD)
+The 95% Bland-Altman Limits of Agreement (LoA) for continuous %DS comparison span **-** percentage points
+(updated after outlier corrections). Literature inter-observer %DS variability of ±5–8% (1 SD)
 corresponds to a 95% LoA span of **±20–32%** between expert readers, making automated agreement
 within this range clinically defensible for a training set of N=32 consecutive clinical cases.

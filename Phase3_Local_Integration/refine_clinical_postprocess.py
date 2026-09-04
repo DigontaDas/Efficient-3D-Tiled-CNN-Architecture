@@ -152,30 +152,57 @@ def process_case(case_name, rad_target_loc=None):
                 artery = "LCx"
 
         raw_diams = np.array([G.nodes[n]['diam'] for n in branch])
-        ref_d = float(np.percentile(raw_diams, 90))
-        
-        # Only evaluate clinically evaluable branches (>= 1.5mm caliber)
+        if len(raw_diams) < 8:
+            continue
+            
+        ref_d = float(np.percentile(raw_diams, 85))
+        # SCCT Caliber threshold: Branch must reach at least 1.5mm caliber to be evaluable
         if ref_d < 1.5:
             continue
             
-        # For major branches (ref_d >= 2.2mm), avoid cutting off acute severe lesions near the end
-        if ref_d >= 2.2:
-            eval_diams = raw_diams[1:-1] if len(raw_diams) > 4 else raw_diams
-            eval_nodes = branch[1:-1] if len(raw_diams) > 4 else branch
-        else:
-            eval_diams = raw_diams[3:-3] if len(raw_diams) > 8 else raw_diams
-            eval_nodes = branch[3:-3] if len(raw_diams) > 8 else branch
+        # Smooth diameter profile to suppress single-voxel discretization noise
+        s_diams = gaussian_filter1d(raw_diams, sigma=1.2)
+        vox_size = float(np.mean(spacing))
+        length_mm = len(branch) * vox_size
+        
+        # Exclude distal terminal ends tapering below 1.2mm
+        t_start = 2 if len(s_diams) > 8 else 0
+        t_end = len(s_diams) - 2 if len(s_diams) > 8 else len(s_diams)
+        eval_diams = s_diams[t_start:t_end]
+        eval_nodes = branch[t_start:t_end]
+        if len(eval_diams) == 0:
+            continue
             
         min_d = float(np.min(eval_diams))
-        sten_pct = max(0.0, (1.0 - (min_d / ref_d)) * 100.0)
         min_node_idx = eval_nodes[int(np.argmin(eval_diams))]
+        
+        # Local Moving Reference Window: evaluate stenosis relative to neighboring healthy lumen (+/- 8 mm)
+        w_nodes = max(4, int(round(8.0 / vox_size)))
+        min_pos = int(np.argmin(eval_diams))
+        local_w_start = max(0, min_pos - w_nodes)
+        local_w_end = min(len(eval_diams), min_pos + w_nodes + 1)
+        local_window = eval_diams[local_w_start:local_w_end]
+        local_ref_d = float(np.percentile(local_window, 85))
+        if local_ref_d < 1.5:
+            local_ref_d = ref_d
+            
+        # Differentiate normal physiological tapering (~0.015 mm/mm) from pathological stenosis
+        expected_taper = 0.016 * length_mm
+        expected_min = max(1.2, local_ref_d - expected_taper)
+        
+        if min_d >= expected_min:
+            # Smooth anatomical taper: non-stenotic, capped at normal/minimal CAD-RADS 1 (<15%)
+            sten_pct = min(15.0, (1.0 - (min_d / local_ref_d)) * 100.0 * 0.35)
+        else:
+            # Pathological focal narrowing beyond expected tapering
+            sten_pct = max(0.0, min(100.0, (1.0 - (min_d / local_ref_d)) * 100.0))
         
         branch_records.append({
             "branch_idx": b_idx,
             "artery": artery,
             "ds": sten_pct,
             "d_min": min_d,
-            "d_ref": ref_d,
+            "d_ref": local_ref_d,
             "node": min_node_idx,
             "length": len(branch)
         })
@@ -183,24 +210,16 @@ def process_case(case_name, rad_target_loc=None):
     all_diams = np.array([G.nodes[n]['diam'] for n in G.nodes()])
     mean_d = float(np.mean(all_diams))
 
-    if is_patent:
-        sten_pct = 10.0
-        cad_rads = "CAD-RADS 1 (Minimal)"
-        best_lesion = {
-            "d_min": 2.80,
-            "d_ref": 3.10,
-            "node": centerline_coords[len(centerline_coords) // 2]
-        }
-    elif not branch_records:
+    if not branch_records:
         sten_pct = 10.0
         cad_rads = "CAD-RADS 1 (Minimal)"
         best_lesion = {
             "d_min": mean_d,
             "d_ref": mean_d,
-            "node": 0
+            "node": centerline_coords[len(centerline_coords) // 2]
         }
     else:
-        # Match target artery if specified
+        # Match target artery branch if specified
         target_records = []
         for r in branch_records:
             if ("RCA" in target_str or "PDA" in target_str) and r["artery"] == "RCA":
@@ -214,15 +233,6 @@ def process_case(case_name, rad_target_loc=None):
         best_lesion = max(eval_set, key=lambda x: x["ds"])
         sten_pct = max(0.0, min(100.0, best_lesion["ds"]))
         cad_rads = get_cad_rads_label(sten_pct)
-
-    if "OCCLUSION" in target_str or "100" in target_str:
-        sten_pct = 100.0
-        cad_rads = "CAD-RADS 5 (Total Occlusion)"
-        best_lesion = {
-            "d_min": 0.0,
-            "d_ref": 3.20,
-            "node": 0
-        }
 
     # Pick the slice with maximum in-plane centerline points for a continuous, panoramic vessel view
     z_coords = centerline_coords[:, 0]
