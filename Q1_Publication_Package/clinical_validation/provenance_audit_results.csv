@@ -1,0 +1,33 @@
+case_id,id_visible,badge_visible,verified,reason
+CT1,no,no,no,Excluded: No screenshot folder exists in labeled root
+CT4,yes,yes,yes,"Verified: EMRUL KAYES (16020889), Badges 70-99% & 50-69%"
+CT5,no,yes,no,Excluded: Patient mismatch (DICOM: MD.ASHEQUR RAHMAN vs Screenshot: MD ENAMUL HAQUE)
+CT61,yes,yes,yes,"Verified: MASUMA AKTAR (14100448), Badge 50-69%"
+CT62,yes,no,no,Excluded: Patient verified (RAZIA SULTANA) but no stenosis badge exists (unbadged patent)
+CT63,yes,yes,yes,"Verified: MD AFZALUR RAHMAN (MR251004225), Badge 70-99%"
+CT64,yes,yes,yes,"Verified: DR.MAHBUBUR RAHMAN (MR251004314), Badge 70-99%"
+CT65,yes,yes,yes,"Verified: TASLIMA AKHTER (25100453), Badge 25-49%"
+CT66,no,yes,no,Excluded: Badge visible (25-49%) but patient ID header cropped off
+CT67,yes,no,no,Excluded: Patient verified (RATNA PARVEEN) but no badge exists (crosshair only)
+CT68,yes,yes,yes,"Verified: MD ABDUS SALAM (18090938), Badge 70-99%"
+CT70,yes,yes,yes,"Verified: ROWSHAN ARA BEGUM (16090010), Badge 90-99%"
+CT71,yes,yes,yes,"Verified: M ZIAUL HOQE (MR251013147), Badge 25-49%"
+CT72,no,yes,no,Excluded: Badge visible (50-69%) but patient ID header cropped off
+CT73,no,yes,no,"Excluded: Badges visible (50-69%, 25-49%) but patient ID header cropped off"
+CT74,yes,yes,yes,"Verified: DIPTI ROY (25102441), Badge 25-49%"
+CT75,yes,yes,yes,"Verified: MIR ASADUZZAMAN CHOWDHURY (MR251012323), Badge 50-69%"
+CT76,yes,yes,yes,"Verified: MD HASIBUL ISLAM (MR250814465), Badge 50-69%"
+CT77,no,yes,no,Excluded: Badges visible (70-99%) but patient ID header cropped off on all screenshots
+CT78,yes,yes,yes,"Verified: MD AMINUR (MR251011415), Badge 90-99%"
+CT79,yes,yes,yes,"Verified: MRS.JHORNA (MR251010886), Badge 25-49%"
+CT80,yes,yes,yes,"Verified: MD.ANWAR HOSSAIN (MR251010840), Badge 90-99%"
+CT81,yes,yes,yes,"Verified: REBAKA SULTANA (17120535), Badge 70-99%"
+CT82,yes,no,no,Excluded: Patient verified (MRS. SHIRIN AKHTER) but no badge exists (unbadged patent)
+CT83,yes,yes,yes,"Verified: SHAH MUHAMMAD AMIRUZZAMAN (MR251010297), Badge 90-99%"
+CT84,no,yes,no,Excluded: Badge visible (50-69%) but patient ID header cropped off
+CT85,yes,yes,yes,"Verified: MD MOHIUDDIN (25100858), Badge 70-99%"
+CT86,yes,no,no,Excluded: Patient verified (MD SAYDUZZAMAN) but no badge exists (unbadged reformat)
+CT87,yes,yes,yes,"Verified: SALMA RAHMAN (25100872), Badge 25-49%"
+CT88,yes,yes,yes,"Verified: KOHINUR BEGUM (25110953), Badge 50-69%"
+CT89,yes,yes,yes,"Verified: ABDUL KAYUM (MR251105307), Badge 70-99%"
+CT90,yes,yes,yes,"Verified: MUSTAFIZUR RAHMAN (25110644), Badge 25-49% on 90.3.png"

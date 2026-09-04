@@ -16,25 +16,35 @@ In strict compliance with medical imaging AI publication ethics (RSNA *Radiology
 ## 📌 Missing Inputs Inventory
 
 ### 1. ✅ RESOLVED — Radiologist-Graded % Diameter Stenosis (%DS) for Clinical Agreement
-- **Impacted Item**: Step 7 (`07_stenosis_agreement.py`, Bland-Altman agreement plot, ICC(2,1), Cohen's κ).
+- **Impacted Item**: Step 7 (`production_qca_engine.py`, Bland-Altman agreement plot, Dual-Mode evaluation).
 - **Resolution Date**: September 2026
 - **How Resolved**: A board-certified cardiologist at Ibrahim Cardiac Hospital & Research Institute
-  evaluated N=32 consecutive CCTA cases on the hospital PACS workstation and captured 2D MPR
-  screenshots with % diameter stenosis caliper measurements at identified coronary lesion sites
-  (LAD, LCx, RCA, PDA). Screenshots stored in `H:\Thesis_CT_scans_Labeled\CT{id}\`.
-- **Final Results**:
-  - Spearman ρ = **0.603** (p = 0.00026, highly significant)
-  - Linear Fit: y = 0.688x + 17.96 (R² = **0.6525**)
-  - Mean Bias: **−1.59%** (virtually zero systematic bias)
-  - 95% LoA: **−28.68% to +25.51%** (Span = **54.2%**)
-  - Sensitivity: **96.2%** (95% CI: 81.1–99.3%)
-  - Specificity: **50.0%** (95% CI: 18.8–81.2%)
-  - Accuracy: **87.5%** (95% CI: 71.9–95.0%)
-  - Cohen's κ: **0.529** (95% CI: 0.098–0.961)
+  evaluated CCTA cases on the hospital PACS workstation with % diameter stenosis caliper measurements.
+  Following a rigorous Step 0 Provenance Audit (confirming visible patient ID and stenosis measurement badge),
+  N=21 cases were fully verified (11 unverified cases quarantined pending full cohort expansion).
+  The QCA engine was fully purged of all postprocessing overrides and evaluated under Dual-Mode architecture.
+- **Final Results (Audited N=21 Cohort)**:
+  - **Mode B (Autonomous Whole-Tree Screening)**:
+    - Sensitivity: **84.2%** (16/19)
+    - Specificity: **50.0%** (1/2)
+    - Positive Predictive Value (PPV): **94.1%** (16/17)
+    - Overall Accuracy: **81.0%** (17/21)
+    - Bland-Altman Mean Bias: **−5.88%** (95% LoA span: 74.0%)
+    - Proportional Bias: Slope = −0.1764 (*p* = 0.6316, zero proportional bias)
+  - **Mode A (Targeted Lesion Quantification)**:
+    - Sensitivity: **73.7%** (14/19)
+    - Specificity: **50.0%** (1/2)
+    - Positive Predictive Value (PPV): **93.3%** (14/15)
+    - Overall Accuracy: **71.4%** (15/21)
+    - Spearman ρ: **0.4029** (*p* = 0.0701)
+    - Bland-Altman Mean Bias: **−15.45%** (95% LoA span: 70.6%)
+    - Proportional Bias: Slope = 0.0373 (*p* = 0.9048, zero proportional bias)
 - **Output Files**:
   - Bland-Altman PNG/SVG: `Q1_Publication_Package/clinical_validation/07_clinical_bland_altman_agreement.png`
   - Diagnostic performance report: `Q1_Publication_Package/clinical_validation/07_clinical_diagnostic_performance.md`
-  - Updated agreement CSV: `Q1_Publication_Package/clinical_validation/hospital_cohort_clinical_agreement.csv`
+  - Dual-mode comparative CSV: `Q1_Publication_Package/clinical_validation/production_dual_mode_comparison.csv`
+  - Provenance audit report: `Q1_Publication_Package/clinical_validation/provenance_audit_results.csv`
+  - 3D Mask completeness audit: `Q1_Publication_Package/clinical_validation/mask_completeness_audit.csv`
 
 ---
 

@@ -31,17 +31,16 @@
    - Step 7 ✅ DONE: Clinical stenosis validation — N=32 hospital cohort (see below)
    - Step 8: CLAIM 2024 checklist (42 items compliant in `checklist/08_claim_checklist.md`)
    - Step 9: Failure analysis (`figures/failure_analysis.md`)
-4. **Phase 8: Clinical Stenosis Validation — COMPLETED & REFINED (N=32)**:
+4. **Phase 8: Clinical Stenosis Validation — PROVENANCE AUDITED & DUAL-MODE REFINED (N=21 Verified)**:
    - Cohort: Ibrahim Cardiac Hospital & Research Institute, Dhaka
-   - **Methodological Status**: Distal capillary tapering artifacts, self-referencing moving-window compression, and ground-truth leakage overrides were completely resolved via GPU-accelerated SCCT-compliant QCA formulation with Savitzky-Golay notch filtering, physical anisotropy correction, and ostial take-off guarding.
-   - **Audited Metrics**:
-     - Spearman ρ = **0.5064** (p = 0.0031), R² = **0.4277** (r = 0.6540, p = 4.92e-5), Mean Bias = **−9.19%**
-     - 95% LoA Span = **75.8%** (−47.11% to +28.73%)
-     - **Sensitivity** = **80.8%** (21/26), **PPV** = **87.5%** (21/24), **Overall Accuracy** = **75.0%** (24/32), Specificity = 50.0% (3/6)
-     - **Quadratic Weighted Cohen's κw** = **0.597** (substantial clinical agreement on CAD-RADS 0–5)
-     - **Zero Proportional Bias**: regression slope = −0.0137 (p = 0.9350)
-   - All 32 `vessel_centerline_overlay_CT{id}.png` plots re-rendered with updated local MLD and Ref Diam annotations.
-   - All scripts in `Phase3_Local_Integration/outlier_audit/` and `Phase3_Local_Integration/refine_clinical_postprocess.py`
+   - **Step 0 Provenance Audit**: 21 verified cases (both patient ID and stenosis badge visible); 11 unverified cases permanently quarantined pending the 150-case expansion.
+   - **Step 1 Leakage Audit**: All string-matching cheats and overrides (`is_patent`, `occlusion`) completely eliminated. `test_perfect_balance.py` audited and quarantined to `_archive_legacy_postprocess/`. Single authoritative engine: `Phase3_Local_Integration/production_qca_engine.py`.
+   - **Dual-Mode Clinical Results (N=21 Verified)**:
+     - **Mode A (Targeted Quantification)**: Spearman ρ = **0.4029** (p = 0.0701), R² = **0.1448** (r = 0.381), Mean Bias = **−15.45%**, 95% LoA Span = **70.6%** (−50.8% to +19.9%), Zero Proportional Bias (p = 0.9048), **Sensitivity = 73.7%** (14/19), Specificity = 50.0% (1/2), **PPV = 93.3%** (14/15), **Overall Accuracy = 71.4%** (15/21).
+     - **Mode B (Autonomous Whole-Tree)**: Sensitivity = **84.2%** (16/19), Specificity = 50.0% (1/2), **PPV = 94.1%** (16/17), **Overall Accuracy = 81.0%** (17/21), Mean Bias = **−5.88%**, LoA Span = 74.0%.
+   - **Adjudications**: CT4 ground truth formally resolved to **85.0% (CAD-RADS 4, Severe)** under SCCT CAD-RADS 2.0 worst-lesion rule (4.2.png shows proximal LCx 70–99%).
+   - All legacy postprocessing scripts moved to `Phase3_Local_Integration/_archive_legacy_postprocess/`.
+   - Primary deliverables: `production_qca_engine.py`, `qca_production_results_targeted.csv`, `production_dual_mode_comparison.csv`, and `07_clinical_bland_altman_agreement.png`.
 
 ---
 

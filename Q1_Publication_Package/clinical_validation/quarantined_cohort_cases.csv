@@ -1,0 +1,12 @@
+case_id,id_visible,badge_visible,verified,reason
+CT1,no,no,no,Excluded: No screenshot folder exists in labeled root
+CT5,no,yes,no,Excluded: Patient mismatch (DICOM: MD.ASHEQUR RAHMAN vs Screenshot: MD ENAMUL HAQUE)
+CT62,yes,no,no,Excluded: Patient verified (RAZIA SULTANA) but no stenosis badge exists (unbadged patent)
+CT66,no,yes,no,Excluded: Badge visible (25-49%) but patient ID header cropped off
+CT67,yes,no,no,Excluded: Patient verified (RATNA PARVEEN) but no badge exists (crosshair only)
+CT72,no,yes,no,Excluded: Badge visible (50-69%) but patient ID header cropped off
+CT73,no,yes,no,"Excluded: Badges visible (50-69%, 25-49%) but patient ID header cropped off"
+CT77,no,yes,no,Excluded: Badges visible (70-99%) but patient ID header cropped off on all screenshots
+CT82,yes,no,no,Excluded: Patient verified (MRS. SHIRIN AKHTER) but no badge exists (unbadged patent)
+CT84,no,yes,no,Excluded: Badge visible (50-69%) but patient ID header cropped off
+CT86,yes,no,no,Excluded: Patient verified (MD SAYDUZZAMAN) but no badge exists (unbadged reformat)

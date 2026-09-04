@@ -142,6 +142,18 @@ TABLE_MAPPINGS = [
     (
         os.path.join(BASE_DIR, "Q1_Publication_Package", "clinical_validation", "07_clinical_validation_summary.md"),
         os.path.join(DEST_DIR, "tables", "Clinical_Validation_Full_Summary.md")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "clinical_validation", "production_dual_mode_comparison.csv"),
+        os.path.join(DEST_DIR, "tables", "Table7_Clinical_Dual_Mode_Comparison.csv")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "clinical_validation", "mask_completeness_audit.csv"),
+        os.path.join(DEST_DIR, "tables", "Table8_Mask_Completeness_Audit.csv")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "clinical_validation", "provenance_audit_results.csv"),
+        os.path.join(DEST_DIR, "tables", "Table9_Provenance_Audit_Results.csv")
     )
 ]
 

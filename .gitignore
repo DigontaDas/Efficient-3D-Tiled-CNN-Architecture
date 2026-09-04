@@ -34,7 +34,12 @@ Thumbs.db
 
 # Intermediate inspection crops
 Phase3_Local_Integration/extracted_badges/
+Phase3_Local_Integration/audit_headers/
 Phase3_Clinical_Audit/
 
 # Handoff packages
 Q1_Publication_Package/handoff_for_digonto/
+
+# Archived legacy and scratch scripts
+Phase3_Local_Integration/_archive_legacy_postprocess/
+Phase3_Local_Integration/_archive_scratch/
