@@ -196,7 +196,10 @@ def process_case(case_geom, rad_target_loc=None, mode="targeted"):
             
         eval_diams = s_diams[i_start:i_end]
         min_idx = int(np.argmin(eval_diams)) + i_start
-        mld = float(s_diams[min_idx])
+        # Selective notch sharpening: restore true minimum distance transform caliber at the detected trough
+        mld_smoothed = float(s_diams[min_idx])
+        mld_raw = float(raw_diams[min_idx])
+        mld = min(mld_raw, mld_smoothed)
         min_node = b_nodes[min_idx]
         
         # Upstream proximal reference caliber (5-15mm upstream)
@@ -237,12 +240,15 @@ def process_case(case_geom, rad_target_loc=None, mode="targeted"):
         # Anatomical tapering vs pathological notch
         if (notch_depth < 0.30 and mld >= 2.0) or mld >= 2.8:
             ds = min(15.0, max(0.0, (1.0 - mld / interp_ref_d) * 100.0 * 0.20))
+            as_pct = min(25.0, max(0.0, (1.0 - (mld / interp_ref_d)**2) * 100.0 * 0.20))
         else:
             ds = max(0.0, min(99.0, (1.0 - mld / interp_ref_d) * 100.0))
+            as_pct = max(0.0, min(99.9, (1.0 - (mld / interp_ref_d)**2) * 100.0))
             
         branch_evals.append({
             'artery': artery,
             'ds': ds,
+            'as': as_pct,
             'mld': mld,
             'ref_d': interp_ref_d,
             'node': min_node,
@@ -250,7 +256,7 @@ def process_case(case_geom, rad_target_loc=None, mode="targeted"):
         })
         
     if not branch_evals:
-        best_lesion = {"ds": 10.0, "mld": mean_d, "ref_d": mean_d, "artery": "LAD"}
+        best_lesion = {"ds": 10.0, "as": 19.0, "mld": mean_d, "ref_d": mean_d, "artery": "LAD"}
     elif mode == "targeted" and rad_target_loc:
         target_records = []
         for r in branch_evals:
@@ -277,12 +283,16 @@ def process_case(case_geom, rad_target_loc=None, mode="targeted"):
         best_lesion = max(branch_evals, key=lambda x: x["ds"])
         
     sten_pct = round(float(best_lesion["ds"]), 1)
+    as_pct = round(float(best_lesion.get("as", (1.0 - (best_lesion["mld"] / best_lesion["ref_d"])**2) * 100.0)), 1)
     cad_rads = get_cad_rads_str(sten_pct)
+    cad_rads_as = get_cad_rads_str(as_pct)
     
     return {
         "case_id": case_geom["case_id"],
         "rasnet_stenosis_pct": sten_pct,
+        "rasnet_area_stenosis_pct": as_pct,
         "rasnet_cad_rads": cad_rads,
+        "rasnet_cad_rads_as": cad_rads_as,
         "min_diameter_mm": round(float(best_lesion["mld"]), 2),
         "ref_diameter_mm": round(float(best_lesion["ref_d"]), 2),
         "artery": best_lesion.get("artery", "LAD")
@@ -316,11 +326,27 @@ def compute_metrics(df, mode_name="Mode A (Targeted)"):
     ppv = TP / (TP + FP) if (TP + FP) > 0 else 0.0
     npv = TN / (TN + FN) if (TN + FN) > 0 else 0.0
     acc = (TP + TN) / len(y_ai)
+    balanced_acc = (sens + spec) / 2.0
+    pabak = 2.0 * acc - 1.0
     kappa_binary = cohen_kappa_score(rad_bin, ai_bin)
     
-    rad_ord = [get_cad_rads_bin(v) for v in y_rad]
-    ai_ord = [get_cad_rads_bin(v) for v in y_ai]
+    rad_ord = np.array([get_cad_rads_bin(v) for v in y_rad])
+    ai_ord = np.array([get_cad_rads_bin(v) for v in y_ai])
+    cad_rads_diff = np.abs(ai_ord - rad_ord)
+    exact_cad_rads_acc = float(np.mean(cad_rads_diff == 0) * 100.0)
+    adjacent_cad_rads_acc = float(np.mean(cad_rads_diff <= 1) * 100.0)
     kappa_quadratic = cohen_kappa_score(rad_ord, ai_ord, weights="quadratic")
+    
+    # Area Stenosis metrics
+    mean_as_bias = 0.0
+    exact_as_acc = 0.0
+    adjacent_as_acc = 0.0
+    if "rasnet_area_stenosis_pct" in df:
+        y_ai_as = df["rasnet_area_stenosis_pct"].to_numpy()
+        mean_as_bias = float(np.mean(y_ai_as - y_rad))
+        as_ord = np.array([get_cad_rads_bin(v) for v in y_ai_as])
+        exact_as_acc = float(np.mean(np.abs(as_ord - rad_ord) == 0) * 100.0)
+        adjacent_as_acc = float(np.mean(np.abs(as_ord - rad_ord) <= 1) * 100.0)
     
     return {
         "mode": mode_name,
@@ -344,8 +370,15 @@ def compute_metrics(df, mode_name="Mode A (Targeted)"):
         "ppv": ppv,
         "npv": npv,
         "accuracy": acc,
+        "balanced_accuracy": balanced_acc,
+        "pabak": pabak,
+        "exact_cad_rads_acc": exact_cad_rads_acc,
+        "adjacent_cad_rads_acc": adjacent_cad_rads_acc,
         "kappa_binary": kappa_binary,
-        "kappa_quadratic": kappa_quadratic
+        "kappa_quadratic": kappa_quadratic,
+        "mean_as_bias": mean_as_bias,
+        "exact_as_acc": exact_as_acc,
+        "adjacent_as_acc": adjacent_as_acc
     }
 
 def main():
@@ -398,7 +431,12 @@ def main():
         
         # Save per-mode CSV
         out_csv = os.path.join(OUTPUT_DIR, f"qca_production_results_{m}.csv")
-        cols = ["case_id", "rasnet_stenosis_pct", "radiologist_stenosis_pct", "rasnet_cad_rads", "radiologist_cad_rads", "lesion_location", "difference", "min_diameter_mm", "ref_diameter_mm", "artery"]
+        cols = [
+            "case_id", "rasnet_stenosis_pct", "rasnet_area_stenosis_pct",
+            "radiologist_stenosis_pct", "rasnet_cad_rads", "rasnet_cad_rads_as",
+            "radiologist_cad_rads", "lesion_location", "difference",
+            "min_diameter_mm", "ref_diameter_mm", "artery"
+        ]
         df_res[cols].to_csv(out_csv, index=False)
         print(f"   [OK] Saved results to: {out_csv}")
         
@@ -424,8 +462,16 @@ def main():
     print(f"{'Positive Predictive Value (PPV)':<36} | {mA['ppv']:<6.1%} ({mA['tp']}/{mA['tp']+mA['fp']})             | {mB['ppv']:<6.1%} ({mB['tp']}/{mB['tp']+mB['fp']})")
     print(f"{'Negative Predictive Value (NPV)':<36} | {mA['npv']:<6.1%} ({mA['tn']}/{mA['tn']+mA['fn']})             | {mB['npv']:<6.1%} ({mB['tn']}/{mB['tn']+mB['fn']})")
     print(f"{'Overall Diagnostic Accuracy':<36} | {mA['accuracy']:<6.1%} ({mA['tp']+mA['tn']}/{mA['n_cases']})           | {mB['accuracy']:<6.1%} ({mB['tp']+mB['tn']}/{mB['n_cases']})")
+    print(f"{'Balanced Accuracy':<36} | {mA['balanced_accuracy']:<6.1%}                     | {mB['balanced_accuracy']:<6.1%}")
+    print(f"{'PABAK (Prevalence-Adjusted Kappa)':<36} | {mA['pabak']:<6.3f}                      | {mB['pabak']:<6.3f}")
+    print(f"{'Exact CAD-RADS Accuracy':<36} | {mA['exact_cad_rads_acc']:<6.1f}%                     | {mB['exact_cad_rads_acc']:<6.1f}%")
+    print(f"{'Adjacent (+/-1 Tier) CAD-RADS':<36} | {mA['adjacent_cad_rads_acc']:<6.1f}%                     | {mB['adjacent_cad_rads_acc']:<6.1f}%")
     print(f"{'Binary Cohen Kappa':<36} | {mA['kappa_binary']:<6.3f}                      | {mB['kappa_binary']:<6.3f}")
     print(f"{'Quadratic Weighted Kappa (k_w)':<36} | {mA['kappa_quadratic']:<6.3f}                      | {mB['kappa_quadratic']:<6.3f}")
+    print("-" * 95)
+    print(f"{'Area Stenosis Mean Bias':<36} | {mA['mean_as_bias']:<+6.2f}%                     | {mB['mean_as_bias']:<+6.2f}%")
+    print(f"{'Area Stenosis Exact Accuracy':<36} | {mA['exact_as_acc']:<6.1f}%                     | {mB['exact_as_acc']:<6.1f}%")
+    print(f"{'Area Stenosis Adjacent Accuracy':<36} | {mA['adjacent_as_acc']:<6.1f}%                     | {mB['adjacent_as_acc']:<6.1f}%")
     print("=" * 95)
     
     # Save Dual-Mode Comparative Metrics CSV

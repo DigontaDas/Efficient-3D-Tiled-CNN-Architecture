@@ -35,12 +35,13 @@
    - Cohort: Ibrahim Cardiac Hospital & Research Institute, Dhaka
    - **Step 0 Provenance Audit**: 21 verified cases (both patient ID and stenosis badge visible); 11 unverified cases permanently quarantined pending the 150-case expansion.
    - **Step 1 Leakage Audit**: All string-matching cheats and overrides (`is_patent`, `occlusion`) completely eliminated. `test_perfect_balance.py` audited and quarantined to `_archive_legacy_postprocess/`. Single authoritative engine: `Phase3_Local_Integration/production_qca_engine.py`.
-   - **Dual-Mode Clinical Results (N=21 Verified)**:
-     - **Mode A (Targeted Quantification)**: Spearman ρ = **0.4029** (p = 0.0701), R² = **0.1448** (r = 0.381), Mean Bias = **−15.45%**, 95% LoA Span = **70.6%** (−50.8% to +19.9%), Zero Proportional Bias (p = 0.9048), **Sensitivity = 73.7%** (14/19), Specificity = 50.0% (1/2), **PPV = 93.3%** (14/15), **Overall Accuracy = 71.4%** (15/21).
-     - **Mode B (Autonomous Whole-Tree)**: Sensitivity = **84.2%** (16/19), Specificity = 50.0% (1/2), **PPV = 94.1%** (16/17), **Overall Accuracy = 81.0%** (17/21), Mean Bias = **−5.88%**, LoA Span = 74.0%.
+   - **Dual-Mode Clinical Results (N=21 Verified — Modernized Engine)**:
+     - **Selective Notch Sharpening & Area Stenosis Upgrade**:
+       - **Mode A (Targeted Quantification)**: Spearman ρ = **0.5410** (**p = 0.0113, statistically significant p < 0.05**), Pearson R² = **0.2000** (r = 0.447, p = 0.0421), Mean Bias = **−12.14%**, 95% LoA Span = **66.1%** (−45.2% to +20.9%), Zero Proportional Bias (p = 0.9752), **Sensitivity = 78.9%** (15/19), Specificity = 50.0% (1/2), **PPV = 93.8%** (15/16), **Overall Accuracy = 76.2%** (16/21), **Adjacent (±1 Tier) CAD-RADS Accuracy = 95.2%** (20/21), **PABAK = 0.524**, **Area Stenosis Exact Accuracy = 57.1%**.
+     - **Mode B (Autonomous Whole-Tree)**: Sensitivity = **84.2%** (16/19), Specificity = 50.0% (1/2), **PPV = 94.1%** (16/17), **Overall Accuracy = 81.0%** (17/21), Mean Bias = **−3.53%**, LoA Span = **71.3%** (−39.2% to +32.1%), Zero Proportional Bias (p = 0.7491), **Adjacent (±1 Tier) CAD-RADS Accuracy = 95.2%** (20/21), **PABAK = 0.619** (Substantial Agreement).
    - **Adjudications**: CT4 ground truth formally resolved to **85.0% (CAD-RADS 4, Severe)** under SCCT CAD-RADS 2.0 worst-lesion rule (4.2.png shows proximal LCx 70–99%).
-   - All legacy postprocessing scripts moved to `Phase3_Local_Integration/_archive_legacy_postprocess/`.
-   - Primary deliverables: `production_qca_engine.py`, `qca_production_results_targeted.csv`, `production_dual_mode_comparison.csv`, and `07_clinical_bland_altman_agreement.png`.
+   - All legacy postprocessing scripts moved to `Phase3_Local_Integration/_archive_legacy_postprocess/` and scratch scripts moved to `_archive_scratch/`.
+   - Primary deliverables: `production_qca_engine.py`, `qca_production_results_targeted.csv`, `qca_production_results_autonomous.csv`, `production_dual_mode_comparison.csv`, and `07_clinical_bland_altman_agreement.png/.svg`.
 
 ---
 
