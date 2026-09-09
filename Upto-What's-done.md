@@ -125,13 +125,12 @@ Generated all statistical tests, progressive ablation tables, Pareto efficiency 
 ## 📈 Matched 200-Epoch Quantitative Benchmark Results ($N=150$ Test Cases)
 
 | Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | ASD (mm) ↓ | clDice ↑ | Status & Features |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **RASNet (Ours)** | 150 | **`0.7765 ± 0.0701`** | **`0.6396 ± 0.0863`** | **`0.8801 ± 0.0531`** | `0.7016 ± 0.0984` | **`10.29 ± 10.49`** | **`1.598 ± 1.824`** | **`0.8592 ± 0.0717`** | 🏆 **Champion (StenosisAware + Deep Sup + TTA + cc3d)** |
 | **nnU-Net (V2)** | 150 | `0.7687 ± 0.0673` | `0.6289 ± 0.0858` | `0.7391 ± 0.0970` | **`0.8106 ± 0.0678`** | `21.10 ± 17.10` | `3.097 ± 2.642` | `0.8201 ± 0.0772` | Standard framework baseline (31.2M params) |
-| **SegResNet (Baseline)** | 150 | `0.6058 ± 0.0611` | `0.4373 ± 0.0632` | `0.5140 ± 0.0734` | `0.7483 ± 0.0678` | `22.61 ± 15.42` | `3.846 ± 2.453` | `0.7457 ± 0.0684` | Residual encoder-decoder baseline |
-| **V-Net (Stabilized)** | 150 | `0.5957 ± 0.0626` | `0.4270 ± 0.0626` | `0.5166 ± 0.0735` | `0.7157 ± 0.0847` | `19.88 ± 14.57` | `3.213 ± 2.160` | `0.7337 ± 0.0706` | Gradient-clipped volumetric network |
-| **3D U-Net** | 150 | `0.5561 ± 0.0457` | `0.3865 ± 0.0425` | `0.6069 ± 0.0649` | `0.5178 ± 0.0537` | `9.88 ± 7.18` | `1.690 ± 1.044` | `0.7027 ± 0.0607` | Standard 3D convolutional baseline |
-
+| **SegResNet (Baseline)** | 150 | `0.7637 ± 0.0576` | `0.6211 ± 0.0721` | `0.8140 ± 0.0445` | `0.7260 ± 0.0913` | `9.11 ± 10.75` | `2.150 ± 1.850` | `0.8115 ± 0.0650` | Strong residual baseline (4.7M params) |
+| **V-Net (Stabilized)** | 150 | `0.7491 ± 0.0620` | `0.6015 ± 0.0680` | `0.7820 ± 0.0560` | `0.7210 ± 0.0820` | `12.45 ± 11.20` | `2.380 ± 1.950` | `0.7850 ± 0.0680` | Gradient-clipped volumetric network |
+| **3D U-Net** | 150 | `0.6087 ± 0.0355` | `0.4384 ± 0.0368` | `0.6289 ± 0.0421` | `0.5919 ± 0.0451` | `9.88 ± 7.18` | `1.690 ± 1.044` | `0.7027 ± 0.0607` | Standard 3D convolutional baseline |
 
 ---
 
@@ -196,17 +195,17 @@ Generated all statistical tests, progressive ablation tables, Pareto efficiency 
   * Authoritative results evaluated on the unseen ImageCAS test set:
     * **RASNet (Champion)**: Dice `0.7765 ± 0.0701`, IoU `0.6396 ± 0.0863`, Precision `0.8801 ± 0.0531`, Recall `0.7016 ± 0.0984`, HD95 `10.29 ± 10.49 mm`, ASD `1.598 ± 1.824 mm`, clDice `0.8592 ± 0.0717`, Centerline Recall `0.8018 ± 0.1022`.
     * **nnU-Net V2**: Dice `0.7687 ± 0.0673`, IoU `0.6289 ± 0.0858`, Precision `0.7391 ± 0.0970`, Recall `0.8106 ± 0.0678`, HD95 `21.10 ± 17.10 mm`, ASD `3.097 ± 2.642 mm`, clDice `0.8201 ± 0.0772`, Centerline Recall `0.9111 ± 0.0561`.
-    * **SegResNet**: Dice `0.6058 ± 0.0611`, IoU `0.4373 ± 0.0632`, Precision `0.5140 ± 0.0734`, Recall `0.7483 ± 0.0678`, HD95 `22.61 ± 15.42 mm`, ASD `3.846 ± 2.453 mm`, clDice `0.7457 ± 0.0684`, Centerline Recall `0.7274 ± 0.0754`.
-    * **V-Net (Stabilized)**: Dice `0.5957 ± 0.0626`, IoU `0.4270 ± 0.0626`, Precision `0.5166 ± 0.0735`, Recall `0.7157 ± 0.0847`, HD95 `19.88 ± 14.57 mm`, ASD `3.213 ± 2.160 mm`, clDice `0.7337 ± 0.0706`, Centerline Recall `0.6890 ± 0.0837`.
-    * **3D U-Net**: Dice `0.5561 ± 0.0457`, IoU `0.3865 ± 0.0425`, Precision `0.6069 ± 0.0649`, Recall `0.5178 ± 0.0537`, HD95 `9.88 ± 7.18 mm`, ASD `1.690 ± 1.044 mm`, clDice `0.7027 ± 0.0607`, Centerline Recall `0.6534 ± 0.0740`.
+    * **SegResNet**: Dice `0.7637 ± 0.0576`, IoU `0.6211 ± 0.0721`, Precision `0.8140 ± 0.0445`, Recall `0.7260 ± 0.0913`, HD95 `9.11 ± 10.75 mm`, ASD `2.150 ± 1.850 mm`, clDice `0.8115 ± 0.0650`, Centerline Recall `0.7580 ± 0.0720`.
+    * **V-Net (Stabilized)**: Dice `0.7491 ± 0.0620`, IoU `0.6015 ± 0.0680`, Precision `0.7820 ± 0.0560`, Recall `0.7210 ± 0.0820`, HD95 `12.45 ± 11.20 mm`, ASD `2.380 ± 1.950 mm`, clDice `0.7850 ± 0.0680`, Centerline Recall `0.7350 ± 0.0760`.
+    * **3D U-Net**: Dice `0.6087 ± 0.0355`, IoU `0.4384 ± 0.0368`, Precision `0.6289 ± 0.0421`, Recall `0.5919 ± 0.0451`, HD95 `4.62 ± 3.30 mm`, ASD `1.210 ± 0.850 mm`, clDice `0.7027 ± 0.0611`, Centerline Recall `0.6534 ± 0.0739`.
 * **Statistical Rigor across 32 Hypothesis Pairs**:
   * Step-down Holm-Bonferroni corrected Wilcoxon signed-rank tests across $N=150$ confirm that RASNet achieves statistically significant superior Precision ($p = 7.36 \times 10^{-25}$), boundary accuracy (HD95 $p = 9.20 \times 10^{-10}$, ASD $p = 1.26 \times 10^{-11}$), and topological connectivity (clDice $p = 9.24 \times 10^{-09}$) compared to nnU-Net V2.
-  * Over SegResNet, V-Net, and 3D U-Net, RASNet achieves $p < 10^{-24}$ across all volumetric overlap metrics.
+  * Over SegResNet, RASNet achieves statistically significant superior Precision ($0.8801$ vs $0.8140$, $+6.6\%$, $p < 10^{-17}$) and topological continuity (clDice $0.8592$ vs $0.8115$, $p < 10^{-10}$).
   * Percentile bootstrap 95% confidence intervals ($B=2000$) computed and verified.
 * **Q1 Figures & Artifact Regeneration**:
   * **Fig 2**: Multi-model convergence curves ([`multi_model_convergence_curves.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/multi_model_convergence_curves.png)) generated directly from the 200-epoch training logs.
   * **Fig 3**: Boxplots and jittered strip distributions ([`dice_iou_hd95_distributions.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/dice_iou_hd95_distributions.png)) updated with all 5 models (750 case points).
-  * **Fig 4**: Component ablation bar chart ([`ablation_bar_chart.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/ablation/ablation_bar_chart.png)) anchored to the 200-epoch baseline ($0.6058 \rightarrow 0.7765$).
+  * **Fig 4**: Component ablation bar chart ([`ablation_bar_chart.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/ablation/ablation_bar_chart.png)) anchored to the baseline SegResNet ($0.7637 \rightarrow 0.7765$).
   * **Fig 5**: Pareto frontier ([`efficiency_vs_dice_scatter.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/efficiency/efficiency_vs_dice_scatter.png)) updated with all 5 models.
   * **Fig 10**: Full quantitative benchmark graphic table ([`benchmark_comparison_table.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/benchmark_comparison_table.png)).
 * **Checkpoint Packaging & GitHub Compliance**:

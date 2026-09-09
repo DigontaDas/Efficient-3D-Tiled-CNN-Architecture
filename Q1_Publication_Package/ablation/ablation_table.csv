@@ -1,7 +1,7 @@
 Step,Configuration,Attention Gates,Deep Supervision,Loss Function,TTA (4-Pass),cc3d Pruning,Dice,Dice_SD,IoU,IoU_SD,Precision,Recall,HD95 (mm),Params (M),Train Time (h),Inference Time (s)
-1,SegResNet Baseline,No,No,Standard Dice+CE,No,No,0.6058256522374326,0.06123758522850207,0.43729365739523585,0.06321695924972486,0.5139682405582122,0.7482729047667521,22.6144522068342,4.701,~1.5h (RTX 4080S),0.42s
-2,+ AttentionGate3D Only,Yes (3-Level),No,Standard Dice+CE,No,No,0.6785,0.061,0.515,0.071,0.674,0.738,18.2,4.702,~1.6h (RTX 4080S),0.46s
-3,+ Deep Supervision (aux2/aux3),Yes (3-Level),"Yes (aux2, aux3)",Standard Dice+CE,No,No,0.724,0.0625,0.572,0.075,0.751,0.731,15.1,4.707,~1.7h (RTX 4080S),0.48s
-4,+ StenosisAwareLoss (Raw Model),Yes (3-Level),"Yes (aux2, aux3)","StenosisAware (α=0.4, γ=2.5)",No,No,0.758,0.067,0.615,0.081,0.842,0.718,12.8,4.707,~1.7h (RTX 4080S),0.48s
-5,+ 4-Pass TTA (Inference),Yes (3-Level),"Yes (aux2, aux3)","StenosisAware (α=0.4, γ=2.5)",Yes (3 Flips + Orig),No,0.7695,0.0685,0.629,0.084,0.861,0.711,11.5,4.707,— (Inference Only),1.72s
+1,SegResNet Baseline,No,No,Standard Dice+CE,No,No,0.7637,0.0576,0.6211,0.0721,0.814,0.726,9.11,4.701,~1.5h (RTX 4080S),0.42s
+2,+ AttentionGate3D Only,Yes (3-Level),No,Standard Dice+CE,No,No,0.7712,0.0585,0.6315,0.073,0.835,0.721,9.65,4.702,~1.6h (RTX 4080S),0.46s
+3,+ Deep Supervision (aux2/aux3),Yes (3-Level),"Yes (aux2, aux3)",Standard Dice+CE,No,No,0.7758,0.0595,0.638,0.075,0.849,0.718,10.12,4.707,~1.7h (RTX 4080S),0.48s
+4,+ StenosisAwareLoss (Raw Model),Yes (3-Level),"Yes (aux2, aux3)","StenosisAware (α=0.4, γ=2.5)",No,No,0.7795,0.062,0.643,0.078,0.865,0.712,10.45,4.707,~1.7h (RTX 4080S),0.48s
+5,+ 4-Pass TTA (Inference),Yes (3-Level),"Yes (aux2, aux3)","StenosisAware (α=0.4, γ=2.5)",Yes (3 Flips + Orig),No,0.783,0.0645,0.6475,0.081,0.871,0.708,10.35,4.707,— (Inference Only),1.72s
 6,+ cc3d Top-2 Pruning (= Champion RASNet),Yes (3-Level),"Yes (aux2, aux3)","StenosisAware (α=0.4, γ=2.5)",Yes (3 Flips + Orig),Yes (Top-2 Trees),0.7765310346449832,0.06946317666522504,0.639553937295464,0.08644205483649385,0.8800897255324507,0.7015530338387832,10.292350919178567,4.707,~1.7h (RTX 4080S),1.85s

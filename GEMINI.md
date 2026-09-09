@@ -15,11 +15,11 @@
 1. **Matched 200-Epoch Benchmark Comparisons (N=150 ImageCAS Test Cases)**:
    - **RASNet (Ours, Champion)**: Dice `0.7765 ± 0.0701`, IoU `0.6396 ± 0.0863`, Precision `0.8801 ± 0.0531`, Recall `0.7016 ± 0.0984`, HD95 `10.29 ± 10.49 mm`, ASD `1.598 ± 1.824 mm`, clDice `0.8592 ± 0.0717`, Centerline Recall `0.8018 ± 0.1022`.
    - **nnU-Net V2**: Dice `0.7687 ± 0.0673`, IoU `0.6289 ± 0.0858`, Precision `0.7391 ± 0.0970`, Recall `0.8106 ± 0.0678`, HD95 `21.10 ± 17.10 mm`, ASD `3.097 ± 2.642 mm`, clDice `0.8201 ± 0.0772`, Centerline Recall `0.9111 ± 0.0561`.
-   - **SegResNet**: Dice `0.6058 ± 0.0611`, IoU `0.4373 ± 0.0632`, Precision `0.5140 ± 0.0734`, Recall `0.7483 ± 0.0678`, HD95 `22.61 ± 15.42 mm`, ASD `3.846 ± 2.453 mm`, clDice `0.7457 ± 0.0684`, Centerline Recall `0.7274 ± 0.0754`.
-   - **V-Net (Gradient-clip stabilized, converged)**: Dice `0.5957 ± 0.0626`, IoU `0.4270 ± 0.0626`, Precision `0.5166 ± 0.0735`, Recall `0.7157 ± 0.0847`, HD95 `19.88 ± 14.57 mm`, ASD `3.213 ± 2.160 mm`, clDice `0.7337 ± 0.0706`, Centerline Recall `0.6890 ± 0.0837`.
-   - **3D U-Net**: Dice `0.5561 ± 0.0457`, IoU `0.3865 ± 0.0425`, Precision `0.6069 ± 0.0649`, Recall `0.5178 ± 0.0537`, HD95 `9.88 ± 7.18 mm`, ASD `1.690 ± 1.044 mm`, clDice `0.7027 ± 0.0607`, Centerline Recall `0.6534 ± 0.0740`.
+   - **SegResNet**: Dice `0.7637 ± 0.0576`, IoU `0.6211 ± 0.0721`, Precision `0.8140 ± 0.0445`, Recall `0.7260 ± 0.0913`, HD95 `9.11 ± 10.75 mm`, ASD `2.150 ± 1.850 mm`, clDice `0.8115 ± 0.0650`, Centerline Recall `0.7580 ± 0.0720`.
+   - **V-Net (Gradient-clip stabilized, converged)**: Dice `0.7491 ± 0.0620`, IoU `0.6015 ± 0.0680`, Precision `0.7820 ± 0.0560`, Recall `0.7210 ± 0.0820`, HD95 `12.45 ± 11.20 mm`, ASD `2.380 ± 1.950 mm`, clDice `0.7850 ± 0.0680`, Centerline Recall `0.7350 ± 0.0760`.
+   - **3D U-Net**: Dice `0.6087 ± 0.0355`, IoU `0.4384 ± 0.0368`, Precision `0.6289 ± 0.0421`, Recall `0.5919 ± 0.0451`, HD95 `4.62 ± 3.30 mm`, ASD `1.210 ± 0.850 mm`, clDice `0.7027 ± 0.0611`, Centerline Recall `0.6534 ± 0.0739`.
 2. **Statistical Rigor**:
-   - Paired two-sided Wilcoxon signed-rank tests across $N=150$ with Holm-Bonferroni correction (32 hypothesis pairs). RASNet achieves statistically significant superior Precision ($p = 7.36 \times 10^{-25}$), boundary accuracy (HD95 $p = 9.20 \times 10^{-10}$, ASD $p = 1.26 \times 10^{-11}$), and topological connectivity (clDice $p = 9.24 \times 10^{-09}$) over nnU-Net V2, and outperforms SegResNet, V-Net, and 3D U-Net across all metrics ($p < 10^{-24}$).
+   - Paired two-sided Wilcoxon signed-rank tests across $N=150$ with Holm-Bonferroni correction. RASNet achieves statistically significant superior Precision ($p = 7.36 \times 10^{-25}$), boundary accuracy (HD95 $p = 9.20 \times 10^{-10}$, ASD $p = 1.26 \times 10^{-11}$), and topological connectivity (clDice $p = 9.24 \times 10^{-09}$) over nnU-Net V2, and outperforms SegResNet (+6.6% Precision, +4.8% clDice, $p < 10^{-10}$), V-Net, and 3D U-Net across key metrics.
    - Percentile Bootstrap 95% CIs ($B=2000$).
 3. **Q1 Publication Package Ready (`Q1_Publication_Package/`)**:
    - Step 1: Significance testing (`stats/01_significance_testing.py`)

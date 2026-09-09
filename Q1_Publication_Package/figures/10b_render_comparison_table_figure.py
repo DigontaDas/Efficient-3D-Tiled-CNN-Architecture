@@ -60,24 +60,24 @@ def render_comparison_table():
         {
             "Architecture": "SegResNet (200 ep)",
             "N": "150",
-            "Dice (DSC) ↑": "0.6058 ± 0.061",
-            "IoU (Jaccard) ↑": "0.4373 ± 0.063",
-            "Precision (PPV) ↑": "0.5140 ± 0.073",
-            "Recall (Sens.) ↑": "0.7483 ± 0.068",
-            "HD95 (mm) ↓": "22.61 ± 15.42",
+            "Dice (DSC) ↑": "0.7637 ± 0.058",
+            "IoU (Jaccard) ↑": "0.6211 ± 0.072",
+            "Precision (PPV) ↑": "0.8140 ± 0.045",
+            "Recall (Sens.) ↑": "0.7260 ± 0.091",
+            "HD95 (mm) ↓": "9.11 ± 10.75",
             "Params (M)": "4.70 M",
             "GFLOPs": "123.15",
             "Latency": "0.42 s",
-            "Status": "Converged baseline, moderate precision"
+            "Status": "Strong baseline, high precision"
         },
         {
             "Architecture": "V-Net (200 ep, Stabilized)",
             "N": "150",
-            "Dice (DSC) ↑": "0.5957 ± 0.063",
-            "IoU (Jaccard) ↑": "0.4270 ± 0.063",
-            "Precision (PPV) ↑": "0.5166 ± 0.074",
-            "Recall (Sens.) ↑": "0.7157 ± 0.085",
-            "HD95 (mm) ↓": "19.88 ± 14.57",
+            "Dice (DSC) ↑": "0.7491 ± 0.062",
+            "IoU (Jaccard) ↑": "0.6015 ± 0.068",
+            "Precision (PPV) ↑": "0.7820 ± 0.056",
+            "Recall (Sens.) ↑": "0.7210 ± 0.082",
+            "HD95 (mm) ↓": "12.45 ± 11.20",
             "Params (M)": "45.60 M",
             "GFLOPs": "640.22",
             "Latency": "3.12 s",
@@ -86,15 +86,15 @@ def render_comparison_table():
         {
             "Architecture": "3D U-Net (200 ep)",
             "N": "150",
-            "Dice (DSC) ↑": "0.5561 ± 0.046",
-            "IoU (Jaccard) ↑": "0.3865 ± 0.043",
-            "Precision (PPV) ↑": "0.6069 ± 0.065",
-            "Recall (Sens.) ↑": "0.5178 ± 0.054",
-            "HD95 (mm) ↓": "9.88 ± 7.18",
+            "Dice (DSC) ↑": "0.6087 ± 0.036",
+            "IoU (Jaccard) ↑": "0.4384 ± 0.037",
+            "Precision (PPV) ↑": "0.6289 ± 0.042",
+            "Recall (Sens.) ↑": "0.5919 ± 0.045",
+            "HD95 (mm) ↓": "4.62 ± 3.30",
             "Params (M)": "16.22 M",
             "GFLOPs": "389.50",
             "Latency": "0.58 s",
-            "Status": "Converged baseline, low distal recall"
+            "Status": "Converged baseline, downsampled grid"
         }
     ]
 

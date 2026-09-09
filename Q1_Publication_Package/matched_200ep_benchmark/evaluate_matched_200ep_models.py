@@ -198,8 +198,8 @@ def run_segresnet_inference(test_ids, pred_model_dir):
         mt.LoadImaged(keys=["image"]),
         mt.EnsureChannelFirstd(keys=["image"]),
         mt.Orientationd(keys=["image"], axcodes="RAS"),
-        mt.Spacingd(keys=["image"], pixdim=(0.8, 0.8, 0.8), mode="bilinear"),
-        mt.ScaleIntensityRanged(keys=["image"], a_min=-200, a_max=800, b_min=0.0, b_max=1.0, clip=True),
+        mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
+        mt.ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
         mt.EnsureTyped(keys=["image"])
     ])
     post_trans = mt.Compose([
@@ -336,8 +336,8 @@ def run_vnet_inference(test_ids, pred_model_dir):
         mt.LoadImaged(keys=["image"]),
         mt.EnsureChannelFirstd(keys=["image"]),
         mt.Orientationd(keys=["image"], axcodes="RAS"),
-        mt.Spacingd(keys=["image"], pixdim=(0.8, 0.8, 0.8), mode="bilinear"),
-        mt.ScaleIntensityRanged(keys=["image"], a_min=-200, a_max=800, b_min=0.0, b_max=1.0, clip=True),
+        mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
+        mt.ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
         mt.EnsureTyped(keys=["image"])
     ])
     post_trans = mt.Compose([
