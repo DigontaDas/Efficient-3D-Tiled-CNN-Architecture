@@ -19,8 +19,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import FancyBboxPatch
 
-OUTPUT_FIG_DIR = r"H:\Thesis_Trainings\Q1_Publication_Package\figures"
-OUTPUT_STAT_DIR = r"H:\Thesis_Trainings\Q1_Publication_Package\stats"
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+OUTPUT_FIG_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "figures")
+OUTPUT_STAT_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "stats")
 os.makedirs(OUTPUT_FIG_DIR, exist_ok=True)
 os.makedirs(OUTPUT_STAT_DIR, exist_ok=True)
 
@@ -58,43 +59,43 @@ def render_comparison_table():
             "Status": "High recall, 2× higher boundary error"
         },
         {
-            "Architecture": "SegResNet (200 ep)",
-            "N": "150",
-            "Dice (DSC) ↑": "0.7637 ± 0.058",
-            "IoU (Jaccard) ↑": "0.6211 ± 0.072",
-            "Precision (PPV) ↑": "0.8140 ± 0.045",
-            "Recall (Sens.) ↑": "0.7260 ± 0.091",
-            "HD95 (mm) ↓": "9.11 ± 10.75",
-            "Params (M)": "4.70 M",
-            "GFLOPs": "123.15",
-            "Latency": "0.42 s",
-            "Status": "Strong baseline, high precision"
-        },
-        {
             "Architecture": "V-Net (200 ep, Stabilized)",
             "N": "150",
-            "Dice (DSC) ↑": "0.7491 ± 0.062",
-            "IoU (Jaccard) ↑": "0.6015 ± 0.068",
-            "Precision (PPV) ↑": "0.7820 ± 0.056",
-            "Recall (Sens.) ↑": "0.7210 ± 0.082",
-            "HD95 (mm) ↓": "12.45 ± 11.20",
+            "Dice (DSC) ↑": "0.7474 ± 0.063",
+            "IoU (Jaccard) ↑": "0.6006 ± 0.079",
+            "Precision (PPV) ↑": "0.7545 ± 0.098",
+            "Recall (Sens.) ↑": "0.7499 ± 0.068",
+            "HD95 (mm) ↓": "21.81 ± 19.14",
             "Params (M)": "45.60 M",
             "GFLOPs": "640.22",
             "Latency": "3.12 s",
-            "Status": "Fully converged, heavy compute"
+            "Status": "Fully converged, balanced recall"
+        },
+        {
+            "Architecture": "SegResNet (200 ep)",
+            "N": "150",
+            "Dice (DSC) ↑": "0.7469 ± 0.064",
+            "IoU (Jaccard) ↑": "0.6001 ± 0.079",
+            "Precision (PPV) ↑": "0.7313 ± 0.091",
+            "Recall (Sens.) ↑": "0.7713 ± 0.065",
+            "HD95 (mm) ↓": "31.48 ± 18.16",
+            "Params (M)": "4.70 M",
+            "GFLOPs": "123.15",
+            "Latency": "0.42 s",
+            "Status": "Fast inference, moderate boundary error"
         },
         {
             "Architecture": "3D U-Net (200 ep)",
             "N": "150",
-            "Dice (DSC) ↑": "0.6087 ± 0.036",
-            "IoU (Jaccard) ↑": "0.4384 ± 0.037",
-            "Precision (PPV) ↑": "0.6289 ± 0.042",
-            "Recall (Sens.) ↑": "0.5919 ± 0.045",
-            "HD95 (mm) ↓": "4.62 ± 3.30",
+            "Dice (DSC) ↑": "0.5561 ± 0.046",
+            "IoU (Jaccard) ↑": "0.3865 ± 0.043",
+            "Precision (PPV) ↑": "0.6069 ± 0.065",
+            "Recall (Sens.) ↑": "0.5178 ± 0.054",
+            "HD95 (mm) ↓": "9.88 ± 7.18",
             "Params (M)": "16.22 M",
             "GFLOPs": "389.50",
             "Latency": "0.58 s",
-            "Status": "Converged baseline, downsampled grid"
+            "Status": "Downsampled grid baseline"
         }
     ]
 

@@ -707,7 +707,11 @@ def main():
     ]
 
     if args.model:
-        model_runners = [(name, runner) for name, runner in model_runners if args.model.lower() in name.lower()]
+        query = args.model.lower().replace("-", "").replace("_", "")
+        model_runners = [
+            (name, runner) for name, runner in model_runners
+            if query in name.lower().replace("-", "").replace("_", "")
+        ]
 
     all_dfs = {}
     for name, runner in model_runners:
