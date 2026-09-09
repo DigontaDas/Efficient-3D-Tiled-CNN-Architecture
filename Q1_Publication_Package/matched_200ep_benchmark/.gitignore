@@ -1,0 +1,9 @@
+# Ignore benchmark dataset caches and preprocessed files
+cache/
+nnUNet_raw/
+nnUNet_preprocessed/
+nnUNet_results/
+*.b2nd
+*.pkl
+*.npy
+*.npz
