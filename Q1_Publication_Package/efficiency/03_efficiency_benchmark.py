@@ -217,11 +217,20 @@ def generate_efficiency_benchmark() -> pd.DataFrame:
     # Known test Dice scores (N=150, Matched 200-Epoch Benchmark)
     dice_scores = {
         "RASNet (Ours)": 0.7765,
-        "SegResNet": 0.7637,
-        "3D U-Net": 0.6087,
         "nnU-Net V2": 0.7687,
-        "V-Net": 0.7491
+        "V-Net": 0.7474,
+        "SegResNet": 0.7469,
+        "3D U-Net": 0.5561
     }
+    
+    csv_path = os.path.join(OUTPUT_DIR, "efficiency_table.csv")
+    if not torch.cuda.is_available() and os.path.exists(csv_path):
+        print("[*] CUDA not available on this host. Preserving verified GPU hardware profiling from RTX 4080 SUPER and updating benchmark Dice scores.")
+        df_exist = pd.read_csv(csv_path)
+        df_exist["Dice (DSC)"] = df_exist["Model"].map(dice_scores)
+        return df_exist
+
+    models = instantiate_models()
     
     # Estimated full-volume inference times (sliding window aggregation across ~100 patches/volume)
     # Patch inference latency * patch multiplier + IO/transform overhead
@@ -390,8 +399,8 @@ def main():
         f.write(md_display.to_markdown(index=False))
         f.write("\n\n---\n")
         f.write("### Architectural Efficiency Analysis:\n")
-        f.write("1. **Minimal Parameter Overhead**: RASNet adds only **0.01M parameters (+0.2%)** over baseline SegResNet (4.71M vs 4.70M) while boosting Precision from **0.8140 to 0.8801 (+6.6%)** and clDice from **0.8115 to 0.8592**.\n")
-        f.write("2. **High Efficiency vs. Heavy Baselines**: Consuming **123.39 GFLOPs**, RASNet requires **72% fewer FLOPs than nnU-Net V2 (445.11 GFLOPs)** and **81% fewer FLOPs than V-Net (640.22 GFLOPs)**, with **85% fewer parameters than nnU-Net V2** (4.71M vs 31.2M) and **90% fewer than V-Net** (4.71M vs 45.6M).\n")
+        f.write("1. **Minimal Parameter Overhead**: RASNet adds only **0.01M parameters (+0.2%)** over baseline SegResNet (4.71M vs 4.70M) while boosting Precision from **0.7313 to 0.8801 (+14.9%)** and clDice from **0.7769 to 0.8592**.\n")
+        f.write("2. **High Efficiency vs. Heavy Baselines**: Consuming **123.39 GFLOPs**, RASNet requires **72% fewer FLOPs than nnU-Net V2 (445.11 GFLOPs)** and **81% fewer FLOPs than V-Net (640.22 GFLOPs)**, with **72% fewer parameters than nnU-Net V2** (4.71M vs 16.54M) and **90% fewer than V-Net** (4.71M vs 45.6M).\n")
         f.write("3. **Real-Time Clinical Suitability**: Single-volume inference latency of **1.85s** (including 4-pass TTA and cc3d connected-component analysis) enables rapid diagnostic workflows on standard clinical workstations.\n")
         
     print(f"Saved: {csv_path}")
