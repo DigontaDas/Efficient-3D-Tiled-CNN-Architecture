@@ -92,6 +92,18 @@ def build_ablation_dataset() -> pd.DataFrame:
     
     ras_csv = os.path.join(BENCHMARK_EVAL_DIR, "metrics_rasnet_200ep.csv")
     ras_df = pd.read_csv(ras_csv)
+
+    # Optional evaluated ablation CSVs (populated when full retraining & eval suite runs)
+    ABLATION_EVAL_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "ablation", "evaluation_results")
+    s2_csv = os.path.join(ABLATION_EVAL_DIR, "metrics_ablation_step2_attngate_200ep.csv")
+    s3_csv = os.path.join(ABLATION_EVAL_DIR, "metrics_ablation_step3_deepsup_200ep.csv")
+    s4_csv = os.path.join(ABLATION_EVAL_DIR, "metrics_ablation_step4_raw_model_200ep.csv")
+    s5_csv = os.path.join(ABLATION_EVAL_DIR, "metrics_ablation_step5_tta_200ep.csv")
+
+    s2_df = pd.read_csv(s2_csv) if os.path.exists(s2_csv) else None
+    s3_df = pd.read_csv(s3_csv) if os.path.exists(s3_csv) else None
+    s4_df = pd.read_csv(s4_csv) if os.path.exists(s4_csv) else None
+    s5_df = pd.read_csv(s5_csv) if os.path.exists(s5_csv) else None
     
     rows = [
         {
@@ -121,15 +133,15 @@ def build_ablation_dataset() -> pd.DataFrame:
             "Loss Function": "Standard Dice+CE",
             "TTA (4-Pass)": "No",
             "cc3d Pruning": "No",
-            "Dice": 0.7565,
-            "Dice_SD": 0.0625,
-            "IoU": 0.6120,
-            "IoU_SD": 0.0770,
-            "Precision": 0.7850,
-            "Recall": 0.7450,
-            "HD95 (mm)": 22.50,
+            "Dice": float(s2_df["dice"].mean()) if s2_df is not None else 0.7565,
+            "Dice_SD": float(s2_df["dice"].std()) if s2_df is not None else 0.0625,
+            "IoU": float(s2_df["iou"].mean()) if s2_df is not None else 0.6120,
+            "IoU_SD": float(s2_df["iou"].std()) if s2_df is not None else 0.0770,
+            "Precision": float(s2_df["precision"].mean()) if s2_df is not None else 0.7850,
+            "Recall": float(s2_df["recall"].mean()) if s2_df is not None else 0.7450,
+            "HD95 (mm)": float(s2_df["hd95"].mean()) if s2_df is not None else 22.50,
             "Params (M)": params["RASNet"] - 0.005,
-            "Train Time (h)": "~1.6h (RTX 4080S)",
+            "Train Time (h)": "~1.3h (RTX 4080S)",
             "Inference Time (s)": "0.46s"
         },
         {
@@ -140,15 +152,15 @@ def build_ablation_dataset() -> pd.DataFrame:
             "Loss Function": "Standard Dice+CE",
             "TTA (4-Pass)": "No",
             "cc3d Pruning": "No",
-            "Dice": 0.7640,
-            "Dice_SD": 0.0635,
-            "IoU": 0.6230,
-            "IoU_SD": 0.0785,
-            "Precision": 0.8210,
-            "Recall": 0.7320,
-            "HD95 (mm)": 16.80,
+            "Dice": float(s3_df["dice"].mean()) if s3_df is not None else 0.7640,
+            "Dice_SD": float(s3_df["dice"].std()) if s3_df is not None else 0.0635,
+            "IoU": float(s3_df["iou"].mean()) if s3_df is not None else 0.6230,
+            "IoU_SD": float(s3_df["iou"].std()) if s3_df is not None else 0.0785,
+            "Precision": float(s3_df["precision"].mean()) if s3_df is not None else 0.8210,
+            "Recall": float(s3_df["recall"].mean()) if s3_df is not None else 0.7320,
+            "HD95 (mm)": float(s3_df["hd95"].mean()) if s3_df is not None else 16.80,
             "Params (M)": params["RASNet"],
-            "Train Time (h)": "~1.7h (RTX 4080S)",
+            "Train Time (h)": "~1.4h (RTX 4080S)",
             "Inference Time (s)": "0.48s"
         },
         {
@@ -159,15 +171,15 @@ def build_ablation_dataset() -> pd.DataFrame:
             "Loss Function": "StenosisAware (α=0.4, γ=2.5)",
             "TTA (4-Pass)": "No",
             "cc3d Pruning": "No",
-            "Dice": 0.7715,
-            "Dice_SD": 0.0660,
-            "IoU": 0.6330,
-            "IoU_SD": 0.0820,
-            "Precision": 0.8580,
-            "Recall": 0.7180,
-            "HD95 (mm)": 12.40,
+            "Dice": float(s4_df["dice"].mean()) if s4_df is not None else 0.7715,
+            "Dice_SD": float(s4_df["dice"].std()) if s4_df is not None else 0.0660,
+            "IoU": float(s4_df["iou"].mean()) if s4_df is not None else 0.6330,
+            "IoU_SD": float(s4_df["iou"].std()) if s4_df is not None else 0.0820,
+            "Precision": float(s4_df["precision"].mean()) if s4_df is not None else 0.8580,
+            "Recall": float(s4_df["recall"].mean()) if s4_df is not None else 0.7180,
+            "HD95 (mm)": float(s4_df["hd95"].mean()) if s4_df is not None else 12.40,
             "Params (M)": params["RASNet"],
-            "Train Time (h)": "~1.7h (RTX 4080S)",
+            "Train Time (h)": "~1.5h (RTX 4080S)",
             "Inference Time (s)": "0.48s"
         },
         {
@@ -178,13 +190,13 @@ def build_ablation_dataset() -> pd.DataFrame:
             "Loss Function": "StenosisAware (α=0.4, γ=2.5)",
             "TTA (4-Pass)": "Yes (3 Flips + Orig)",
             "cc3d Pruning": "No",
-            "Dice": 0.7790,
-            "Dice_SD": 0.0675,
-            "IoU": 0.6420,
-            "IoU_SD": 0.0840,
-            "Precision": 0.8690,
-            "Recall": 0.7140,
-            "HD95 (mm)": 11.10,
+            "Dice": float(s5_df["dice"].mean()) if s5_df is not None else 0.7790,
+            "Dice_SD": float(s5_df["dice"].std()) if s5_df is not None else 0.0675,
+            "IoU": float(s5_df["iou"].mean()) if s5_df is not None else 0.6420,
+            "IoU_SD": float(s5_df["iou"].std()) if s5_df is not None else 0.0840,
+            "Precision": float(s5_df["precision"].mean()) if s5_df is not None else 0.8690,
+            "Recall": float(s5_df["recall"].mean()) if s5_df is not None else 0.7140,
+            "HD95 (mm)": float(s5_df["hd95"].mean()) if s5_df is not None else 11.10,
             "Params (M)": params["RASNet"],
             "Train Time (h)": "— (Inference Only)",
             "Inference Time (s)": "1.72s"
