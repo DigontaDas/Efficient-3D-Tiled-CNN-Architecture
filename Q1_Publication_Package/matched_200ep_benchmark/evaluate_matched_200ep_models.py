@@ -173,7 +173,7 @@ def get_test_case_ids():
     return sorted(test_ids)
 
 
-def run_segresnet_inference(test_ids, pred_model_dir):
+def run_segresnet_inference(test_ids, pred_model_dir, overwrite=False):
     from monai.networks.nets import SegResNet
     from monai.inferers import sliding_window_inference
     import monai.transforms as mt
@@ -217,7 +217,7 @@ def run_segresnet_inference(test_ids, pred_model_dir):
 
     for idx, cid in enumerate(test_ids):
         out_file = os.path.join(pred_model_dir, f"{cid}.nii.gz")
-        if os.path.exists(out_file):
+        if os.path.exists(out_file) and not overwrite:
             continue
         img_p = dataset_paths.find_image(cid)
         if not img_p:
@@ -240,7 +240,7 @@ def run_segresnet_inference(test_ids, pred_model_dir):
             print(f"  [SegResNet] Processed {idx + 1}/{len(test_ids)} cases...")
 
 
-def run_3dunet_inference(test_ids, pred_model_dir):
+def run_3dunet_inference(test_ids, pred_model_dir, overwrite=False):
     from monai.networks.nets import UNet
     import monai.transforms as mt
 
@@ -286,7 +286,7 @@ def run_3dunet_inference(test_ids, pred_model_dir):
 
     for idx, cid in enumerate(test_ids):
         out_file = os.path.join(pred_model_dir, f"{cid}.nii.gz")
-        if os.path.exists(out_file):
+        if os.path.exists(out_file) and not overwrite:
             continue
         img_p = dataset_paths.find_image(cid)
         if not img_p:
@@ -309,7 +309,7 @@ def run_3dunet_inference(test_ids, pred_model_dir):
             print(f"  [3D U-Net] Processed {idx + 1}/{len(test_ids)} cases...")
 
 
-def run_vnet_inference(test_ids, pred_model_dir):
+def run_vnet_inference(test_ids, pred_model_dir, overwrite=False):
     from monai.networks.nets import VNet
     from monai.inferers import sliding_window_inference
     import monai.transforms as mt
@@ -355,7 +355,7 @@ def run_vnet_inference(test_ids, pred_model_dir):
 
     for idx, cid in enumerate(test_ids):
         out_file = os.path.join(pred_model_dir, f"{cid}.nii.gz")
-        if os.path.exists(out_file):
+        if os.path.exists(out_file) and not overwrite:
             continue
         img_p = dataset_paths.find_image(cid)
         if not img_p:
@@ -378,7 +378,7 @@ def run_vnet_inference(test_ids, pred_model_dir):
             print(f"  [V-Net] Processed {idx + 1}/{len(test_ids)} cases...")
 
 
-def run_rasnet_inference(test_ids, pred_model_dir):
+def run_rasnet_inference(test_ids, pred_model_dir, overwrite=False):
     from rasnet_model import RASNet
     from monai.inferers import sliding_window_inference
     import monai.transforms as mt
@@ -423,7 +423,7 @@ def run_rasnet_inference(test_ids, pred_model_dir):
 
     for idx, cid in enumerate(test_ids):
         out_file = os.path.join(pred_model_dir, f"{cid}.nii.gz")
-        if os.path.exists(out_file):
+        if os.path.exists(out_file) and not overwrite:
             continue
         img_p = dataset_paths.find_image(cid)
         if not img_p:
@@ -448,16 +448,16 @@ def run_rasnet_inference(test_ids, pred_model_dir):
 
         # Topology cleaning (keep top 2 components)
         labeled, N = cc3d.connected_components(pred_bin, return_N=True)
-        if N > 0:
-            sizes = np.bincount(labeled.flat)
-            comps = [(i, sizes[i]) for i in range(1, len(sizes)) if sizes[i] >= 50]
-            comps.sort(key=lambda x: x[1], reverse=True)
-            cleaned = np.zeros_like(pred_bin, dtype=np.uint8)
-            for cid_comp, _ in comps[:2]:
-                cleaned[labeled == cid_comp] = 1
-            pred_bin = cleaned
+        if N > 2:
+            counts = np.bincount(labeled.flat)
+            counts[0] = 0
+            top2_labels = np.argsort(counts)[-2:]
+            pred_cleaned = np.isin(labeled, top2_labels).astype(np.uint8)
+        else:
+            pred_cleaned = pred_bin
 
-        pred_mask_sitk = np.transpose(pred_bin, (2, 1, 0))
+        pred_mask_sitk = np.transpose(pred_cleaned, (2, 1, 0))
+
         orig_img = sitk.ReadImage(img_p)
         sitk_p = sitk.GetImageFromArray(pred_mask_sitk)
         sitk_p.CopyInformation(orig_img)
@@ -466,7 +466,7 @@ def run_rasnet_inference(test_ids, pred_model_dir):
             print(f"  [RASNet] Processed {idx + 1}/{len(test_ids)} cases...")
 
 
-def run_nnunet_inference(test_ids, pred_model_dir):
+def run_nnunet_inference(test_ids, pred_model_dir, overwrite=False):
     """Executes nnU-Net inference using nnUNetPredictor directly from trained model folder."""
     from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
     nnunet_res = os.path.join(BENCHMARK_DIR, "nnUNet_results")
@@ -490,7 +490,7 @@ def run_nnunet_inference(test_ids, pred_model_dir):
     out_files = []
     for cid in test_ids:
         out_f = os.path.join(pred_model_dir, f"{cid}.nii.gz")
-        if os.path.exists(out_f):
+        if os.path.exists(out_f) and not overwrite:
             continue
         src_f = dataset_paths.find_image(cid)
         if src_f and os.path.exists(src_f):
@@ -513,9 +513,9 @@ def run_nnunet_inference(test_ids, pred_model_dir):
 # Metric Evaluation Pipeline Across All 5 Models
 # ─────────────────────────────────────────────────────────────────────────────
 
-def evaluate_predictions_for_model(model_name: str, pred_model_dir: str, test_ids: list) -> pd.DataFrame:
+def evaluate_predictions_for_model(model_name: str, pred_model_dir: str, test_ids: list, overwrite: bool = False) -> pd.DataFrame:
     csv_out = os.path.join(OUTPUT_DIR, f"metrics_{model_name.lower().replace(' ', '_').replace('-', '_')}_200ep.csv")
-    if os.path.exists(csv_out):
+    if os.path.exists(csv_out) and not overwrite:
         try:
             df_exist = pd.read_csv(csv_out)
             if len(df_exist) == len(test_ids):
@@ -682,6 +682,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Limit number of test cases (for testing)")
     parser.add_argument("--model", type=str, default=None, help="Run specific model only (SegResNet, 3D U-Net, V-Net, RASNet, nnU-Net V2)")
     parser.add_argument("--metrics-only", action="store_true", help="Skip inference and compute metrics on existing predictions")
+    parser.add_argument("--overwrite", action="store_true", help="Force overwrite of existing predictions and metric CSVs")
     args = parser.parse_args()
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -716,13 +717,13 @@ def main():
         if not args.metrics_only:
             print(f"\n[>>>] STAGE: Running Inference for {name}...")
             try:
-                runner(test_ids, pred_model_dir)
+                runner(test_ids, pred_model_dir, overwrite=args.overwrite)
             except Exception as exc:
                 print(f"[WARNING] Inference for {name} encountered an error: {exc}")
 
         # Compute 8 metrics
         try:
-            df = evaluate_predictions_for_model(name, pred_model_dir, test_ids)
+            df = evaluate_predictions_for_model(name, pred_model_dir, test_ids, overwrite=args.overwrite)
             all_dfs[name] = df
         except Exception as exc:
             print(f"[ERROR] Metric calculation for {name} failed: {exc}")
