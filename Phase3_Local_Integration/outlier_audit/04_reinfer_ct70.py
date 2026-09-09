@@ -28,7 +28,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 PATCH_SIZE = (96, 96, 96)
 SW_BATCH_SIZE = 2
 
-CKPT_PATH = r"H:\Thesis_Trainings\results-after-hallucin-fix\checkpoints\rasnet_best.pth"
+CKPT_PATH = r"H:\Thesis_Trainings\Q1_Publication_Package\matched_200ep_benchmark\checkpoints\rasnet_best.pth"
 IMG_PATH   = r"H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT70\image.nii.gz"
 PRED_PATH  = r"H:\Thesis_Trainings\Phase3_Local_Integration\local_data\CT70\pred_mask.nii.gz"
 

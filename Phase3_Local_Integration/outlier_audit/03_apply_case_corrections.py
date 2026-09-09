@@ -17,7 +17,7 @@ sys.path.insert(0, r'H:\Thesis_Trainings\Phase3_Local_Integration')
 
 CSV_PATH = r"H:\Thesis_Trainings\Q1_Publication_Package\clinical_validation\hospital_cohort_clinical_agreement.csv"
 NIFTI_ROOT = r"H:\Thesis_Trainings\Phase3_Local_Integration\local_data"
-CHECKPOINT_PATH = r"H:\Thesis_Trainings\results-after-hallucin-fix\checkpoints\rasnet_best.pth"
+CHECKPOINT_PATH = r"H:\Thesis_Trainings\Q1_Publication_Package\matched_200ep_benchmark\checkpoints\rasnet_best.pth"
 
 df = pd.read_csv(CSV_PATH)
 print("Original CSV loaded:", df.shape)

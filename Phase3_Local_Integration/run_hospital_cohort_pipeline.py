@@ -40,7 +40,8 @@ SW_BATCH_SIZE = 2  # Optimized for 8 GB VRAM RTX 3060 Ti
 
 # Paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-CKPT_PATH = os.path.join(BASE_DIR, "results-after-hallucin-fix", "checkpoints", "rasnet_best.pth")
+# Authoritative 200-Epoch Matched Benchmark Champion Checkpoint
+CKPT_PATH = os.path.join(BASE_DIR, "Q1_Publication_Package", "matched_200ep_benchmark", "checkpoints", "rasnet_best.pth")
 DICOM_ROOT = r"H:\CT_Scans_Thesis"
 LOCAL_DATA_DIR = os.path.join(os.path.dirname(__file__), "local_data")
 

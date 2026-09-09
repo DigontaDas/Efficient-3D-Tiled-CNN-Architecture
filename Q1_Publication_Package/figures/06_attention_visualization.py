@@ -45,9 +45,9 @@ PRED_DIR = os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "prediction
 PATCH_SIZE = (96, 96, 96)
 
 CKPT_CANDIDATES = [
-    os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "checkpoints", "rasnet_best.pth"),
-    os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "rasnet_best.pth"),
-    os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "checkpoints", "rasnet_epoch_70.pth")
+    os.path.join(TRAININGS_DIR, "Q1_Publication_Package", "matched_200ep_benchmark", "checkpoints", "rasnet_best.pth"),
+    os.path.join(TRAININGS_DIR, "_Archive_Historical_Experiments_and_Logs", "archived_rasnet_checkpoints", "hallucin_fix_aug31", "rasnet_best.pth"),
+    os.path.join(TRAININGS_DIR, "_Archive_Historical_Experiments_and_Logs", "archived_rasnet_checkpoints", "70ep_development_run", "rasnet_best.pth")
 ]
 CKPT_PATH = next((p for p in CKPT_CANDIDATES if os.path.exists(p)), None)
 

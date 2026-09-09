@@ -70,7 +70,8 @@
 ---
 
 ## 📂 Key File Locations
-- Champion Checkpoint: `Thesis_Trainings/results-after-hallucin-fix/checkpoints/rasnet_best.pth`
+- Champion Checkpoint (200-Epoch Matched): `Thesis_Trainings/Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth`
+- Archived Historical Checkpoints: `Thesis_Trainings/_Archive_Historical_Experiments_and_Logs/archived_rasnet_checkpoints/`
 - Full Progress Document: `Thesis_Trainings/Upto-What's-done.md`
 - Q1 Publication Artifacts: `Q1_Publication_Package/`
 - Local Data QC & Fine-Tuning: `Thesis_Trainings/Phase3_Local_Integration/`
