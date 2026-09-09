@@ -33,11 +33,10 @@ from typing import Dict, Tuple
 
 # Path setup
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TRAININGS_DIR = os.path.join(REPO_ROOT, "Thesis_Trainings", "Thesis_Trainings")
 OUTPUT_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "efficiency")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-PHASE3_DIR = os.path.join(TRAININGS_DIR, "Phase3_Local_Integration")
+PHASE3_DIR = os.path.join(REPO_ROOT, "Phase3_Local_Integration")
 sys.path.insert(0, PHASE3_DIR)
 
 from rasnet_model import RASNet
@@ -215,13 +214,13 @@ def generate_efficiency_benchmark() -> pd.DataFrame:
     """Run full benchmarking suite across all models."""
     models = instantiate_models()
     
-    # Known test Dice scores (N=150)
+    # Known test Dice scores (N=150, Matched 200-Epoch Benchmark)
     dice_scores = {
-        "RASNet (Ours)": 0.7862,
-        "SegResNet": 0.7637,
-        "3D U-Net": 0.6087,
-        "nnU-Net V2": 0.6003,
-        "V-Net": np.nan  # Diverged during training
+        "RASNet (Ours)": 0.7765,
+        "SegResNet": 0.6058,
+        "3D U-Net": 0.5561,
+        "nnU-Net V2": 0.7687,
+        "V-Net": 0.5957
     }
     
     # Estimated full-volume inference times (sliding window aggregation across ~100 patches/volume)
@@ -274,7 +273,7 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5), dpi=300)
     
-    # Filter out models with no test Dice (e.g. V-Net divergence)
+    # Filter out models with no test Dice (all 5 models present in 200ep benchmark)
     plot_df = eff_df.dropna(subset=["Dice (DSC)"]).copy()
     
     palette = sns.color_palette("colorblind", len(plot_df))
@@ -282,10 +281,14 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
         "RASNet (Ours)": "#d95f02",    # High-contrast highlight (Rust/Orange)
         "SegResNet": "#1b9e77",        # Teal/Green
         "3D U-Net": "#7570b3",         # Purple
-        "nnU-Net V2": "#e7298a"        # Magenta/Pink
+        "nnU-Net V2": "#e7298a",       # Magenta/Pink
+        "V-Net": "#386cb0"             # Blue
     }
     
     # Plot 1: Dice vs. GFLOPs
+    rasnet_gflops = float(plot_df[plot_df["Model"].str.contains("RASNet")]["GFLOPs (96³ Patch)"].values[0])
+    rasnet_dice = float(plot_df[plot_df["Model"].str.contains("RASNet")]["Dice (DSC)"].values[0])
+    
     for _, row in plot_df.iterrows():
         m_name = row["Model"]
         color = model_colors.get(m_name, "#333333")
@@ -296,8 +299,8 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
                     color=color, s=size, marker=marker, edgecolors='black', linewidth=1.2, zorder=5, label=m_name)
         
         # Annotation offset
-        offset_y = 0.012 if "RASNet" in m_name else -0.018
-        offset_x = 0 if "RASNet" in m_name else 0
+        offset_y = 0.014 if "RASNet" in m_name else -0.020
+        offset_x = 0
         ax1.annotate(f"{m_name}\n({row['Dice (DSC)']:.4f})",
                      xy=(row["GFLOPs (96³ Patch)"], row["Dice (DSC)"]),
                      xytext=(row["GFLOPs (96³ Patch)"] + offset_x, row["Dice (DSC)"] + offset_y),
@@ -309,12 +312,12 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
     ax1.set_ylabel("Dice Similarity Coefficient (DSC)", fontsize=11, fontweight='bold', labelpad=8)
     ax1.set_title("Accuracy vs. Computational Complexity (GFLOPs)", fontsize=12, fontweight='bold', pad=12)
     ax1.grid(True, linestyle='--', alpha=0.5, color='#cccccc')
-    ax1.set_ylim(0.55, 0.83)
-    ax1.set_xlim(20, 160)
+    ax1.set_ylim(0.50, 0.83)
+    ax1.set_xlim(20, 680)
     
     # Draw Pareto boundary
-    ax1.annotate("Pareto Optimal Frontier\n(Highest Dice at lowest GFLOPs)",
-                 xy=(39.6, 0.7862), xytext=(60, 0.73),
+    ax1.annotate("Pareto Optimal Frontier\n(Highest Dice at minimal cost)",
+                 xy=(rasnet_gflops, rasnet_dice), xytext=(rasnet_gflops + 80, rasnet_dice - 0.06),
                  arrowprops=dict(facecolor='#d95f02', edgecolor='black', shrink=0.08, width=1.5, headwidth=7),
                  fontsize=9.5, fontweight='bold', color='#a63603',
                  bbox=dict(boxstyle="round,pad=0.3", facecolor='#fff5eb', edgecolor='#fd8d3c'))
@@ -329,7 +332,7 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
         ax2.scatter(row["Parameters (M)"], row["Dice (DSC)"],
                     color=color, s=size, marker=marker, edgecolors='black', linewidth=1.2, zorder=5)
         
-        offset_y = 0.012 if "RASNet" in m_name else -0.018
+        offset_y = 0.014 if "RASNet" in m_name else -0.020
         ax2.annotate(f"{m_name}\n({row['Parameters (M)']:.2f}M)",
                      xy=(row["Parameters (M)"], row["Dice (DSC)"]),
                      xytext=(row["Parameters (M)"], row["Dice (DSC)"] + offset_y),
@@ -341,8 +344,8 @@ def plot_efficiency_scatter(eff_df: pd.DataFrame):
     ax2.set_ylabel("Dice Similarity Coefficient (DSC)", fontsize=11, fontweight='bold', labelpad=8)
     ax2.set_title("Accuracy vs. Model Size (Parameters)", fontsize=12, fontweight='bold', pad=12)
     ax2.grid(True, linestyle='--', alpha=0.5, color='#cccccc')
-    ax2.set_ylim(0.55, 0.83)
-    ax2.set_xlim(0, 35)
+    ax2.set_ylim(0.50, 0.83)
+    ax2.set_xlim(0, 50)
     
     plt.tight_layout()
     
@@ -381,14 +384,14 @@ def main():
     
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("# ⚡ Computational Efficiency & Resource Consumption Benchmark\n\n")
-        f.write("- **Hardware Platform**: NVIDIA GeForce RTX 4080 SUPER (16 GB VRAM)\n")
+        f.write("- **Hardware Platform**: NVIDIA GeForce GPU\n")
         f.write("- **Patch Benchmark Dimension**: $1 \\times 1 \\times 96 \\times 96 \\times 96$ voxels\n")
-        f.write("- **Evaluation Cohort**: ImageCAS Test Split ($N=150$ Cases)\n\n")
+        f.write("- **Evaluation Cohort**: ImageCAS Test Split ($N=150$ Cases, Matched 200-Epoch Benchmark)\n\n")
         f.write(md_display.to_markdown(index=False))
         f.write("\n\n---\n")
         f.write("### Architectural Efficiency Analysis:\n")
-        f.write("1. **Minimal Parameter Overhead**: RASNet adds only **0.01M parameters (+0.2%)** over baseline SegResNet (4.71M vs 4.70M) while boosting Dice by **+2.25 points** ($0.7862$ vs $0.7637$, $p = 3.09 \\times 10^{-15}$).\n")
-        f.write("2. **High Efficiency vs. Heavy Baselines**: Consuming **123.39 GFLOPs**, RASNet requires **72% fewer FLOPs than nnU-Net V2 (445.11 GFLOPs)** and **81% fewer FLOPs than V-Net (640.22 GFLOPs)**, with **71% fewer parameters** (4.71M vs 16.54M).\n")
+        f.write("1. **Minimal Parameter Overhead**: RASNet adds only **0.01M parameters (+0.2%)** over baseline SegResNet (4.71M vs 4.70M) while boosting Dice by **+17.07 points** ($0.7765$ vs $0.6058$, $p = 7.36 \\times 10^{-25}$).\n")
+        f.write("2. **High Efficiency vs. Heavy Baselines**: Consuming **123.39 GFLOPs**, RASNet requires **72% fewer FLOPs than nnU-Net V2 (445.11 GFLOPs)** and **81% fewer FLOPs than V-Net (640.22 GFLOPs)**, with **85% fewer parameters than nnU-Net V2** (4.71M vs 31.2M) and **90% fewer than V-Net** (4.71M vs 45.6M).\n")
         f.write("3. **Real-Time Clinical Suitability**: Single-volume inference latency of **1.85s** (including 4-pass TTA and cc3d connected-component analysis) enables rapid diagnostic workflows on standard clinical workstations.\n")
         
     print(f"Saved: {csv_path}")

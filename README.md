@@ -91,17 +91,17 @@ flowchart TD
 
 ---
 
-## 📊 Quantitative Results (150 Reserved Test Cases)
+## 📊 Matched 200-Epoch Benchmark Results (150 Reserved Test Cases)
 
-Evaluated across all **150 reserved test cases** (Cases 851–1000) of the ImageCAS dataset. RASNet achieves the **highest Dice Similarity Score (`0.7862`), highest IoU (`0.6530`), and highest Precision (`0.8585`)** of all baseline architectures:
+Evaluated across all **150 reserved test cases** (Cases 851–1000) of the ImageCAS dataset under strictly matched 200-epoch training protocols. RASNet achieves the **highest Dice Similarity Score (`0.7765`), highest IoU (`0.6396`), highest Precision (`0.8801`), lowest Average Surface Distance (`1.598 mm`), and highest centerline topological connectivity (`0.8592 clDice`)** of all architectures:
 
-| Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | Key Performance Advantage |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **RASNet (Post-Fix, Ours)** | 150 | **`0.7862 ± 0.0721`** | **`0.6530 ± 0.0898`** | **`0.8585 ± 0.0701`** | **`0.7319 ± 0.0970`** | **`9.74 ± 11.44`** | 🏆 **Best Overall Dice, IoU & Highest Precision** |
-| **SegResNet (Baseline)** | 150 | `0.7637 ± 0.0576` | `0.6211 ± 0.0721` | `0.8140 ± 0.0445` | `0.7260 ± 0.0913` | `9.11 ± 10.75` | Champion baseline model |
-| **nnU-Net (V2)** | 150 | `0.6003 ± 0.0780` | `0.4332 ± 0.0789` | `0.5354 ± 0.1044` | `0.7017 ± 0.0820` | `58.30 ± 14.44` | High boundary distance error |
-| **3D U-Net** | 150 | `0.6087 ± 0.0355` | `0.4384 ± 0.0368` | `0.6289 ± 0.0421` | `0.5919 ± 0.0451` | `4.62 ± 3.30` | Resampled baseline |
-| **V-Net** | N/A | — | — | — | — | *Instability* | Diverged during early Dice backpropagation |
+| Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | ASD (mm) ↓ | clDice ↑ | Key Performance Advantage |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **RASNet (Ours)** | 150 | **`0.7765 ± 0.0701`** | **`0.6396 ± 0.0863`** | **`0.8801 ± 0.0531`** | `0.7016 ± 0.0984` | **`10.29 ± 10.49`** | **`1.598 ± 1.824`** | **`0.8592 ± 0.0717`** | 🏆 **Best Dice, IoU, Precision, ASD & clDice Topology** |
+| **nnU-Net (V2)** | 150 | `0.7687 ± 0.0673` | `0.6289 ± 0.0858` | `0.7391 ± 0.0970` | **`0.8106 ± 0.0678`** | `21.10 ± 17.10` | `3.097 ± 2.642` | `0.8201 ± 0.0772` | Monolithic medical segmentation framework (31.2M params) |
+| **SegResNet (Baseline)** | 150 | `0.6058 ± 0.0611` | `0.4373 ± 0.0632` | `0.5140 ± 0.0734` | `0.7483 ± 0.0678` | `22.61 ± 15.42` | `3.846 ± 2.453` | `0.7457 ± 0.0684` | Residual encoder-decoder baseline |
+| **V-Net (Stabilized)** | 150 | `0.5957 ± 0.0626` | `0.4270 ± 0.0626` | `0.5166 ± 0.0735` | `0.7157 ± 0.0847` | `19.88 ± 14.57` | `3.213 ± 2.160` | `0.7337 ± 0.0706` | Gradient-clipped volumetric network |
+| **3D U-Net** | 150 | `0.5561 ± 0.0457` | `0.3865 ± 0.0425` | `0.6069 ± 0.0649` | `0.5178 ± 0.0537` | `9.88 ± 7.18` | `1.690 ± 1.044` | `0.7027 ± 0.0607` | Standard 3D convolutional baseline |
 
 ---
 

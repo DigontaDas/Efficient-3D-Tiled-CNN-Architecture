@@ -31,17 +31,16 @@ import matplotlib.pyplot as plt
 
 # Path setup
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TRAININGS_DIR = os.path.join(REPO_ROOT, "Thesis_Trainings", "Thesis_Trainings")
 OUTPUT_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "figures")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-PHASE3_DIR = os.path.join(TRAININGS_DIR, "Phase3_Local_Integration")
+PHASE3_DIR = os.path.join(REPO_ROOT, "Phase3_Local_Integration")
 sys.path.insert(0, PHASE3_DIR)
 
 import dataset_paths
 
-RASNET_CSV = os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "metrics_rasnet.csv")
-PRED_DIR = os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "predictions")
+RASNET_CSV = os.path.join(REPO_ROOT, "Q1_Publication_Package", "matched_200ep_benchmark", "evaluation_results", "metrics_rasnet_200ep.csv")
+PRED_DIR = os.path.join(REPO_ROOT, "results-after-hallucin-fix", "predictions")
 
 plt.rcParams['font.sans-serif'] = 'DejaVu Sans'
 plt.rcParams['font.size'] = 9.0

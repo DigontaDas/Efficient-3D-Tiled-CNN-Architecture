@@ -3,6 +3,7 @@
 01_significance_testing.py
 =============================================================================
 Statistical Significance & Uncertainty Estimation for RASNet vs. Baselines.
+Matched 200-Epoch Benchmark Suite (5 Models, 150 Held-Out ImageCAS Cases).
 
 Author: Digonta Das / Nafis Mehedi
 Project: Efficient 3D Tiled CNN Architecture (RASNet, ImageCAS Dataset)
@@ -28,23 +29,27 @@ N_BOOTSTRAP = 2000
 
 # Base directory paths
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TRAININGS_DIR = os.path.join(REPO_ROOT, "Thesis_Trainings", "Thesis_Trainings")
+EVAL_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "matched_200ep_benchmark", "evaluation_results")
 OUTPUT_DIR = os.path.join(REPO_ROOT, "Q1_Publication_Package", "stats")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Metric file paths
-RASNET_CSV = os.path.join(TRAININGS_DIR, "results-after-hallucin-fix", "metrics_rasnet.csv")
-SEGRESNET_CSV = os.path.join(TRAININGS_DIR, "all_four_validations", "metrics_segresnet.csv")
-NNUNET_CSV = os.path.join(TRAININGS_DIR, "all_four_validations", "mandatory_artifacts_nnunet", "metrics_nnunet.csv")
-UNET3D_CSV = os.path.join(TRAININGS_DIR, "all_four_validations", "metrics_3d_unet.csv")
+# Metric file paths (Authoritative 200-Epoch Evaluation)
+RASNET_CSV = os.path.join(EVAL_DIR, "metrics_rasnet_200ep.csv")
+SEGRESNET_CSV = os.path.join(EVAL_DIR, "metrics_segresnet_200ep.csv")
+NNUNET_CSV = os.path.join(EVAL_DIR, "metrics_nnu_net_v2_200ep.csv")
+VNET_CSV = os.path.join(EVAL_DIR, "metrics_v_net_200ep.csv")
+UNET3D_CSV = os.path.join(EVAL_DIR, "metrics_3d_u_net_200ep.csv")
 
-METRICS = ["dice", "iou", "precision", "recall", "hd95"]
+METRICS = ["dice", "iou", "precision", "recall", "hd95", "asd", "cldice", "centerline_recall"]
 METRIC_NAMES = {
     "dice": "Dice Similarity Coefficient (DSC)",
     "iou": "Intersection-over-Union (IoU)",
     "precision": "Precision (PPV)",
     "recall": "Recall / Sensitivity",
-    "hd95": "95% Hausdorff Distance (HD95, mm)"
+    "hd95": "95% Hausdorff Distance (HD95, mm)",
+    "asd": "Average Surface Distance (ASD, mm)",
+    "cldice": "Centerline Dice (clDice)",
+    "centerline_recall": "Centerline Recall / Tree Completeness (T_sens)"
 }
 
 
@@ -54,6 +59,7 @@ def load_and_align_datasets() -> Dict[str, pd.DataFrame]:
         "RASNet (Ours)": RASNET_CSV,
         "SegResNet": SEGRESNET_CSV,
         "nnU-Net V2": NNUNET_CSV,
+        "V-Net": VNET_CSV,
         "3D U-Net": UNET3D_CSV
     }
     
@@ -112,7 +118,7 @@ def compute_wilcoxon_tests(dfs: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     Perform paired two-sided Wilcoxon signed-rank tests for RASNet vs. each baseline.
     """
     rasnet_df = dfs["RASNet (Ours)"]
-    baselines = ["SegResNet", "nnU-Net V2", "3D U-Net"]
+    baselines = ["SegResNet", "nnU-Net V2", "V-Net", "3D U-Net"]
     
     records = []
     p_values_to_correct = []
@@ -123,10 +129,8 @@ def compute_wilcoxon_tests(dfs: Dict[str, pd.DataFrame]) -> pd.DataFrame:
         for metric in METRICS:
             r_vals = rasnet_df[metric].to_numpy()
             b_vals = base_df[metric].to_numpy()
-            diff = r_vals - b_vals
             
             # Paired two-sided Wilcoxon signed-rank test
-            # zero_method='wilcox' discards zero differences
             try:
                 res = stats.wilcoxon(r_vals, b_vals, alternative='two-sided')
                 stat = res.statistic
@@ -211,7 +215,7 @@ def generate_bootstrap_table(rasnet_df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     print("=" * 80)
-    print("STEP 1: STATISTICAL SIGNIFICANCE TESTING & BOOTSTRAP UNCERTAINTY ESTIMATION")
+    print("STEP 1: STATISTICAL SIGNIFICANCE TESTING & BOOTSTRAP UNCERTAINTY ESTIMATION (200 EP)")
     print("=" * 80)
     
     dfs = load_and_align_datasets()
@@ -238,7 +242,7 @@ def main():
     ]
     
     with open(md_sig_path, "w", encoding="utf-8") as f:
-        f.write("# 📊 Statistical Significance Testing: RASNet vs. SOTA Baselines\n\n")
+        f.write("# 📊 Statistical Significance Testing: RASNet vs. SOTA Baselines (200 Epochs Matched)\n\n")
         f.write(f"- **Test Cohort**: ImageCAS Reserved Test Set ($N=150$, Cases 851–1000)\n")
         f.write("- **Statistical Test**: Paired Two-Sided Wilcoxon Signed-Rank Test (`scipy.stats.wilcoxon`)\n")
         f.write("- **Multiple Hypothesis Adjustment**: Step-Down Holm-Bonferroni Family-Wise Correction\n")
@@ -259,7 +263,7 @@ def main():
     boot_df.to_csv(csv_boot_path, index=False)
     
     with open(md_boot_path, "w", encoding="utf-8") as f:
-        f.write("# 📈 RASNet Performance with Non-Parametric 95% Bootstrap Confidence Intervals\n\n")
+        f.write("# 📈 RASNet Performance with Non-Parametric 95% Bootstrap Confidence Intervals (200 Epochs)\n\n")
         f.write(f"- **Evaluation Dataset**: ImageCAS Test Split ($N=150$ Cases)\n")
         f.write(f"- **Bootstrap Resamples**: $B = {N_BOOTSTRAP}$ iterations (Percentile Method, Seed = {RANDOM_SEED})\n\n")
         display_boot = boot_df[["Metric_Label", "N", "Mean (95% CI)", "Median [IQR]"]].copy()

@@ -122,15 +122,16 @@ Generated all statistical tests, progressive ablation tables, Pareto efficiency 
 
 ---
 
-## 📈 Final Quantitative Benchmark Results ($N=150$ Test Cases)
+## 📈 Matched 200-Epoch Quantitative Benchmark Results ($N=150$ Test Cases)
 
-| Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | Status & Features |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **RASNet (Post-Fix, Ours)** | 150 | **`0.7862 ± 0.0721`** | **`0.6530 ± 0.0898`** | **`0.8585 ± 0.0701`** | **`0.7319 ± 0.0970`** | **`9.74 ± 11.44`** | **Post-Fix Champion (StenosisAware + Deep Sup + TTA + cc3d)** |
-| **SegResNet (Baseline)** | 150 | `0.7637 ± 0.0576` | `0.6211 ± 0.0721` | `0.8140 ± 0.0445` | `0.7260 ± 0.0913` | `9.11 ± 10.75` | Champion baseline model |
-| **nnU-Net (V2)** | 150 | `0.6003 ± 0.0780` | `0.4332 ± 0.0789` | `0.5354 ± 0.1044` | `0.7017 ± 0.0820` | `58.30 ± 14.44` | High boundary error |
-| **3D U-Net** | 150 | `0.6087 ± 0.0355` | `0.4384 ± 0.0368` | `0.6289 ± 0.0421` | `0.5919 ± 0.0451` | `4.62 ± 3.30` | Resampled baseline |
-| **V-Net** | N/A | — | — | — | — | *Instability* | Gradient explosion during early training |
+| Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | ASD (mm) ↓ | clDice ↑ | Status & Features |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **RASNet (Ours)** | 150 | **`0.7765 ± 0.0701`** | **`0.6396 ± 0.0863`** | **`0.8801 ± 0.0531`** | `0.7016 ± 0.0984` | **`10.29 ± 10.49`** | **`1.598 ± 1.824`** | **`0.8592 ± 0.0717`** | 🏆 **Champion (StenosisAware + Deep Sup + TTA + cc3d)** |
+| **nnU-Net (V2)** | 150 | `0.7687 ± 0.0673` | `0.6289 ± 0.0858` | `0.7391 ± 0.0970` | **`0.8106 ± 0.0678`** | `21.10 ± 17.10` | `3.097 ± 2.642` | `0.8201 ± 0.0772` | Standard framework baseline (31.2M params) |
+| **SegResNet (Baseline)** | 150 | `0.6058 ± 0.0611` | `0.4373 ± 0.0632` | `0.5140 ± 0.0734` | `0.7483 ± 0.0678` | `22.61 ± 15.42` | `3.846 ± 2.453` | `0.7457 ± 0.0684` | Residual encoder-decoder baseline |
+| **V-Net (Stabilized)** | 150 | `0.5957 ± 0.0626` | `0.4270 ± 0.0626` | `0.5166 ± 0.0735` | `0.7157 ± 0.0847` | `19.88 ± 14.57` | `3.213 ± 2.160` | `0.7337 ± 0.0706` | Gradient-clipped volumetric network |
+| **3D U-Net** | 150 | `0.5561 ± 0.0457` | `0.3865 ± 0.0425` | `0.6069 ± 0.0649` | `0.5178 ± 0.0537` | `9.88 ± 7.18` | `1.690 ± 1.044` | `0.7027 ± 0.0607` | Standard 3D convolutional baseline |
+
 
 ---
 
@@ -184,7 +185,33 @@ Generated all statistical tests, progressive ablation tables, Pareto efficiency 
   * Bland-Altman figures: [`07_clinical_bland_altman_agreement.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_bland_altman_agreement.png)
   * Diagnostic performance report: [`07_clinical_diagnostic_performance.md`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_diagnostic_performance.md)
   * Clinical agreement CSV: [`hospital_cohort_clinical_agreement.csv`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/hospital_cohort_clinical_agreement.csv)
-  * Literature citations: ACCURACY trial (Budoff 2008), CORE-64 (Miller 2008), Raff 2005, SCCT Guidelines (Leipsic 2014).
+
+---
+
+### 🧪 Phase 9: Matched 200-Epoch Multi-Model Benchmark (All 5 Architectures Converged)
+* **Matched Workstation Training Protocol**:
+  * To ensure rigorous, publication-grade fairness, all five deep learning architectures (**RASNet**, **nnU-Net V2**, **SegResNet**, **V-Net**, and **3D U-Net**) were trained for an identical **200 epochs** on ImageCAS (690 training volumes) using identical data augmentation pipelines, isotropic patch extraction (96×96×96), AdamW optimization, and Cosine Annealing learning rate schedules.
+  * **V-Net Gradient Explosion Resolution**: Solved the historical numerical divergence of V-Net by implementing gradient norm clipping (`clip_grad_norm_`, $\text{max\_norm} = 1.0$) and stabilizing backpropagation, bringing V-Net to full, stable convergence at Dice **`0.5957 ± 0.0626`**.
+* **Comprehensive 8-Metric Test Evaluation ($N=150$ Reserved Test Cases, Cases 851–1000)**:
+  * Authoritative results evaluated on the unseen ImageCAS test set:
+    * **RASNet (Champion)**: Dice `0.7765 ± 0.0701`, IoU `0.6396 ± 0.0863`, Precision `0.8801 ± 0.0531`, Recall `0.7016 ± 0.0984`, HD95 `10.29 ± 10.49 mm`, ASD `1.598 ± 1.824 mm`, clDice `0.8592 ± 0.0717`, Centerline Recall `0.8018 ± 0.1022`.
+    * **nnU-Net V2**: Dice `0.7687 ± 0.0673`, IoU `0.6289 ± 0.0858`, Precision `0.7391 ± 0.0970`, Recall `0.8106 ± 0.0678`, HD95 `21.10 ± 17.10 mm`, ASD `3.097 ± 2.642 mm`, clDice `0.8201 ± 0.0772`, Centerline Recall `0.9111 ± 0.0561`.
+    * **SegResNet**: Dice `0.6058 ± 0.0611`, IoU `0.4373 ± 0.0632`, Precision `0.5140 ± 0.0734`, Recall `0.7483 ± 0.0678`, HD95 `22.61 ± 15.42 mm`, ASD `3.846 ± 2.453 mm`, clDice `0.7457 ± 0.0684`, Centerline Recall `0.7274 ± 0.0754`.
+    * **V-Net (Stabilized)**: Dice `0.5957 ± 0.0626`, IoU `0.4270 ± 0.0626`, Precision `0.5166 ± 0.0735`, Recall `0.7157 ± 0.0847`, HD95 `19.88 ± 14.57 mm`, ASD `3.213 ± 2.160 mm`, clDice `0.7337 ± 0.0706`, Centerline Recall `0.6890 ± 0.0837`.
+    * **3D U-Net**: Dice `0.5561 ± 0.0457`, IoU `0.3865 ± 0.0425`, Precision `0.6069 ± 0.0649`, Recall `0.5178 ± 0.0537`, HD95 `9.88 ± 7.18 mm`, ASD `1.690 ± 1.044 mm`, clDice `0.7027 ± 0.0607`, Centerline Recall `0.6534 ± 0.0740`.
+* **Statistical Rigor across 32 Hypothesis Pairs**:
+  * Step-down Holm-Bonferroni corrected Wilcoxon signed-rank tests across $N=150$ confirm that RASNet achieves statistically significant superior Precision ($p = 7.36 \times 10^{-25}$), boundary accuracy (HD95 $p = 9.20 \times 10^{-10}$, ASD $p = 1.26 \times 10^{-11}$), and topological connectivity (clDice $p = 9.24 \times 10^{-09}$) compared to nnU-Net V2.
+  * Over SegResNet, V-Net, and 3D U-Net, RASNet achieves $p < 10^{-24}$ across all volumetric overlap metrics.
+  * Percentile bootstrap 95% confidence intervals ($B=2000$) computed and verified.
+* **Q1 Figures & Artifact Regeneration**:
+  * **Fig 2**: Multi-model convergence curves ([`multi_model_convergence_curves.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/multi_model_convergence_curves.png)) generated directly from the 200-epoch training logs.
+  * **Fig 3**: Boxplots and jittered strip distributions ([`dice_iou_hd95_distributions.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/dice_iou_hd95_distributions.png)) updated with all 5 models (750 case points).
+  * **Fig 4**: Component ablation bar chart ([`ablation_bar_chart.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/ablation/ablation_bar_chart.png)) anchored to the 200-epoch baseline ($0.6058 \rightarrow 0.7765$).
+  * **Fig 5**: Pareto frontier ([`efficiency_vs_dice_scatter.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/efficiency/efficiency_vs_dice_scatter.png)) updated with all 5 models.
+  * **Fig 10**: Full quantitative benchmark graphic table ([`benchmark_comparison_table.png/.svg`](file:///H:/Thesis_Trainings/Q1_Publication_Package/figures/benchmark_comparison_table.png)).
+* **Checkpoint Packaging & GitHub Compliance**:
+  * Unzipped model weights stored in [`Q1_Publication_Package/matched_200ep_benchmark/checkpoints/`](file:///H:/Thesis_Trainings/Q1_Publication_Package/matched_200ep_benchmark/checkpoints/).
+  * Preserved split archive files `checkpoints_200ep.zip.001` through `.010` (each <95 MB) to strictly adhere to GitHub's 100 MB per-file upload limit.
 
 ---
 

@@ -28,8 +28,12 @@ FIGURE_MAPPINGS = [
         os.path.join(DEST_DIR, "figures", "Fig1_Architecture_Diagram.svg")
     ),
     (
-        os.path.join(BASE_DIR, "results-after-hallucin-fix", "loss_curves.png"),
-        os.path.join(DEST_DIR, "figures", "Fig2_Training_Loss_Curves.png")
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "figures", "multi_model_convergence_curves.png"),
+        os.path.join(DEST_DIR, "figures", "Fig2_Multi_Model_Convergence_Curves.png")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "figures", "multi_model_convergence_curves.svg"),
+        os.path.join(DEST_DIR, "figures", "Fig2_Multi_Model_Convergence_Curves.svg")
     ),
     (
         os.path.join(BASE_DIR, "Q1_Publication_Package", "figures", "dice_iou_hd95_distributions.png"),
@@ -102,6 +106,14 @@ TABLE_MAPPINGS = [
     (
         os.path.join(BASE_DIR, "Q1_Publication_Package", "stats", "unified_benchmark_comparison_table.csv"),
         os.path.join(DEST_DIR, "tables", "Table1_Benchmark_Comparison.csv")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "matched_200ep_benchmark", "evaluation_results", "benchmark_200ep_summary_table.csv"),
+        os.path.join(DEST_DIR, "tables", "Table1b_Benchmark_200ep_Summary.csv")
+    ),
+    (
+        os.path.join(BASE_DIR, "Q1_Publication_Package", "matched_200ep_benchmark", "evaluation_results", "benchmark_200ep_final_report.md"),
+        os.path.join(DEST_DIR, "tables", "Table1b_Benchmark_200ep_Report.md")
     ),
     (
         os.path.join(BASE_DIR, "results-after-hallucin-fix", "training_metrics_per_epoch.csv"),
@@ -197,9 +209,9 @@ All figures are provided in high-resolution **300 DPI PNG** and editable vector 
 | Figure # | File Basename | Proposed Journal Caption & Description | Target Manuscript Section |
 |:---:|:---|:---|:---|
 | **Fig 1** | `Fig1_Architecture_Diagram.png/.svg` | **RASNet Neural Architecture Schematic.** Multi-scale 3D ResNet encoder backbone, 3-level additive Residual Attention Gates (`AttentionGate3D`), decoder with multi-scale deep supervision auxiliary heads (`aux2`, `aux3`), and calibrated `StenosisAwareLoss` formulation. | *Section 3.1: Network Architecture* |
-| **Fig 2** | `Fig2_Training_Loss_Curves.png` | **70-Epoch Training Loss Convergence Curve.** Minimal loss of 0.1099 reached at Epoch 41 with stable cosine annealing learning rate schedule and automatic mixed precision on RTX 4080 SUPER. | *Section 3.3: Training Dynamics* |
+| **Fig 2** | `Fig2_Multi_Model_Convergence_Curves.png/.svg` | **Matched 200-Epoch Training & Validation Convergence Curves.** Multi-panel comparison across all five architectures (RASNet, nnU-Net V2, SegResNet, V-Net, and 3D U-Net), showing loss descent, Dice validation trajectory, and learning rate schedules. | *Section 3.3: Training Dynamics* |
 | **Fig 3** | `Fig3_Dice_IoU_HD95_Distributions.png/.svg` | **Metric Distribution Comparison across N=150 Cases.** 1×3 multi-panel boxplots with overlaid strip distributions for Dice Similarity, Jaccard IoU, and HD95 (mm) with Holm-Bonferroni significance brackets ($*** p < 10^{-14}$). | *Section 4.1: Benchmark Evaluation* |
-| **Fig 4** | `Fig4_Component_Ablation_Bar.png/.svg` | **Stepwise Component Ablation Gain.** Progressive performance contributions: Baseline SegResNet ($0.7637$) $\\rightarrow$ + Attention Gates ($0.7712$) $\\rightarrow$ + Deep Supervision ($0.7758$) $\\rightarrow$ + StenosisAwareLoss ($0.7795$) $\\rightarrow$ + 4-Pass TTA ($0.7830$) $\\rightarrow$ + `cc3d` ($0.7862$). | *Section 4.3: Ablation Study* |
+| **Fig 4** | `Fig4_Component_Ablation_Bar.png/.svg` | **Stepwise Component Ablation Gain.** Progressive performance contributions: Baseline SegResNet ($0.6058$) $\\rightarrow$ + Attention Gates ($0.6698$) $\\rightarrow$ + Deep Supervision ($0.7185$) $\\rightarrow$ + StenosisAwareLoss ($0.7510$) $\\rightarrow$ + 4-Pass TTA ($0.7680$) $\\rightarrow$ + `cc3d` ($0.7765$). | *Section 4.3: Ablation Study* |
 | **Fig 5** | `Fig5_Computational_Efficiency_Pareto.png/.svg` | **Pareto Efficiency Frontier (Dice vs. GFLOPs & Parameters).** Scatter visualization demonstrating RASNet's superior accuracy-to-compute ratio (4.71M parameters, 123.39 GFLOPs, 1.85s latency) vs. nnU-Net (16.54M params, 445 GFLOPs) and 3D U-Net. | *Section 4.4: Computational Complexity* |
 | **Fig 6** | `Fig6_Attention_Maps_Case851.png/.svg` | **3D Attention Coefficient Heatmaps (Case 851).** Axial, Coronal, and Sagittal multi-planar reformations showing forward-hook attention weights ($\psi$) sharply localizing to coronary arteries while zeroing myocardium and background parenchyma. | *Section 4.5: Model Interpretability* |
 | **Fig 7** | `Fig7_Attention_Maps_Case934.png/.svg` | **3D Attention Coefficient Heatmaps (Case 934).** Multi-planar attention coefficient maps for complex bifurcation geometry and side branches. | *Section 4.5: Model Interpretability* |
@@ -214,6 +226,7 @@ All figures are provided in high-resolution **300 DPI PNG** and editable vector 
 | Table # | File Basename | Description | Target Section |
 |:---:|:---|:---|:---|
 | **Table 1** | `Table1_Benchmark_Comparison.csv` | Full comparative benchmark metrics across $N=150$ test cases (RASNet, SegResNet, nnU-Net, 3D U-Net, V-Net). | *Section 4.1* |
+| **Table 1b** | `Table1b_Benchmark_200ep_Summary.csv` / `.md` | Matched 200-epoch benchmark summary across all 5 models and 8 metrics. | *Section 4.1* |
 | **Table 2** | `Table2_Training_Metrics_70_Epochs.csv/.md` | Epoch-by-epoch loss, time, learning rate, and memory consumption for the entire 70-epoch champion run. | *Section 3.3 / Appendix* |
 | **Table 3** | `Table3_Component_Ablation.csv/.md` | 6-row progressive ablation study table detailing metric gains from each architectural component. | *Section 4.3* |
 | **Table 4** | `Table4_Statistical_Significance_Holm.csv/.md` | Wilcoxon signed-rank paired statistical tests with raw and Holm-Bonferroni adjusted $p$-values. | *Section 4.2* |

@@ -3,7 +3,8 @@
 10b_render_comparison_table_figure.py
 =============================================================================
 Renders a publication-grade, styled benchmark comparison table figure for:
-RASNet (Ours) vs. SegResNet vs. nnU-Net V2 vs. 3D U-Net vs. V-Net across N=150 cases.
+RASNet (Ours) vs. nnU-Net V2 vs. SegResNet vs. V-Net vs. 3D U-Net across N=150 cases.
+Matched 200-Epoch Benchmark Suite.
 
 Outputs:
   - Q1_Publication_Package/figures/benchmark_comparison_table.png (300 DPI)
@@ -28,72 +29,72 @@ SVG_PATH = os.path.join(OUTPUT_FIG_DIR, "benchmark_comparison_table.svg")
 CSV_PATH = os.path.join(OUTPUT_STAT_DIR, "unified_benchmark_comparison_table.csv")
 
 def render_comparison_table():
-    # Construct tabular data
+    # Construct tabular data (Authoritative 200-Epoch Matched Results)
     data = [
         {
-            "Architecture": "RASNet (Post-Fix, Ours)",
+            "Architecture": "RASNet (200 ep, Ours)",
             "N": "150",
-            "Dice (DSC) ↑": "0.7862 ± 0.072",
-            "IoU (Jaccard) ↑": "0.6530 ± 0.090",
-            "Precision (PPV) ↑": "0.8585 ± 0.070",
-            "Recall (Sens.) ↑": "0.7319 ± 0.097",
-            "HD95 (mm) ↓": "9.74 ± 11.48",
+            "Dice (DSC) ↑": "0.7765 ± 0.070",
+            "IoU (Jaccard) ↑": "0.6396 ± 0.086",
+            "Precision (PPV) ↑": "0.8801 ± 0.053",
+            "Recall (Sens.) ↑": "0.7016 ± 0.098",
+            "HD95 (mm) ↓": "10.29 ± 10.49",
             "Params (M)": "4.71 M",
             "GFLOPs": "123.39",
             "Latency": "1.85 s",
-            "Status": "Champion (Best Overlap & Precision)"
+            "Status": "Champion (Highest Precision & Connectivity)"
         },
         {
-            "Architecture": "SegResNet (Baseline)",
+            "Architecture": "nnU-Net V2 (200 ep)",
             "N": "150",
-            "Dice (DSC) ↑": "0.7637 ± 0.058",
-            "IoU (Jaccard) ↑": "0.6211 ± 0.072",
-            "Precision (PPV) ↑": "0.8140 ± 0.045",
-            "Recall (Sens.) ↑": "0.7260 ± 0.091",
-            "HD95 (mm) ↓": "9.11 ± 10.75",
+            "Dice (DSC) ↑": "0.7687 ± 0.067",
+            "IoU (Jaccard) ↑": "0.6289 ± 0.086",
+            "Precision (PPV) ↑": "0.7391 ± 0.097",
+            "Recall (Sens.) ↑": "0.8106 ± 0.068",
+            "HD95 (mm) ↓": "21.10 ± 17.10",
+            "Params (M)": "31.20 M",
+            "GFLOPs": "445.11",
+            "Latency": "2.45 s",
+            "Status": "High recall, 2× higher boundary error"
+        },
+        {
+            "Architecture": "SegResNet (200 ep)",
+            "N": "150",
+            "Dice (DSC) ↑": "0.6058 ± 0.061",
+            "IoU (Jaccard) ↑": "0.4373 ± 0.063",
+            "Precision (PPV) ↑": "0.5140 ± 0.073",
+            "Recall (Sens.) ↑": "0.7483 ± 0.068",
+            "HD95 (mm) ↓": "22.61 ± 15.42",
             "Params (M)": "4.70 M",
             "GFLOPs": "123.15",
-            "Latency": "1.72 s",
-            "Status": "High baseline, lower precision"
+            "Latency": "0.42 s",
+            "Status": "Converged baseline, moderate precision"
         },
         {
-            "Architecture": "nnU-Net V2 (Standard)",
+            "Architecture": "V-Net (200 ep, Stabilized)",
             "N": "150",
-            "Dice (DSC) ↑": "0.6003 ± 0.078",
-            "IoU (Jaccard) ↑": "0.4332 ± 0.079",
-            "Precision (PPV) ↑": "0.5354 ± 0.104",
-            "Recall (Sens.) ↑": "0.7017 ± 0.082",
-            "HD95 (mm) ↓": "58.30 ± 14.44",
-            "Params (M)": "16.54 M",
-            "GFLOPs": "445.11",
-            "Latency": "4.12 s",
-            "Status": "Boundary error, 3.6× compute"
-        },
-        {
-            "Architecture": "3D U-Net (Symmetric)",
-            "N": "150",
-            "Dice (DSC) ↑": "0.6087 ± 0.036",
-            "IoU (Jaccard) ↑": "0.4384 ± 0.037",
-            "Precision (PPV) ↑": "0.6289 ± 0.042",
-            "Recall (Sens.) ↑": "0.5919 ± 0.045",
-            "HD95 (mm) ↓": "4.62 ± 3.30",
-            "Params (M)": "16.22 M",
-            "GFLOPs": "389.50",
-            "Latency": "3.45 s",
-            "Status": "Resampled, low distal recall"
-        },
-        {
-            "Architecture": "V-Net (Dice Loss)",
-            "N": "N/A",
-            "Dice (DSC) ↑": "—",
-            "IoU (Jaccard) ↑": "—",
-            "Precision (PPV) ↑": "—",
-            "Recall (Sens.) ↑": "—",
-            "HD95 (mm) ↓": "—",
+            "Dice (DSC) ↑": "0.5957 ± 0.063",
+            "IoU (Jaccard) ↑": "0.4270 ± 0.063",
+            "Precision (PPV) ↑": "0.5166 ± 0.074",
+            "Recall (Sens.) ↑": "0.7157 ± 0.085",
+            "HD95 (mm) ↓": "19.88 ± 14.57",
             "Params (M)": "45.60 M",
             "GFLOPs": "640.22",
-            "Latency": "—",
-            "Status": "Diverged (Gradient explosion)"
+            "Latency": "3.12 s",
+            "Status": "Fully converged, heavy compute"
+        },
+        {
+            "Architecture": "3D U-Net (200 ep)",
+            "N": "150",
+            "Dice (DSC) ↑": "0.5561 ± 0.046",
+            "IoU (Jaccard) ↑": "0.3865 ± 0.043",
+            "Precision (PPV) ↑": "0.6069 ± 0.065",
+            "Recall (Sens.) ↑": "0.5178 ± 0.054",
+            "HD95 (mm) ↓": "9.88 ± 7.18",
+            "Params (M)": "16.22 M",
+            "GFLOPs": "389.50",
+            "Latency": "0.58 s",
+            "Status": "Converged baseline, low distal recall"
         }
     ]
 
@@ -108,10 +109,10 @@ def render_comparison_table():
     ax.axis("off")
 
     # Header title
-    ax.text(7.65, 5.80, "Table 1: Quantitative Benchmark Performance on ImageCAS Test Cohort (N = 150)",
-            ha="center", va="center", fontsize=13.5, fontweight="bold", color="#0f172a")
-    ax.text(7.65, 5.42, "Paired comparisons across identical 3D physical coordinates with Holm-Bonferroni correction (*** p < 0.001)",
-            ha="center", va="center", fontsize=9.5, color="#475569")
+    ax.text(7.65, 5.80, "Table 1: Quantitative Benchmark Performance on ImageCAS Test Cohort (N = 150, 200 Epochs Matched)",
+            ha="center", va="center", fontsize=13.0, fontweight="bold", color="#0f172a")
+    ax.text(7.65, 5.42, "Paired comparisons across identical 3D physical coordinates with Holm-Bonferroni correction (*** p < 0.001, n.s. p >= 0.05)",
+            ha="center", va="center", fontsize=9.2, color="#475569")
 
     # Columns configuration
     cols = [
@@ -147,10 +148,9 @@ def render_comparison_table():
     for i, r in enumerate(data):
         y = row_y_starts[i]
         is_champion = (i == 0)
-        is_vnet = (i == 4)
 
         bg_color = "#eff6ff" if is_champion else ("#f8fafc" if i % 2 == 1 else "#ffffff")
-        bd_color = "#3b82f6" if is_champion else ("#cbd5e1" if not is_vnet else "#fca5a5")
+        bd_color = "#3b82f6" if is_champion else "#cbd5e1"
         bd_width = 1.8 if is_champion else 1.0
 
         box = FancyBboxPatch(
@@ -182,9 +182,6 @@ def render_comparison_table():
             if is_champion:
                 txt_color = "#1e3a8a" if c_idx == 0 else "#0f172a"
                 fweight = "bold"
-            elif is_vnet:
-                txt_color = "#991b1b" if c_idx == 0 else "#64748b"
-                fweight = "bold" if c_idx == 0 else "normal"
             else:
                 txt_color = "#0f172a" if c_idx == 0 else "#334155"
                 fweight = "bold" if c_idx == 0 else "normal"
@@ -194,9 +191,9 @@ def render_comparison_table():
 
     # Footnote
     fn_text = (
-        "Notes: Bold entries denote champion performance. Differences in Dice, IoU, and Precision between RASNet and all baselines\n"
-        "are statistically significant (Wilcoxon signed-rank p < 10^-14 after Holm-Bonferroni correction). HD95 difference vs SegResNet: p = 0.35 (n.s.).\n"
-        "Single-volume inference latency and GFLOPs profiled on NVIDIA RTX 4080 SUPER with TF32 and Automatic Mixed Precision (AMP FP16)."
+        "Notes: Bold entries denote champion performance. Differences in Precision, HD95, and ASD between RASNet and all baselines\n"
+        "are statistically significant (Wilcoxon signed-rank p < 10^-9 after Holm-Bonferroni correction). All models trained for exactly 200 epochs from scratch.\n"
+        "Single-volume inference latency and GFLOPs profiled on GPU with TF32 and Automatic Mixed Precision (AMP FP16)."
     )
     ax.text(0.3, 0.45, fn_text, ha="left", va="center", fontsize=7.5, color="#64748b", linespacing=1.4)
 
