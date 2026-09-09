@@ -1,0 +1,14 @@
+Field,Value
+Dataset Name,3D CAS Images (200 Samples)
+Number of cases,200
+Format,NIfTI (.nii uncompressed)
+Modality,Cardiac Computed Tomography Angiography (CCTA)
+Source / Curator,"ImageCAS Repository Subset (Format A, Cases 1-200)"
+License,CC BY-NC-SA 4.0 (Open Research Use)
+Official Source Link,https://github.com/XiaoweiXu/ImageCAS-A-Large-Coronary-Artery-Dataset
+Dataset Description,3D volumetric CCTA scans with full coronary artery lumen annotations
+Annotation Type,"Binary voxel masks (0: Background, 1: Coronary Artery Tree)"
+Target Anatomy,"Left and Right Coronary Artery Trees (LCA, RCA, circumflex, branches)"
+Standard Preprocessing,"RAS Orientation, 0.5mm isotropic resampling, [-100, 800] HU windowing"
+Potential Overlap with Primary Dataset,Verified: Repackaged Cases 1-200 of ImageCAS. Overlaps with 115 train cases and 19 val cases; 66 cases are unseen.
+Reporting Protocol,Two-tier reporting: Full Cohort (N=200) and Unseen Sub-cohort (N=66) to prevent leakage claims
