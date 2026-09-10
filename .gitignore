@@ -86,3 +86,7 @@ Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/qua
 Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/qualitative_overlays/case_934_mip_overlay.png
 Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/qualitative_overlays/case_934_overlay.png
 Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/rasnet_200ep_log.csv
+
+# 3D CAS Unseen Cohort random stenosis block profile PNGs and large predictions
+3d Cas Validations and doings/results/unseen_66_cohort/stenosis_blocks/case_*_block_profile.png
+3d Cas Validations and doings/results/unseen_66_cohort/predictions/

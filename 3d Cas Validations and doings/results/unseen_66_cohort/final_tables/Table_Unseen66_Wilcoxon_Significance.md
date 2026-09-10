@@ -1,0 +1,49 @@
+# 🧪 Paired Wilcoxon Signed-Rank Tests (Holm-Bonferroni Adjusted)
+
+| Comparison                | Metric            |   N |   RASNet_Mean |   Competitor_Mean |   W_Stat |       P_Raw |     Diff |   P_Holm_Bonferroni | Significant_p_005   |
+|:--------------------------|:------------------|----:|--------------:|------------------:|---------:|------------:|---------:|--------------------:|:--------------------|
+| RASNet vs RASNET_THRESH05 | DICE              |  66 |        0.7376 |            0.7397 |      236 | 2.78508e-08 |  -0.0021 |          1.2027e-07 | YES                 |
+| RASNet vs RASNET_THRESH05 | IOU               |  66 |        0.5899 |            0.5929 |      232 | 2.40534e-08 |  -0.003  |          1.2027e-07 | YES                 |
+| RASNet vs RASNET_THRESH05 | PRECISION         |  66 |        0.8553 |            0.8427 |        0 | 1.64095e-12 |   0.0126 |          1.4769e-11 | YES                 |
+| RASNet vs RASNET_THRESH05 | RECALL            |  66 |        0.6595 |            0.6701 |       66 | 3.12811e-11 |  -0.0106 |          2.1897e-10 | YES                 |
+| RASNet vs RASNET_THRESH05 | SPECIFICITY       |  66 |        0.9998 |            0.9998 |        0 | 1.64095e-12 |   0      |          1.4769e-11 | YES                 |
+| RASNet vs RASNET_THRESH05 | HD95_MM           |  66 |       15.1187 |           14.5136 |      327 | 1.10589e-06 |   0.6051 |          2.2118e-06 | YES                 |
+| RASNet vs RASNET_THRESH05 | ASD_MM            |  66 |        2.3966 |            2.3348 |      308 | 3.49672e-07 |   0.0617 |          1.049e-06  | YES                 |
+| RASNet vs RASNET_THRESH05 | CLDICE            |  66 |        0.8215 |            0.8248 |      583 | 0.000844529 |  -0.0033 |          0.00084453 | YES                 |
+| RASNet vs RASNET_THRESH05 | CENTERLINE_RECALL |  66 |        0.7595 |            0.7699 |       60 | 5.61081e-11 |  -0.0104 |          3.3665e-10 | YES                 |
+| RASNet vs SEGRESNET       | DICE              |  66 |        0.7376 |            0.7546 |      381 | 3.6892e-06  |  -0.017  |          1.3524e-05 | YES                 |
+| RASNet vs SEGRESNET       | IOU               |  66 |        0.5899 |            0.6117 |      374 | 2.97003e-06 |  -0.0219 |          1.3524e-05 | YES                 |
+| RASNet vs SEGRESNET       | PRECISION         |  66 |        0.8553 |            0.8119 |        1 | 1.71813e-12 |   0.0435 |          1.4769e-11 | YES                 |
+| RASNet vs SEGRESNET       | RECALL            |  66 |        0.6595 |            0.7136 |      102 | 1.45101e-10 |  -0.0541 |          1.0157e-09 | YES                 |
+| RASNet vs SEGRESNET       | SPECIFICITY       |  66 |        0.9998 |            0.9997 |        0 | 1.64095e-12 |   0.0001 |          1.4769e-11 | YES                 |
+| RASNet vs SEGRESNET       | HD95_MM           |  66 |       15.1187 |           12.8972 |      371 | 2.70487e-06 |   2.2215 |          1.3524e-05 | YES                 |
+| RASNet vs SEGRESNET       | ASD_MM            |  66 |        2.3966 |            2.2206 |      386 | 4.30215e-06 |   0.1759 |          1.3524e-05 | YES                 |
+| RASNet vs SEGRESNET       | CLDICE            |  66 |        0.8215 |            0.8305 |      606 | 0.00141857  |  -0.009  |          0.0014186  | YES                 |
+| RASNet vs SEGRESNET       | CENTERLINE_RECALL |  66 |        0.7595 |            0.8065 |      160 | 1.5418e-09  |  -0.0469 |          9.2508e-09 | YES                 |
+| RASNet vs VNET            | DICE              |  66 |        0.7376 |            0.7119 |      421 | 1.22752e-05 |   0.0257 |          6.3593e-05 | YES                 |
+| RASNet vs VNET            | IOU               |  66 |        0.5899 |            0.561  |      416 | 1.05988e-05 |   0.0289 |          6.3593e-05 | YES                 |
+| RASNet vs VNET            | PRECISION         |  66 |        0.8553 |            0.8065 |       82 | 6.22631e-11 |   0.0488 |          4.9811e-10 | YES                 |
+| RASNet vs VNET            | RECALL            |  66 |        0.6595 |            0.6501 |     1036 | 0.657063    |   0.0095 |          0.65706    | NO                  |
+| RASNet vs VNET            | SPECIFICITY       |  66 |        0.9998 |            0.9997 |       79 | 5.47667e-11 |   0.0001 |          4.929e-10  | YES                 |
+| RASNet vs VNET            | HD95_MM           |  66 |       15.1187 |           19.4053 |      692 | 0.00825467  |  -4.2866 |          0.016509   | YES                 |
+| RASNet vs VNET            | ASD_MM            |  66 |        2.3966 |            3.53   |      646 | 0.003332    |  -1.1334 |          0.009996   | YES                 |
+| RASNet vs VNET            | CLDICE            |  66 |        0.8215 |            0.7876 |      403 | 7.20209e-06 |   0.0339 |          5.0415e-05 | YES                 |
+| RASNet vs VNET            | CENTERLINE_RECALL |  66 |        0.7595 |            0.7277 |      590 | 0.000991048 |   0.0318 |          0.0039642  | YES                 |
+| RASNet vs NNUNET          | DICE              |  66 |        0.7376 |            0.4704 |        0 | 1.64095e-12 |   0.2672 |          1.4769e-11 | YES                 |
+| RASNet vs NNUNET          | IOU               |  66 |        0.5899 |            0.3225 |        0 | 1.64095e-12 |   0.2674 |          1.4769e-11 | YES                 |
+| RASNet vs NNUNET          | PRECISION         |  66 |        0.8553 |            0.7597 |       64 | 2.86814e-11 |   0.0957 |          5.7363e-11 | YES                 |
+| RASNet vs NNUNET          | RECALL            |  66 |        0.6595 |            0.372  |        0 | 1.64095e-12 |   0.2875 |          1.4769e-11 | YES                 |
+| RASNet vs NNUNET          | SPECIFICITY       |  66 |        0.9998 |            0.9998 |     1062 | 0.781103    |  -0      |          0.7811     | NO                  |
+| RASNet vs NNUNET          | HD95_MM           |  66 |       15.1187 |           48.701  |       30 | 6.40305e-12 | -33.5823 |          1.9209e-11 | YES                 |
+| RASNet vs NNUNET          | ASD_MM            |  66 |        2.3966 |           12.6639 |       19 | 3.90299e-12 | -10.2674 |          1.5612e-11 | YES                 |
+| RASNet vs NNUNET          | CLDICE            |  66 |        0.8215 |            0.4844 |        0 | 1.64095e-12 |   0.3371 |          1.4769e-11 | YES                 |
+| RASNet vs NNUNET          | CENTERLINE_RECALL |  66 |        0.7595 |            0.3525 |        0 | 1.64095e-12 |   0.407  |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | DICE              |  66 |        0.7376 |            0.5322 |        0 | 1.64095e-12 |   0.2055 |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | IOU               |  66 |        0.5899 |            0.3639 |        0 | 1.64095e-12 |   0.226  |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | PRECISION         |  66 |        0.8553 |            0.6019 |        0 | 1.64095e-12 |   0.2535 |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | RECALL            |  66 |        0.6595 |            0.4833 |       10 | 2.59377e-12 |   0.1762 |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | SPECIFICITY       |  66 |        0.9998 |            0.9995 |        0 | 1.64095e-12 |   0.0003 |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | HD95_MM           |  66 |       15.1187 |           13.8013 |     1098 | 0.961787    |   1.3174 |          0.96179    | NO                  |
+| RASNet vs 3DUNET          | ASD_MM            |  66 |        2.3966 |            2.4013 |      799 | 0.0502362   |  -0.0047 |          0.10047    | NO                  |
+| RASNet vs 3DUNET          | CLDICE            |  66 |        0.8215 |            0.6717 |        3 | 1.88334e-12 |   0.1498 |          1.4769e-11 | YES                 |
+| RASNet vs 3DUNET          | CENTERLINE_RECALL |  66 |        0.7595 |            0.6089 |       65 | 2.99537e-11 |   0.1506 |          8.9861e-11 | YES                 |
