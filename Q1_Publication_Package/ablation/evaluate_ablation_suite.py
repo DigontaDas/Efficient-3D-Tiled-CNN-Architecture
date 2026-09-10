@@ -173,6 +173,8 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate Ablation Models Suite (N=150 Cases)")
     parser.add_argument("--overwrite", action="store_true", help="Force overwrite of existing predictions and CSVs")
     parser.add_argument("--sw-batch-size", type=int, default=8, help="Sliding window batch size (default: 8, optimal for 16GB GPU)")
+    parser.add_argument("--variant", type=str, default="all", choices=["all", "step2", "step3", "step4", "step5"],
+                        help="Which ablation step to evaluate (default: 'all')")
     args = parser.parse_args()
 
     test_ids = get_test_case_ids()
@@ -180,6 +182,7 @@ def main():
 
     tasks = [
         {
+            "id": "step2",
             "name": "Step 2 (+ AttentionGate3D Only)",
             "ckpt": os.path.join(ckpt_dir, "ablation_attngate_best.pth"),
             "pred_dir": os.path.join(PRED_DIR, "step2_attngate"),
@@ -187,6 +190,7 @@ def main():
             "use_tta": False
         },
         {
+            "id": "step3",
             "name": "Step 3 (+ Deep Supervision)",
             "ckpt": os.path.join(ckpt_dir, "ablation_deepsup_best.pth"),
             "pred_dir": os.path.join(PRED_DIR, "step3_deepsup"),
@@ -194,6 +198,7 @@ def main():
             "use_tta": False
         },
         {
+            "id": "step4",
             "name": "Step 4 (+ StenosisAwareLoss Raw Model)",
             "ckpt": os.path.join(ckpt_dir, "rasnet_best.pth"),
             "pred_dir": os.path.join(PRED_DIR, "step4_raw_model"),
@@ -201,6 +206,7 @@ def main():
             "use_tta": False
         },
         {
+            "id": "step5",
             "name": "Step 5 (+ 4-Pass TTA)",
             "ckpt": os.path.join(ckpt_dir, "rasnet_best.pth"),
             "pred_dir": os.path.join(PRED_DIR, "step5_tta"),
@@ -208,6 +214,9 @@ def main():
             "use_tta": True
         }
     ]
+
+    if args.variant != "all":
+        tasks = [t for t in tasks if t["id"] == args.variant]
 
     for t in tasks:
         print("\n" + "=" * 80)

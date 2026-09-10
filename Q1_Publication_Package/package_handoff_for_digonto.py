@@ -11,7 +11,8 @@ into a single, clean handoff directory:
 import os
 import shutil
 
-BASE_DIR = r"H:\Thesis_Trainings"
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = REPO_ROOT if os.path.exists(os.path.join(REPO_ROOT, "Q1_Publication_Package")) else r"H:\Thesis_Trainings"
 DEST_DIR = os.path.join(BASE_DIR, "Q1_Publication_Package", "handoff_for_digonto")
 os.makedirs(DEST_DIR, exist_ok=True)
 os.makedirs(os.path.join(DEST_DIR, "figures"), exist_ok=True)
