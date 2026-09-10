@@ -62,19 +62,26 @@ def get_model(model_name: str):
         )
         ckpt_p = os.path.join(ckpt_dir, "vnet_best.pt")
     elif model_name == "nnunet":
-        model = monai.networks.nets.DynUNet(
-            spatial_dims=3, in_channels=1, out_channels=2,
-            kernel_size=[[3,3,3], [3,3,3], [3,3,3], [3,3,3]],
-            strides=[[1,1,1], [2,2,2], [2,2,2], [2,2,2]],
-            upsample_kernel_size=[[2,2,2], [2,2,2], [2,2,2]],
-            filters=[32, 64, 128, 256], dropout=0.1, deep_supervision=False
-        )
         ckpt_p = os.path.join(ckpt_dir, "nnunet_best.pt")
+        ckpt = torch.load(ckpt_p, map_location=DEVICE, weights_only=False)
+        from dynamic_network_architectures.architectures.unet import PlainConvUNet
+        arch = ckpt['init_args']['plans']['configurations']['3d_fullres']['architecture']['arch_kwargs'].copy()
+        arch['conv_op'] = torch.nn.Conv3d
+        arch['norm_op'] = torch.nn.InstanceNorm3d
+        arch['dropout_op'] = None
+        arch['nonlin'] = torch.nn.LeakyReLU
+        model = PlainConvUNet(input_channels=1, num_classes=2, **arch)
+        state_dict = ckpt['network_weights']
+        model.load_state_dict(state_dict)
+        model.to(DEVICE)
+        model.eval()
+        return model, ckpt_p
     else:
         raise ValueError(f"Unknown model name: {model_name}")
 
-    ckpt = torch.load(ckpt_p, map_location=DEVICE)
-    model.load_state_dict(ckpt.get("model_state_dict", ckpt))
+    ckpt = torch.load(ckpt_p, map_location=DEVICE, weights_only=False)
+    state_dict = ckpt.get("model_state_dict", ckpt.get("network_weights", ckpt))
+    model.load_state_dict(state_dict)
     model.to(DEVICE)
     model.eval()
     return model, ckpt_p
@@ -226,9 +233,12 @@ def run_inference_for_model(model_name: str, sw_batch_size: int = 4):
         if model_name == "3dunet":
             pred_probs = torch.sigmoid(batch["pred"]).squeeze(0)
             pred_mask = (pred_probs > 0.5).cpu().numpy().astype(np.uint8)
-        else:
+        elif model_name == "rasnet":
             pred_probs = torch.softmax(batch["pred"], dim=0)[1]  # foreground
             pred_mask = (pred_probs > 0.6).cpu().numpy().astype(np.uint8)
+        else:
+            pred_probs = torch.softmax(batch["pred"], dim=0)[1]
+            pred_mask = (pred_probs > 0.5).cpu().numpy().astype(np.uint8)
 
         # Apply cc3d top-2 components pruning
         labels_out, N = cc3d.connected_components(pred_mask, return_N=True)
@@ -270,18 +280,18 @@ def run_inference_for_model(model_name: str, sw_batch_size: int = 4):
         rows.append(m)
 
         # Periodically save CSV
-        if len(rows) % 10 == 0 or case_id == 200:
+        if len(rows) % 5 == 0 or case_id == 200:
             pd.DataFrame(rows).to_csv(out_csv, index=False)
-            print(f"  [{model_name}] Evaluated {case_id}/200 cases (Dice: {m['dice']:.4f}, Time: {elapsed:.2f}s) -> saved")
+            print(f"  [{model_name}] Evaluated {case_id}/200 cases (Dice: {m['dice']:.4f}, Time: {elapsed:.2f}s) -> saved", flush=True)
 
     df = pd.DataFrame(rows)
     df.to_csv(out_csv, index=False)
-    print(f"[OK] Completed {model_name}. Saved per-case results to: {out_csv}")
+    print(f"[OK] Completed {model_name}. Saved per-case results to: {out_csv}", flush=True)
     return df
 
 
 def generate_summary_tables():
-    models = ["rasnet", "segresnet", "nnunet", "3dunet"]
+    models = ["rasnet", "segresnet", "vnet", "3dunet", "nnunet"]
     summary_rows = []
 
     for m in models:
@@ -300,8 +310,15 @@ def generate_summary_tables():
         for s_name, s_df in subsets.items():
             if s_df.empty:
                 continue
+            display_name = {
+                "rasnet": "RASNet",
+                "segresnet": "SegResNet",
+                "vnet": "V-Net",
+                "3dunet": "3D U-Net",
+                "nnunet": "nnU-Net"
+            }.get(m, m.upper())
             summary_rows.append({
-                "Model": m.upper() if m != "3dunet" else "3D U-Net",
+                "Model": display_name,
                 "Cohort": s_name,
                 "Cases": len(s_df),
                 "Dice": f"{s_df['dice'].mean():.4f} ± {s_df['dice'].std():.4f}",
@@ -318,7 +335,7 @@ def generate_summary_tables():
     sum_df = pd.DataFrame(summary_rows)
     comp_csv = os.path.join(RESULTS_DIR, "3d_cas_model_comparison.csv")
     sum_df.to_csv(comp_csv, index=False)
-    print(f"[OK] Saved model comparison CSV: {comp_csv}")
+    print(f"[OK] Saved model comparison CSV: {comp_csv}", flush=True)
 
     # Generate Markdown Table
     md_p = os.path.join(RESULTS_DIR, "table_3d_cas_model_comparison.md")
@@ -342,16 +359,16 @@ def generate_summary_tables():
 """
     with open(md_p, "w", encoding="utf-8") as f:
         f.write(md_content)
-    print(f"[OK] Saved comparison Markdown: {md_p}")
+    print(f"[OK] Saved comparison Markdown: {md_p}", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate models on 3D CAS 200 Samples")
-    parser.add_argument("--model", type=str, default="all", choices=["rasnet", "segresnet", "nnunet", "3dunet", "all"])
+    parser.add_argument("--model", type=str, default="all", choices=["rasnet", "segresnet", "vnet", "3dunet", "nnunet", "all"])
     parser.add_argument("--sw-batch-size", type=int, default=4, help="Sliding window batch size (default: 4 for RTX 3060 Ti)")
     args = parser.parse_args()
 
-    models = ["rasnet", "segresnet", "nnunet", "3dunet"] if args.model == "all" else [args.model]
+    models = ["rasnet", "segresnet", "vnet", "3dunet", "nnunet"] if args.model == "all" else [args.model]
 
     for m in models:
         run_inference_for_model(m, sw_batch_size=args.sw_batch_size)

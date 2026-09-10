@@ -250,7 +250,7 @@ Evaluate the available baseline models on the same external dataset:
 2. SegResNet
 3. nnU-Net
 4. 3D U-Net
-
+5. V-Net
 Use equivalent preprocessing/evaluation conditions wherever technically possible.
 
 Do not create an unfair comparison.

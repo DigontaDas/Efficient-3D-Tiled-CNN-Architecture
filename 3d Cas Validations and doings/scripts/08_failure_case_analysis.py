@@ -78,13 +78,13 @@ def render_failure_panel(case_id: int, row: dict, out_png: str):
     fp_s = (~gt_slice) & pred_slice
     fn_s = gt_slice & (~pred_slice)
 
-    overlay = np.zeros((*ct_slice.shape, 3), dtype=np.float32)
-    overlay[tp_s] = [1.0, 1.0, 0.0] # Yellow (True Positive)
-    overlay[fp_s] = [1.0, 0.2, 0.2] # Red (False Positive)
-    overlay[fn_s] = [0.2, 1.0, 0.2] # Green (False Negative / Missed)
+    overlay = np.zeros((*ct_slice.shape, 4), dtype=np.float32)
+    overlay[tp_s] = [1.0, 1.0, 0.0, 0.85] # Yellow (True Positive)
+    overlay[fp_s] = [1.0, 0.2, 0.2, 0.85] # Red (False Positive)
+    overlay[fn_s] = [0.2, 1.0, 0.2, 0.85] # Green (False Negative / Missed)
 
     axes[3].imshow(ct_win, cmap="gray", origin="lower")
-    axes[3].imshow(np.ma.masked_where(~(tp_s | fp_s | fn_s), overlay), alpha=0.85, origin="lower")
+    axes[3].imshow(overlay, origin="lower")
     axes[3].set_title(f"Overlap (Dice: {row.get('dice', 0.0):.3f} | HD95: {row.get('hd95', 0.0):.1f}mm)",
                       color="white", fontsize=13, weight="bold")
     axes[3].axis("off")

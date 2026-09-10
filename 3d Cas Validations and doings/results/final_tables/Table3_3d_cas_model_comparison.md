@@ -1,0 +1,28 @@
+# 📊 Table 3: Model Comparison on 3D CAS Dataset (200 Samples)
+**Generated in Phase 4 & 5**  
+**Evaluation Platform**: NVIDIA GeForce RTX 3060 Ti (8 GB VRAM, PyTorch AMP FP16, `sw_batch_size=4`)  
+**Standard Preprocessing**: RAS Orientation, 0.5 mm isotropic spacing, HU window [-100, 800]  
+**Post-Processing**: `cc3d` top-2 components filtering  
+
+---
+
+### Headline Results Breakdown (Full Cohort vs Unseen vs Train-Recall)
+
+| Model     | Cohort                      |   Cases | Dice            | IoU             | Precision       | Recall          | Specificity     | HD95 (mm)     | ASD (mm)        | clDice          | Avg Time (s)   |
+|:----------|:----------------------------|--------:|:----------------|:----------------|:----------------|:----------------|:----------------|:--------------|:----------------|:----------------|:---------------|
+| RASNet    | Full Cohort (N=200)         |     134 | 0.7765 ± 0.0626 | 0.6387 ± 0.0809 | 0.8759 ± 0.0457 | 0.7031 ± 0.0908 | 0.9998 ± 0.0001 | 29.38 ± 12.84 | 1.509 ± 1.271   | 0.8585 ± 0.0720 | 85.40s         |
+| RASNet    | Train-Recall Subset (N=115) |     115 | 0.7770 ± 0.0629 | 0.6395 ± 0.0813 | 0.8721 ± 0.0472 | 0.7063 ± 0.0907 | 0.9998 ± 0.0001 | 29.39 ± 12.95 | 1.493 ± 1.267   | 0.8583 ± 0.0723 | 86.50s         |
+| SegResNet | Full Cohort (N=200)         |     134 | 0.7883 ± 0.0637 | 0.6548 ± 0.0808 | 0.8409 ± 0.0738 | 0.7461 ± 0.0764 | 0.9998 ± 0.0001 | 27.04 ± 12.25 | 1.367 ± 1.987   | 0.8680 ± 0.0786 | 72.95s         |
+| SegResNet | Train-Recall Subset (N=115) |     115 | 0.7871 ± 0.0659 | 0.6534 ± 0.0830 | 0.8359 ± 0.0771 | 0.7479 ± 0.0774 | 0.9997 ± 0.0001 | 27.29 ± 12.50 | 1.398 ± 2.125   | 0.8655 ± 0.0810 | 64.21s         |
+| V-Net     | Full Cohort (N=200)         |     134 | 0.7669 ± 0.0680 | 0.6266 ± 0.0844 | 0.8424 ± 0.0692 | 0.7101 ± 0.0901 | 0.9998 ± 0.0001 | 30.92 ± 13.01 | 1.885 ± 2.385   | 0.8446 ± 0.0795 | 47.81s         |
+| V-Net     | Train-Recall Subset (N=115) |     115 | 0.7669 ± 0.0695 | 0.6267 ± 0.0859 | 0.8367 ± 0.0718 | 0.7138 ± 0.0901 | 0.9998 ± 0.0001 | 30.89 ± 13.41 | 1.908 ± 2.524   | 0.8434 ± 0.0818 | 47.65s         |
+| 3D U-Net  | Full Cohort (N=200)         |     134 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 1.0000 ± 0.0000 | 37.00 ± 52.35 | 15.731 ± 31.573 | 0.0000 ± 0.0000 | 8.57s          |
+| 3D U-Net  | Train-Recall Subset (N=115) |     115 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 1.0000 ± 0.0000 | 34.88 ± 50.80 | 14.480 ± 30.689 | 0.0000 ± 0.0000 | 8.23s          |
+| nnU-Net   | Full Cohort (N=200)         |     134 | 0.5574 ± 0.1458 | 0.4001 ± 0.1369 | 0.7925 ± 0.0688 | 0.4559 ± 0.1743 | 0.9998 ± 0.0001 | 58.13 ± 17.03 | 7.187 ± 4.867   | 0.5693 ± 0.1829 | 29.42s         |
+| nnU-Net   | Train-Recall Subset (N=115) |     115 | 0.5601 ± 0.1469 | 0.4029 ± 0.1380 | 0.7904 ± 0.0721 | 0.4604 ± 0.1765 | 0.9998 ± 0.0001 | 57.50 ± 17.37 | 7.069 ± 4.847   | 0.5744 ± 0.1833 | 29.28s         |
+
+---
+### ⚠️ Provenance & Leakage Disclosure:
+1. **Unseen Subset ($N=66$)**: These 66 cases were completely excluded during training and hyperparameter tuning of all models, serving as a genuine test of external generalization.
+2. **Train-Recall Subset ($N=115$)**: Reflects training memorization and reconstruction fidelity on seen cases.
+3. **Full Cohort ($N=200$)**: Characterizes the entire 200-volume distribution.

@@ -93,12 +93,14 @@ def main():
     # 1. Primary Dataset Wilcoxon
     ras_pri = pd.read_csv(os.path.join(PRIMARY_EVAL_DIR, "metrics_rasnet_200ep.csv"))
     seg_pri = pd.read_csv(os.path.join(PRIMARY_EVAL_DIR, "metrics_segresnet_200ep.csv"))
+    vnet_pri = pd.read_csv(os.path.join(PRIMARY_EVAL_DIR, "metrics_v_net_200ep.csv"))
     nnu_pri = pd.read_csv(os.path.join(PRIMARY_EVAL_DIR, "metrics_nnu_net_v2_200ep.csv"))
     unet_pri = pd.read_csv(os.path.join(PRIMARY_EVAL_DIR, "metrics_3d_u_net_200ep.csv"))
 
     pri_tests = []
-    pri_tests.extend(run_wilcoxon_suite(ras_pri, seg_pri, "RASNet", "SegResNet"))
     pri_tests.extend(run_wilcoxon_suite(ras_pri, nnu_pri, "RASNet", "nnU-Net"))
+    pri_tests.extend(run_wilcoxon_suite(ras_pri, vnet_pri, "RASNet", "V-Net"))
+    pri_tests.extend(run_wilcoxon_suite(ras_pri, seg_pri, "RASNet", "SegResNet"))
     pri_tests.extend(run_wilcoxon_suite(ras_pri, unet_pri, "RASNet", "3D U-Net"))
 
     df_pri_sig = pd.DataFrame(pri_tests)
@@ -109,21 +111,21 @@ def main():
     # 2. 3D CAS Wilcoxon (if evaluated)
     cas_ras_p = os.path.join(RESULTS_DIR, "3d_cas_rasnet_case_metrics.csv")
     cas_seg_p = os.path.join(RESULTS_DIR, "3d_cas_segresnet_case_metrics.csv")
+    cas_vnet_p = os.path.join(RESULTS_DIR, "3d_cas_vnet_case_metrics.csv")
     cas_nnu_p = os.path.join(RESULTS_DIR, "3d_cas_nnunet_case_metrics.csv")
     cas_unet_p = os.path.join(RESULTS_DIR, "3d_cas_3dunet_case_metrics.csv")
 
     cas_tests = []
-    if os.path.exists(cas_ras_p) and os.path.exists(cas_seg_p):
+    if os.path.exists(cas_ras_p):
         cas_ras = pd.read_csv(cas_ras_p)
-        cas_seg = pd.read_csv(cas_seg_p)
-        cas_nnu = pd.read_csv(cas_nnu_p) if os.path.exists(cas_nnu_p) else None
-        cas_unet = pd.read_csv(cas_unet_p) if os.path.exists(cas_unet_p) else None
-
-        cas_tests.extend(run_wilcoxon_suite(cas_ras, cas_seg, "RASNet", "SegResNet"))
-        if cas_nnu is not None:
-            cas_tests.extend(run_wilcoxon_suite(cas_ras, cas_nnu, "RASNet", "nnU-Net"))
-        if cas_unet is not None:
-            cas_tests.extend(run_wilcoxon_suite(cas_ras, cas_unet, "RASNet", "3D U-Net"))
+        if os.path.exists(cas_nnu_p):
+            cas_tests.extend(run_wilcoxon_suite(cas_ras, pd.read_csv(cas_nnu_p), "RASNet", "nnU-Net"))
+        if os.path.exists(cas_vnet_p):
+            cas_tests.extend(run_wilcoxon_suite(cas_ras, pd.read_csv(cas_vnet_p), "RASNet", "V-Net"))
+        if os.path.exists(cas_seg_p):
+            cas_tests.extend(run_wilcoxon_suite(cas_ras, pd.read_csv(cas_seg_p), "RASNet", "SegResNet"))
+        if os.path.exists(cas_unet_p):
+            cas_tests.extend(run_wilcoxon_suite(cas_ras, pd.read_csv(cas_unet_p), "RASNet", "3D U-Net"))
 
     df_cas_sig = pd.DataFrame(cas_tests) if cas_tests else pd.DataFrame()
     cas_csv = os.path.join(RESULTS_DIR, "statistical_significance_3d_cas.csv")
@@ -131,7 +133,7 @@ def main():
     print(f"[OK] Saved: {cas_csv}")
 
     # 3. Bootstrap 95% CIs
-    models_pri = {"RASNet": ras_pri, "nnU-Net": nnu_pri, "SegResNet": seg_pri, "3D U-Net": unet_pri}
+    models_pri = {"RASNet": ras_pri, "nnU-Net": nnu_pri, "V-Net": vnet_pri, "SegResNet": seg_pri, "3D U-Net": unet_pri}
     ci_pri_rows = []
     for m_name, df_m in models_pri.items():
         for metric in METRICS:
@@ -147,6 +149,31 @@ def main():
             })
     df_ci_pri = pd.DataFrame(ci_pri_rows)
     df_ci_pri.to_csv(os.path.join(RESULTS_DIR, "confidence_intervals_primary.csv"), index=False)
+
+    # 3b. 3D CAS Bootstrap 95% CIs (if evaluated)
+    cas_dict = {}
+    if os.path.exists(cas_ras_p): cas_dict["RASNet"] = pd.read_csv(cas_ras_p)
+    if os.path.exists(cas_nnu_p): cas_dict["nnU-Net"] = pd.read_csv(cas_nnu_p)
+    if os.path.exists(cas_vnet_p): cas_dict["V-Net"] = pd.read_csv(cas_vnet_p)
+    if os.path.exists(cas_seg_p): cas_dict["SegResNet"] = pd.read_csv(cas_seg_p)
+    if os.path.exists(cas_unet_p): cas_dict["3D U-Net"] = pd.read_csv(cas_unet_p)
+
+    ci_cas_rows = []
+    for m_name, df_m in cas_dict.items():
+        for metric in METRICS:
+            mean_v, low, high = bootstrap_ci(df_m[metric].values)
+            ci_cas_rows.append({
+                "Dataset": "3D CAS External (N=134)",
+                "Model": m_name,
+                "Metric": metric.upper(),
+                "Mean": round(mean_v, 4),
+                "95% CI Lower": round(low, 4),
+                "95% CI Upper": round(high, 4),
+                "CI_Span": round(high - low, 4)
+            })
+    if ci_cas_rows:
+        df_ci_cas = pd.DataFrame(ci_cas_rows)
+        df_ci_cas.to_csv(os.path.join(RESULTS_DIR, "confidence_intervals_3d_cas.csv"), index=False)
 
     # 4. Master Table Markdown
     tbl_sig_md = os.path.join(RESULTS_DIR, "table_statistical_significance.md")
