@@ -174,7 +174,10 @@ def train_single_variant(variant: str, args):
     train_ds = PersistentDataset(data=train_files, transform=train_transforms, cache_dir=cache_dir)
     train_loader = DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=True,
-        num_workers=4 if not args.dry_run else 0, pin_memory=True
+        num_workers=args.num_workers if not args.dry_run else 0,
+        pin_memory=True,
+        prefetch_factor=2 if args.num_workers > 0 and not args.dry_run else None,
+        persistent_workers=True if args.num_workers > 0 and not args.dry_run else False
     )
 
     val_ds = Dataset(data=val_files, transform=val_transforms)
@@ -337,6 +340,7 @@ def main():
                         help="Which ablation variant to train (default: 'all' runs both sequentially)")
     parser.add_argument("--dry-run", action="store_true", help="Quick verification step")
     parser.add_argument("--batch-size", type=int, default=4, help="Batch size (default: 4)")
+    parser.add_argument("--num-workers", type=int, default=10, help="DataLoader workers (default: 10)")
     parser.add_argument("--epochs", type=int, default=200, help="Target epochs (default: 200)")
     parser.add_argument("--lr", type=float, default=2e-4, help="Learning rate (default: 2e-4)")
     parser.add_argument("--seed", type=int, default=42, help="Seed")
