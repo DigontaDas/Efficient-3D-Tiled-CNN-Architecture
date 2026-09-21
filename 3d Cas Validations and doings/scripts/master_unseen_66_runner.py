@@ -44,23 +44,23 @@ def main():
 
     total_start = time.time()
 
-    # Step 1: RASNet
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "rasnet"], "RASNet Unseen 66 Evaluation")
+    # Step 1: RASNet (Calibrated 0.45, dust filtering, 70% overlap, sw_batch_size 8)
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "rasnet", "--overwrite"], "RASNet Unseen 66 Evaluation")
 
-    # Step 2: SegResNet
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "segresnet"], "SegResNet Unseen 66 Evaluation")
+    # Step 2: SegResNet (Fair 0.45 threshold, dust filtering, 70% overlap, sw_batch_size 8)
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "segresnet", "--overwrite"], "SegResNet Unseen 66 Evaluation")
 
     # Step 3: V-Net
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "vnet"], "V-Net Unseen 66 Evaluation")
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "vnet", "--overwrite"], "V-Net Unseen 66 Evaluation")
 
     # Step 4: nnU-Net
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "nnunet"], "nnU-Net Unseen 66 Evaluation")
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "nnunet", "--overwrite"], "nnU-Net Unseen 66 Evaluation")
 
-    # Step 4b: RASNet (Threshold 0.5 - Pure Comparison)
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "rasnet", "--threshold", "0.5"], "RASNet Threshold 0.5 Unseen 66 Evaluation")
+    # Step 4b: RASNet (Threshold 0.5 - Reference Comparison)
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "rasnet", "--threshold", "0.5", "--overwrite"], "RASNet Threshold 0.5 Unseen 66 Evaluation")
 
     # Step 5: 3D U-Net
-    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "3dunet"], "3D U-Net Unseen 66 Evaluation")
+    run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "evaluate_unseen_66_models.py"), "--model", "3dunet", "--overwrite"], "3D U-Net Unseen 66 Evaluation")
 
     # Step 6: Stenosis & Block Detection Gallery (20 visual panels)
     run_command([PYTHON_EXE, "-u", os.path.join(SCRIPTS_DIR, "unseen_66_stenosis_detection.py")], "20-Case Visual Stenosis Block Detection Gallery")

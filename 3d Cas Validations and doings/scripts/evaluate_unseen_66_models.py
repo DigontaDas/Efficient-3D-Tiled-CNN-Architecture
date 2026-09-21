@@ -170,7 +170,7 @@ def compute_metrics(pred: np.ndarray, gt: np.ndarray, spacing: tuple) -> dict:
     }
 
 
-def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = None, threshold: float = None):
+def evaluate_unseen(model_name: str, sw_batch_size: int = 8, max_cases: int = None, threshold: float = None, overlap: float = 0.7, overwrite: bool = False, dust_threshold: int = 50):
     unseen_ids = get_unseen_case_ids()
     if max_cases is not None:
         unseen_ids = unseen_ids[:max_cases]
@@ -180,7 +180,7 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
         thresh_val = float(threshold)
     else:
         tag = model_name
-        thresh_val = 0.6 if model_name == "rasnet" else 0.5
+        thresh_val = 0.45
 
     out_pred_dir = os.path.join(RESULTS_DIR, "predictions", tag)
     os.makedirs(out_pred_dir, exist_ok=True)
@@ -188,11 +188,16 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
     os.makedirs(out_metrics_dir, exist_ok=True)
     out_csv = os.path.join(out_metrics_dir, f"unseen_66_{tag}_case_metrics.csv")
 
-    existing_df = pd.read_csv(out_csv) if os.path.exists(out_csv) else pd.DataFrame()
-    done_ids = set(existing_df["case_id"].tolist()) if "case_id" in existing_df.columns else set()
+    if not overwrite and os.path.exists(out_csv):
+        existing_df = pd.read_csv(out_csv)
+        done_ids = set(existing_df["case_id"].tolist()) if "case_id" in existing_df.columns else set()
+    else:
+        existing_df = pd.DataFrame()
+        done_ids = set()
 
     model, ckpt_p = get_model(model_name)
-    print(f"\n{'='*80}\n[*] MODEL: {model_name.upper()} (Tag: {tag}, Threshold: {thresh_val}) | Checkpoint: {ckpt_p}")
+    print(f"\n{'='*80}\n[*] MODEL: {model_name.upper()} (Tag: {tag}, Threshold: {thresh_val}, Overlap: {overlap}, SW_Batch: {sw_batch_size})")
+    print(f"[*] Checkpoint: {ckpt_p}")
     print(f"[*] Total Unseen Cohort: {len(unseen_ids)} cases | Completed so far: {len(done_ids)}/{len(unseen_ids)}\n{'='*80}")
 
     if model_name == "3dunet":
@@ -203,6 +208,16 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
             mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
             mt.ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
             mt.Resized(keys=["image"], spatial_size=(128, 128, 128), mode="trilinear"),
+            mt.EnsureTyped(keys=["image"])
+        ])
+    elif model_name == "nnunet":
+        # Native nnU-Net CTNormalization: clamped to [-166, 727], then Z-score normalized
+        pre_trans = mt.Compose([
+            mt.LoadImaged(keys=["image"]),
+            mt.EnsureChannelFirstd(keys=["image"]),
+            mt.Orientationd(keys=["image"], axcodes="RAS"),
+            mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
+            mt.Lambdad(keys=["image"], func=lambda x: (torch.clamp(x, -166.0, 727.0) - 147.97113037109375) / 179.68487548828125),
             mt.EnsureTyped(keys=["image"])
         ])
     else:
@@ -235,6 +250,8 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
             continue
 
         img_p = os.path.join(DATASET_ROOT, f"{case_id}.img.nii", "dia_0.nii")
+        if not os.path.exists(img_p):
+            img_p = os.path.join(DATASET_ROOT, f"{case_id}.img.nii", "diao_0.nii")
         lbl_p = os.path.join(DATASET_ROOT, f"{case_id}.label.nii", "label.nii")
         pred_p = os.path.join(out_pred_dir, f"case_{case_id}_pred.nii.gz")
 
@@ -254,7 +271,7 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
             else:
                 logits = sliding_window_inference(
                     inp, (96, 96, 96), sw_batch_size=sw_batch_size,
-                    predictor=model, overlap=0.5
+                    predictor=model, overlap=overlap
                 )
                 if isinstance(logits, (tuple, list)):
                     logits = logits[0]
@@ -269,17 +286,9 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
             pred_probs = torch.softmax(batch["pred"], dim=0)[1]  # foreground
             pred_mask = (pred_probs > thresh_val).cpu().numpy().astype(np.uint8)
 
-        # Apply cc3d top-2 components pruning
-        labels_out, N = cc3d.connected_components(pred_mask, return_N=True)
-        if N > 2:
-            pred_mask = cc3d.dust(pred_mask, threshold=50, connectivity=26)
-            labels_out, N = cc3d.connected_components(pred_mask, return_N=True)
-            stats = cc3d.statistics(labels_out)
-            voxel_counts = stats["voxel_counts"][1:]  # ignore background
-            top_k = min(2, len(voxel_counts))
-            if top_k > 0:
-                top_labels = np.argsort(voxel_counts)[-top_k:] + 1
-                pred_mask = np.isin(labels_out, top_labels).astype(np.uint8)
+        # Apply cc3d dust-only component filtering (preserves authentic distal branches >= dust_threshold)
+        if dust_threshold > 0:
+            pred_mask = cc3d.dust(pred_mask, threshold=dust_threshold, connectivity=26)
         pred_arr = pred_mask
 
         # Save prediction volume with proper transpose
@@ -315,9 +324,20 @@ def evaluate_unseen(model_name: str, sw_batch_size: int = 4, max_cases: int = No
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, required=True, choices=["rasnet", "segresnet", "vnet", "nnunet", "3dunet"])
-    parser.add_argument("--sw_batch_size", type=int, default=4)
+    parser.add_argument("--sw_batch_size", type=int, default=8, help="Sliding window batch size on GPU (default: 8)")
+    parser.add_argument("--overlap", type=float, default=0.7, help="Sliding window overlap ratio (default: 0.7)")
+    parser.add_argument("--dust_threshold", type=int, default=50, help="Minimum connected component voxel size (default: 50)")
     parser.add_argument("--max_cases", type=int, default=None)
-    parser.add_argument("--threshold", type=float, default=None, help="Custom probability threshold (e.g. 0.5)")
+    parser.add_argument("--threshold", type=float, default=None, help="Custom probability threshold (e.g. 0.45)")
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing predictions and metrics")
     args = parser.parse_args()
 
-    evaluate_unseen(args.model, sw_batch_size=args.sw_batch_size, max_cases=args.max_cases, threshold=args.threshold)
+    evaluate_unseen(
+        args.model,
+        sw_batch_size=args.sw_batch_size,
+        overlap=args.overlap,
+        dust_threshold=args.dust_threshold,
+        max_cases=args.max_cases,
+        threshold=args.threshold,
+        overwrite=args.overwrite
+    )

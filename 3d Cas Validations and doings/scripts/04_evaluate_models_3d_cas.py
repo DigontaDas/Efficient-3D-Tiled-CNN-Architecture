@@ -162,26 +162,41 @@ def compute_metrics(pred: np.ndarray, gt: np.ndarray, spacing: tuple) -> dict:
     }
 
 
-def run_inference_for_model(model_name: str, sw_batch_size: int = 4):
+def run_inference_for_model(model_name: str, sw_batch_size: int = 4, overwrite: bool = False):
     out_pred_dir = os.path.join(PRED_BASE, model_name)
     os.makedirs(out_pred_dir, exist_ok=True)
     out_csv = os.path.join(RESULTS_DIR, f"3d_cas_{model_name}_case_metrics.csv")
 
-    existing_df = pd.read_csv(out_csv) if os.path.exists(out_csv) else pd.DataFrame()
-    done_ids = set(existing_df["case_id"].tolist()) if "case_id" in existing_df.columns else set()
+    if not overwrite and os.path.exists(out_csv):
+        existing_df = pd.read_csv(out_csv)
+        done_ids = set(existing_df["case_id"].tolist()) if "case_id" in existing_df.columns else set()
+    else:
+        existing_df = pd.DataFrame()
+        done_ids = set()
 
     model, ckpt_p = get_model(model_name)
     print(f"\n{'='*80}\n[*] MODEL: {model_name.upper()} | Checkpoint: {ckpt_p}\n{'='*80}")
     print(f"[*] Done so far: {len(done_ids)}/200 cases. Running inference on RTX 3060 Ti (sw_batch_size={sw_batch_size})...")
 
-    pre_trans = mt.Compose([
-        mt.LoadImaged(keys=["image"]),
-        mt.EnsureChannelFirstd(keys=["image"]),
-        mt.Orientationd(keys=["image"], axcodes="RAS"),
-        mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
-        mt.ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
-        mt.EnsureTyped(keys=["image"])
-    ])
+    if model_name == "nnunet":
+        # Native nnU-Net CTNormalization: clamped to [-166, 727], then Z-score normalized
+        pre_trans = mt.Compose([
+            mt.LoadImaged(keys=["image"]),
+            mt.EnsureChannelFirstd(keys=["image"]),
+            mt.Orientationd(keys=["image"], axcodes="RAS"),
+            mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
+            mt.Lambdad(keys=["image"], func=lambda x: (torch.clamp(x, -166.0, 727.0) - 147.97113037109375) / 179.68487548828125),
+            mt.EnsureTyped(keys=["image"])
+        ])
+    else:
+        pre_trans = mt.Compose([
+            mt.LoadImaged(keys=["image"]),
+            mt.EnsureChannelFirstd(keys=["image"]),
+            mt.Orientationd(keys=["image"], axcodes="RAS"),
+            mt.Spacingd(keys=["image"], pixdim=(0.5, 0.5, 0.5), mode="bilinear"),
+            mt.ScaleIntensityRanged(keys=["image"], a_min=-100, a_max=800, b_min=0.0, b_max=1.0, clip=True),
+            mt.EnsureTyped(keys=["image"])
+        ])
 
     post_trans = mt.Compose([
         mt.Invertd(
@@ -279,10 +294,9 @@ def run_inference_for_model(model_name: str, sw_batch_size: int = 4):
         m["inference_time_sec"] = round(elapsed, 2)
         rows.append(m)
 
-        # Periodically save CSV
-        if len(rows) % 5 == 0 or case_id == 200:
-            pd.DataFrame(rows).to_csv(out_csv, index=False)
-            print(f"  [{model_name}] Evaluated {case_id}/200 cases (Dice: {m['dice']:.4f}, Time: {elapsed:.2f}s) -> saved", flush=True)
+        # Save CSV on every case
+        pd.DataFrame(rows).to_csv(out_csv, index=False)
+        print(f"  [{model_name.upper()}] Case {case_id:03d}/200 (Dice: {m['dice']:.4f}, Prec: {m['precision']:.4f}, Rec: {m['recall']:.4f}, Time: {elapsed:.2f}s) -> saved ({len(rows)} cases)", flush=True)
 
     df = pd.DataFrame(rows)
     df.to_csv(out_csv, index=False)
@@ -366,12 +380,13 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate models on 3D CAS 200 Samples")
     parser.add_argument("--model", type=str, default="all", choices=["rasnet", "segresnet", "vnet", "3dunet", "nnunet", "all"])
     parser.add_argument("--sw-batch-size", type=int, default=4, help="Sliding window batch size (default: 4 for RTX 3060 Ti)")
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing predictions and metrics")
     args = parser.parse_args()
 
     models = ["rasnet", "segresnet", "vnet", "3dunet", "nnunet"] if args.model == "all" else [args.model]
 
     for m in models:
-        run_inference_for_model(m, sw_batch_size=args.sw_batch_size)
+        run_inference_for_model(m, sw_batch_size=args.sw_batch_size, overwrite=args.overwrite)
 
     generate_summary_tables()
 

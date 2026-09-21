@@ -90,3 +90,6 @@ Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/ras
 # 3D CAS Unseen Cohort random stenosis block profile PNGs and large predictions
 3d Cas Validations and doings/results/unseen_66_cohort/stenosis_blocks/case_*_block_profile.png
 3d Cas Validations and doings/results/unseen_66_cohort/predictions/
+3d Cas Validations and doings/results/unseen_66_cohort/logs/
+scratch/test_nnunet_norm.py
+
