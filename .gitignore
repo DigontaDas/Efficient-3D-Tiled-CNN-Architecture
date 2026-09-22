@@ -46,7 +46,6 @@ __pycache__/
 *.log
 
 # Editor / OS
-.vscode/
 .DS_Store
 Thumbs.db
 
@@ -93,3 +92,5 @@ Q1_Publication_Package/matched_200ep_benchmark/_archive_rasnet_champion_70ep/ras
 3d Cas Validations and doings/results/unseen_66_cohort/logs/
 scratch/test_nnunet_norm.py
 
+config.bat
+node_modules

