@@ -1,0 +1,11 @@
+# The benchmark runner is not complete. This configuration is not approval to run the locked test.
+dataset_root: 'C:\Thesis_RASNET\secondary-imagcas-dataset'
+split_file: 'Phase3_Local_Integration/splits_final.json'
+output_root: 'results/benchmark_runs'
+seed: 42
+
+# Primary confirmatory family, prespecified before the rerun; Wilcoxon is two-sided.
+hypotheses:
+  - {a: rasnet, b: nnunet, metric: precision, direction: higher}
+  - {a: rasnet, b: nnunet, metric: hd95, direction: lower}
+  - {a: rasnet, b: nnunet, metric: asd, direction: lower}
