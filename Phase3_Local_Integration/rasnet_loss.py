@@ -1,19 +1,25 @@
-# c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Phase3_Local_Integration\rasnet_loss.py
+# c:\Thesis_RASNET\Phase3_Local_Integration\rasnet_loss.py
 """
 Custom Compound Loss Function for Coronary Artery Segmentation.
 
-Verified Formulation (from RASNet_Problems_and_Adaptations_Documentation.md §3.1):
+Implemented Formulation (used during 200-epoch RASNet training in train_rasnet_200ep.py):
     L_total = α · L_Dice + (1 - α) · L_Focal
 
 Calibration Parameters:
-    α = 0.4  (Dice weight — emphasizes volumetric overlap)
-    γ = 2.5  (Focal focusing parameter — heavily penalizes confident
-              background false positives without over-penalizing
-              borderline vessel voxels)
+    α = 0.4  (Dice weight — MONAI DiceLoss with smooth_nr=0.0, smooth_dr=1e-5,
+              to_onehot_y=True, softmax=True, include_background=True [default])
+    γ = 2.5  (Focal focusing parameter — MONAI FocalLoss with gamma=2.5,
+              to_onehot_y=True, use_softmax=False [default sigmoid per channel],
+              include_background=True [default])
 
-This two-component loss was validated on the ImageCAS 150-case test set to
-achieve Precision 0.8533 and HD95 8.12 mm by suppressing false positive
-hallucinations in non-vascular tissues (cardiac muscle, aorta walls).
+Note on Deep Supervision & Historical Provenance:
+    - Multi-scale deep supervision weights are applied in train_rasnet_200ep.py:215 as:
+      total_loss = loss_main + 0.4 * aux2_loss + 0.2 * aux3_loss
+      (where aux2 is Decoder Level 2 at 1/4 resolution and aux3 is Decoder Level 1 at 1/2 resolution).
+    - BoundaryLoss defined below is a standalone class and is NOT called by StenosisAwareLoss.
+    - Because historical calibration (α=0.4, γ=2.5) and threshold sweeps previously inspected
+      the 150-case ImageCAS test split (IDs 851-1000), evaluations on IDs 851-1000 are reported
+      as retrospective reassessments (see BENCHMARK_PREREGISTRATION.md and LAB_CHECKS.md).
 """
 import torch
 import torch.nn as nn
@@ -22,18 +28,15 @@ from monai.losses import DiceLoss, FocalLoss
 
 class StenosisAwareLoss(nn.Module):
     """
-    Combined Dice + Focal loss for coronary artery segmentation.
+    Combined two-component Dice + Focal loss for 3D coronary artery segmentation.
 
     L_total = α · L_Dice + (1 - α) · L_Focal
 
-    Hardcoded calibration (per project documentation):
-        α = 0.4  → Dice receives 40% weight
-        γ = 2.5  → Focal focusing parameter
-
-    Reducing γ from 3.0 → 2.5 is critical: it still heavily penalizes
-    easy-negative background voxels (suppressing hallucinated blobs) but
-    avoids over-penalizing borderline vessel voxels where the model is
-    uncertain, thereby preserving recall on thin distal branches.
+    Hardcoded calibration:
+        α = 0.4  → DiceLoss(smooth_nr=0.0, smooth_dr=1e-5, to_onehot_y=True,
+                            softmax=True, include_background=True)
+        γ = 2.5  → FocalLoss(gamma=2.5, to_onehot_y=True, use_softmax=False,
+                             include_background=True)
     """
 
     # ── Hardcoded calibration parameters ────────────────────────────────

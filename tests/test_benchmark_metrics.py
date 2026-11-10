@@ -19,8 +19,13 @@ def test_anisotropic_and_random_bruteforce():
         a, b = rng.random((5, 6, 7)) > .7, rng.random((5, 6, 7)) > .7
         spacing = (3., 1.5, .5)
         sa, sb = a & ~binary_erosion(a), b & ~binary_erosion(b)
-        expected = cdist(np.argwhere(sa)*spacing, np.argwhere(sb)*spacing).min(axis=1)
-        assert np.allclose(surface_distances(a,b,spacing), expected)
+        expected_ab = cdist(np.argwhere(sa)*spacing, np.argwhere(sb)*spacing).min(axis=1)
+        expected_ba = cdist(np.argwhere(sb)*spacing, np.argwhere(sa)*spacing).min(axis=1)
+        assert np.allclose(surface_distances(a,b,spacing), expected_ab)
+        pooled = np.concatenate([expected_ab, expected_ba])
+        m = compute_metrics(a, b, spacing)
+        assert np.isclose(m['hd95'], np.percentile(pooled, 95))
+        assert np.isclose(m['asd'], np.mean(pooled))
 
 def test_shifted_masks():
     a = np.zeros((7,7,7), bool); a[2,2,2] = 1

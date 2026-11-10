@@ -74,3 +74,71 @@ def test_cpu_end_to_end_dry_run_all_five_adapters_and_vnet_padding(tmp_path):
     with pytest.raises(FileNotFoundError):
         build_nnunet_predictor(str(tmp_path / "nonexistent_nnunet_folder"), device="cpu")
 
+
+def test_asymmetric_phantom_anisotropic_nonzero_origin_and_flipped_direction(tmp_path):
+    """
+    Phase B3 spatial-content verification:
+    Uses an asymmetric off-center phantom with anisotropic spacing, nonzero origin, and flipped direction cosines.
+    Verifies that both the patch-based transform+Invertd chain (CropForegroundd -> Spacingd -> Invertd)
+    and the 3D U-Net transform+Invertd chain (Resized(128^3) -> Invertd) recover the physical landmark
+    at its exact native SimpleITK (Z, Y, X) location, and rejects non-finite probabilities.
+    """
+    from benchmark.adapters.monai_models import infer_monai_both_passes
+
+    # Shape (Z=24, Y=28, X=32), background = -100 HU, foreground box = 0 HU, off-center bright landmark at (z=7..10, y=19..23, x=23..28) = 700 HU
+    arr = np.full((24, 28, 32), -100.0, dtype=np.float32)
+    arr[2:22, 3:25, 4:30] = 50.0  # non-zero foreground crop region
+    arr[7:11, 19:23, 23:28] = 750.0  # off-center asymmetric target
+    expected_com = np.array([8.5, 20.5, 25.0])  # center of [7..10, 19..22, 23..27]
+
+    img = sitk.GetImageFromArray(arr)
+    img.SetSpacing((0.45, 0.65, 1.25))  # (sx, sy, sz) anisotropic
+    img.SetOrigin((15.2, -34.8, 102.0))
+    img.SetDirection((-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0))
+    p = tmp_path / "asymmetric_phantom.nii.gz"
+    sitk.WriteImage(img, str(p))
+
+    class IntensityEchoNet(torch.nn.Module):
+        def __init__(self, two_channel: bool):
+            super().__init__()
+            self.two_channel = two_channel
+
+        def forward(self, x):
+            # x is scaled in [0, 1]; map bright landmark (x > 0.5) to high logit (+6), background to (-6)
+            fg_logit = (x - 0.5) * 12.0
+            if self.two_channel:
+                return torch.cat([-fg_logit, fg_logit], dim=1)
+            return fg_logit
+
+    for name in ("rasnet", "3dunet"):
+        net = IntensityEchoNet(two_channel=(name != "3dunet"))
+        prob_1, prob_tta = infer_monai_both_passes(
+            name=name,
+            net=net,
+            image_path=str(p),
+            device="cpu",
+            roi_size=(32, 32, 32),
+            sw_batch_size=2,
+            need_tta=True,
+            use_amp=False,
+        )
+        assert prob_1.shape == (24, 28, 32)
+        assert prob_tta is not None and prob_tta.shape == (24, 28, 32)
+        # Recovered high-probability voxels must align with the asymmetric landmark
+        mask = prob_1 >= 0.5
+        assert mask.any()
+        coords = np.argwhere(mask)
+        recovered_com = coords.mean(axis=0)
+        assert np.allclose(recovered_com, expected_com, atol=1.0), (
+            f"{name} landmark center-of-mass {recovered_com} != expected {expected_com}"
+        )
+
+    # Non-finite model outputs must be rejected loudly before thresholding
+    class NaNNet(torch.nn.Module):
+        def forward(self, x):
+            return torch.full_like(x, float("nan"))
+
+    with pytest.raises(RuntimeError, match="Non-finite"):
+        infer_monai_both_passes("3dunet", NaNNet(), str(p), "cpu", use_amp=False)
+
+

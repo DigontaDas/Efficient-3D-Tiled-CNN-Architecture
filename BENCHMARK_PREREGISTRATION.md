@@ -48,4 +48,12 @@ All paired comparisons match exact unique `case_id`s (`N = 150` on the test spli
 ---
 
 ## 4. Historical Comparison Tolerance
-- **Pre-Declared Numerical Tolerance**: $\epsilon = 10^{-4}$ (`0.0001`) for per-case metric comparisons between new benchmark runs and the historical CSVs in `Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_*_200ep.csv`.
+- **Pre-Declared Numerical Tolerance**: $\epsilon = 10^{-4}$ (`0.0001`) for per-case metric comparisons between new benchmark runs and the historical CSVs in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_*_200ep.csv`.
+
+---
+
+## 5. Dated Amendments & Post-Audit Notes (`2026-11-10`)
+1. **Paired Difference Bootstrap 95% CIs & Non-Parametric Summary Columns**:
+   - During the `2026-11-10` verification audit (`results/audits/2026-11-10_verification_audit/`), `benchmark/stats.py` was extended so that `paired_analysis` and `analyze_family` also output percentile bootstrap 95% confidence intervals on the paired difference $A - B$ (`diff_ci95_lo`, `diff_ci95_hi`, $B=2000$, seed `42`) as well as `median_difference`, `q25_difference`, `q75_difference`, and `iqr_difference`. Full augmented tables for `test_retrospective_150` and `val_full_94` are stored in `results/audits/2026-11-10_verification_audit/paired_stats_*_with_ci.csv`.
+2. **Validation Threshold Grid Boundary Observation (`results/thresholds.json`)**:
+   - Under the frozen validation grid $\tau \in \{0.30, 0.35, \dots, 0.70\}$, `nnunet` ($\tau^*=0.35$, mean validation Dice `0.8075`) and `segresnet` ($\tau^*=0.35$, mean validation Dice `0.7901`) peaked strictly inside the grid, whereas `rasnet` ($\tau^*=0.30$, `0.7897`), `vnet` ($\tau^*=0.30$, `0.7702`), and `3dunet` ($\tau^*=0.30$, `0.6047`) selected the lower boundary `0.30`. To prevent post-hoc threshold snooping, the pre-registered grid was **not** expanded after inspecting validation/test results; this boundary behavior is explicitly reported as a methodological limitation and sensitivity curve (`fig2_validation_threshold_sensitivity_n94.png`).

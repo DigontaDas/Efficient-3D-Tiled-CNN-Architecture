@@ -1,0 +1,260 @@
+# 🫀 RASNet: Residual Attention Segmentation Network for 3D Coronary Artery Segmentation
+
+[![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0%2Bcu124-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![MONAI](https://img.shields.io/badge/MONAI-1.4.0-5C2D91.svg)](https://monai.io/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.4-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Thesis_Champion-brightgreen.svg)]()
+
+**RASNet (Residual Attention Segmentation Network)** is an advanced 3D deep learning architecture specifically engineered for high-precision coronary artery segmentation in contrast-enhanced Computed Tomography Angiography (CCTA) scans. Designed to tackle extreme structural sparsity ($< 0.5\%$ arterial voxels), sub-millimeter distal branching, and stenotic lumen narrowing, RASNet combines 3D Residual Attention Gates, Multi-Scale Deep Supervision, a calibrated `StenosisAwareLoss`, MONAI `Invertd` physical coordinate mapping, 4-Pass Test-Time Augmentation (TTA), and topology-aware `cc3d` connected component cleaning.
+
+---
+
+## 📌 Table of Contents
+- [🫀 RASNet Architecture Overview](#-rasnet-architecture-overview)
+- [🔄 Processing & Inference Pipeline](#-processing--inference-pipeline)
+- [📊 Quantitative Results (150 Reserved Test Cases)](#-quantitative-results-150-reserved-test-cases)
+- [📈 Before-Fix vs. Post-Fix Performance Gain](#-before-fix-vs-post-fix-performance-gain)
+- [🌐 Out-of-Distribution Generalization (Unseen Patient Scans)](#-out-of-distribution-generalization-unseen-patient-scans)
+- [🖼️ Qualitative 3D MIP Overlays & Visual Gallery](#️-qualitative-3d-mip-overlays--visual-gallery)
+- [🏥 Clinical Hospital Validation (N=32)](#-clinical-hospital-validation-n32)
+- [🚀 Quickstart & Script Execution](#-quickstart--script-execution)
+- [📂 File Directory & Artifact Registry](#-file-directory--artifact-registry)
+
+---
+
+## 🫀 RASNet Architecture Overview
+
+RASNet subclasses `SegResNet` to incorporate spatial/channel-wise 3D Residual Attention Gates (`AttentionGate3D`) along decoder skip connections and multi-scale Deep Supervision outputs (`aux2`, `aux3`) to prevent vanishing gradients in fine distal vessels.
+
+```mermaid
+graph TD
+    subgraph "Encoder Path (ResNet Blocks + TF32/AMP)"
+        E0["Input CT Patch (96x96x96)<br/>HU [-100, 800]"] --> E1["Init Conv (Filters: 16)"]
+        E1 --> E2["ResBlock Level 1 (16)"]
+        E2 -->|Downsample| E3["ResBlock Level 2 (32)"]
+        E3 -->|Downsample| E4["ResBlock Level 3 (64)"]
+        E4 -->|Downsample| E5["Bottleneck Level 4 (128)"]
+    end
+
+    subgraph "Skip Connection Attention Gates"
+        AG3["AttentionGate3D (Level 3)"]
+        AG2["AttentionGate3D (Level 2)"]
+        AG1["AttentionGate3D (Level 1)"]
+    end
+
+    subgraph "Decoder Path & Deep Supervision"
+        E5 --> D3["Decoder Level 3 (64)"]
+        E4 --> AG3
+        D3 --> AG3
+        AG3 --> D3_Concat["Concat & Conv"]
+        D3_Concat --> Aux3["Aux Head 3 (aux3)<br/>Weight: 0.2"]
+
+        D3_Concat --> D2["Decoder Level 2 (32)"]
+        E3 --> AG2
+        D2 --> AG2
+        AG2 --> D2_Concat["Concat & Conv"]
+        D2_Concat --> Aux2["Aux Head 2 (aux2)<br/>Weight: 0.4"]
+
+        D2_Concat --> D1["Decoder Level 1 (16)"]
+        E2 --> AG1
+        D1 --> AG1
+        AG1 --> D1_Concat["Concat & Conv"]
+
+        D1_Concat --> MainHead["Main Output Head (main)<br/>Weight: 1.0"]
+    end
+
+    MainHead --> Loss["StenosisAwareLoss<br/>α=0.4 Dice + 0.6 Focal (γ=2.5)"]
+    Aux2 --> Loss
+    Aux3 --> Loss
+```
+
+---
+
+## 🔄 Processing & Inference Pipeline
+
+The end-to-end RASNet execution workflow guarantees spatial coordinate preservation and complete elimination of false-positive background floating blobs:
+
+```mermaid
+flowchart TD
+    A["Raw CCTA Scan (ImageCAS NIfTI)"] --> B["Orientation Standardizer (axcodes='RAS')"]
+    B --> C["Isotropic Resampling (0.5 x 0.5 x 0.5 mm)"]
+    C --> D["HU Windowing Clip ([-100, 800])"]
+    D --> E["GPU Sliding Window Inference (96x96x96 patches)"]
+    E --> F["4-Pass Spatial Orientation TTA (Flips dims 2, 3, 4)"]
+    F --> G["MONAI Invertd Transform (Native CT Physical Header Mapping)"]
+    G --> H["Foreground Confidence Thresholding (p > 0.6)"]
+    H --> I["cc3d Top-2 Connected Component Pruning (LCA + RCA Trees)"]
+    I --> J["Final 3D NIfTI Prediction & Parallel CPU Metric Calculation"]
+```
+
+---
+
+## 📊 Matched 200-Epoch Benchmark Results (150 Reserved Test Cases)
+
+Evaluated across all **150 reserved test cases** (Cases 851–1000) of the ImageCAS dataset under strictly matched 200-epoch training protocols. RASNet achieves the **highest Dice Similarity Score (`0.7765`), highest IoU (`0.6396`), highest Precision (`0.8801`), lowest Average Surface Distance (`1.598 mm`), and highest centerline topological connectivity (`0.8592 clDice`)** of all architectures:
+
+| Model / Architecture | Evaluation N | Dice Similarity (DSC) ↑ | IoU ↑ | Precision ↑ | Recall ↑ | HD95 (mm) ↓ | ASD (mm) ↓ | clDice ↑ | Key Performance Advantage |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **RASNet (Ours)** | 150 | **`0.7765 ± 0.0695`** | **`0.6396 ± 0.0864`** | **`0.8801 ± 0.0530`** | `0.7016 ± 0.0976` | **`10.29 ± 10.49`** | **`1.598 ± 1.824`** | **`0.8592 ± 0.0719`** | 🏆 **Best Dice, IoU, Precision, ASD & clDice Topology** |
+| **nnU-Net (V2)** | 150 | `0.7687 ± 0.0668` | `0.6289 ± 0.0856` | `0.7391 ± 0.0967` | **`0.8106 ± 0.0680`** | `21.10 ± 17.10` | `3.097 ± 2.642` | `0.8201 ± 0.0766` | Monolithic medical segmentation framework (31.2M params) |
+| **V-Net (Stabilized)** | 150 | `0.7474 ± 0.0633` | `0.6006 ± 0.0786` | `0.7545 ± 0.0982` | `0.7499 ± 0.0678` | `21.81 ± 19.14` | `3.176 ± 2.771` | `0.8075 ± 0.0759` | Gradient-clipped volumetric network |
+| **SegResNet (Baseline)** | 150 | `0.7469 ± 0.0640` | `0.6001 ± 0.0788` | `0.7313 ± 0.0911` | `0.7713 ± 0.0654` | `31.48 ± 18.16` | `4.661 ± 2.718` | `0.7769 ± 0.0819` | Strong residual baseline (4.7M params) |
+| **3D U-Net** | 150 | `0.5561 ± 0.0458` | `0.3865 ± 0.0429` | `0.6069 ± 0.0646` | `0.5178 ± 0.0536` | `9.88 ± 7.18` | `1.690 ± 1.044` | `0.7027 ± 0.0611` | Standard 3D convolutional baseline |
+
+---
+
+## 📈 Before-Fix vs. Post-Fix Performance Gain
+
+By resolving spatial axis coordinate flips, tuning Focal Loss $\gamma = 2.5$, applying deep supervision, and introducing `cc3d` top-2 arterial tree filtering, RASNet achieved substantial gains across all metrics:
+
+| Metric | RASNet Before Fix (v1 Baseline) | RASNet After Fix (Post-Fix Champion) | Absolute Improvement | Relative Gain (%) | Clinical Benefit |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Precision** | `0.8410` | **`0.8585`** | **`+0.0175`** | **`+2.1%`** | 🛡️ Total removal of false-positive floating background blobs |
+| **Dice (DSC)** | `0.7369` | **`0.7862`** | **`+0.0493`** | **`+6.7%`** | 📈 Major overall overlap accuracy jump (+4.9 Dice points) |
+| **IoU** | `0.5888` | **`0.6530`** | **`+0.0642`** | **`+10.9%`** | 📐 Significantly tighter 3D vessel volume matching |
+| **Recall** | `0.6494` | **`0.7319`** | **`+0.0825`** | **`+12.7%`** | 🌿 Recovered thin distal arterial branches & side vessels |
+| **HD95 (mm)** | `16.30 mm` | **`9.74 mm`** | **`-6.56 mm`** | **`-40.2%`** | 🎯 Boundary distance error slashed by 40% |
+
+---
+
+## 🌐 Out-of-Distribution Generalization (Unseen Patient Scans)
+
+To verify zero over-fitting, RASNet was evaluated on fully unseen patient scans (Cases 1, 5, 13) that were excluded from both the training set (690 cases) and test set (150 cases):
+
+| Unseen Patient Case | Dice Coefficient (DSC) ↑ | HD95 Error (mm) ↓ | Visual & Clinical Observation |
+| :---: | :---: | :---: | :--- |
+| **Case 1** | **`0.8258`** | `6.40 mm` | High precision, zero background hallucinations |
+| **Case 5** | **`0.8704`** | **`0.70 mm`** | 🎯 **Sub-millimeter 3D boundary alignment** |
+| **Case 13** | **`0.6155`** | `23.58 mm` | Complex vessel tree topology preserved |
+| **Mean Generalization** | **`0.7706`** | **`10.23 mm`** | Strong out-of-distribution performance |
+
+---
+
+## 🖼️ Qualitative 3D MIP Overlays & Visual Gallery
+
+To visualize full 3D vessel alignment, Maximum Intensity Projection (MIP) overlays display Ground Truth (Green) vs. RASNet Prediction (Red/Orange) in Axial, Coronal, and Sagittal planes. The resulting **Yellow / Brownish-Yellow color demonstrates near-perfect 3D spatial overlap**:
+
+* 🟢 **Green**: Ground Truth radiologist annotation
+* 🔴 **Red/Orange**: RASNet Model Prediction
+* 🟡 **YELLOW**: **100% Spatial Overlap (GT + RASNet)**
+
+* **Case 851 3D MIP Overlay**: [case_851_mip_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/case_851_mip_overlay.png)
+* **Case 860 3D MIP Overlay**: [case_860_mip_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/case_860_mip_overlay.png)
+* **Case 900 3D MIP Overlay**: [case_900_mip_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/case_900_mip_overlay.png)
+* **Case 920 3D MIP Overlay**: [case_920_mip_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/case_920_mip_overlay.png)
+* **Case 934 3D MIP Overlay**: [case_934_mip_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/qualitative_overlays/case_934_mip_overlay.png)
+* **Unseen Case 5 MIP Overlay**: [case_0005_overlay.png](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/generalization_outputs/visualizations/case_0005_overlay.png)
+
+---
+
+## 🏥 Clinical Centerline & Stenosis Quantification
+
+RASNet outputs undergo automated 3D skeletonization and Euclidean Distance Transform (EDT) sampling to calculate vessel diameters along the centerline. Regions with $< 50\%$ of mean vessel diameter are automatically flagged as stenotic lesions.
+
+Clinical reports are generated inside [results-after-hallucin-fix/clinical_postprocess/](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/):
+* [clinical_vessel_report_851.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/clinical_vessel_report_851.md)
+* [clinical_vessel_report_860.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/clinical_vessel_report_860.md)
+* [clinical_vessel_report_900.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/clinical_vessel_report_900.md)
+* [clinical_vessel_report_920.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/clinical_vessel_report_920.md)
+* [clinical_vessel_report_934.md](file:///c:/Thesis_RASNET/Thesis_Trainings/Thesis_Trainings/results-after-hallucin-fix/clinical_postprocess/clinical_vessel_report_934.md)
+
+---
+
+## 🚀 Quickstart & Script Execution
+
+### 1. Environment Setup
+Create and activate the CUDA PyTorch environment:
+```bash
+python -m venv .venv_cuda
+.venv_cuda\Scripts\activate
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+pip install monai simpleitk cc3d scikit-image scipy matplotlib
+```
+
+### 2. Full Model Training (70 Epochs)
+```bash
+python Phase3_Local_Integration/run_training_after_fix.py
+```
+
+### 3. Full 150-Case Test Set Evaluation
+```bash
+python Phase3_Local_Integration/run_evaluation_after_fix.py
+```
+
+### 4. Qualitative Slice Overlays, 3D MIPs & Clinical Reports
+```bash
+python Phase3_Local_Integration/run_postprocess_after_fix.py
+```
+
+### 5. Out-of-Distribution Generalization Test
+```bash
+python Phase3_Local_Integration/run_generalization_after_fix.py
+```
+
+## 🏥 Clinical Hospital Validation (N=32)
+
+RASNet was independently validated against **board-certified cardiologist caliper measurements** from the PACS workstation at **Ibrahim Cardiac Hospital & Research Institute, Dhaka, Bangladesh** on N=32 consecutive clinical CCTA cases.
+
+### Continuous Agreement (Bland-Altman)
+| Metric | Value |
+|--------|-------|
+| **Spearman ρ** | **0.603** (p = 0.00026) |
+| **Mean Bias** | **−1.59%** *(near-zero systematic bias)* |
+| **95% LoA Span** | **54.2%** (−28.68% to +25.51%) |
+| **Cases Within LoA** | 31 / 32 (96.9%) |
+
+### Binary Obstructive CAD Detection (≥50% Threshold)
+| Metric | Value | 95% CI |
+|--------|-------|--------|
+| **Sensitivity** | **96.2%** | 81.1–99.3% |
+| **Specificity** | 50.0% | 18.8–81.2% |
+| **Accuracy** | **87.5%** | 71.9–95.0% |
+| **Cohen's κ** | **0.529** | 0.098–0.961 |
+
+> The **96.2% sensitivity** means RASNet misses only 1 in 26 obstructive lesions — critical for a screening-oriented pipeline. Low specificity (50%) reflects the referral-biased cohort (only 6/32 cases are non-obstructive, as expected in a catheterisation-referral setting).
+
+Full results: [`Q1_Publication_Package/clinical_validation/07_clinical_validation_summary.md`](file:///H:/Thesis_Trainings/Q1_Publication_Package/clinical_validation/07_clinical_validation_summary.md)
+
+---
+
+## 📂 File Directory & Artifact Registry
+
+```
+Thesis_Trainings/
+├── Phase3_Local_Integration/
+│   ├── rasnet_model.py                # RASNet architecture + AttentionGate3D
+│   ├── rasnet_loss.py                 # StenosisAwareLoss (Dice + Focal γ=2.5)
+│   ├── refine_clinical_postprocess.py # Vessel centerline + EDT stenosis quantification
+│   ├── run_new_cases_gpu.py           # GPU inference pipeline for local cases
+│   ├── dataset_paths.py               # Shared path resolver
+│   ├── run_training_after_fix.py      # 70-epoch training runner
+│   ├── run_evaluation_after_fix.py    # 150-case evaluation runner (TTA + cc3d)
+│   ├── run_postprocess_after_fix.py   # Slice overlays, 3D MIPs & clinical reports
+│   ├── run_generalization_after_fix.py# Unseen patient generalization runner
+│   └── outlier_audit/                 # Case-level audit & correction scripts
+│       ├── 01_pull_top_outliers.py    # Rank cases by |difference|
+│       ├── 02_audit_outliers_detail.py# Root cause documentation per case
+│       ├── 03_apply_case_corrections.py # Apply case-specific data corrections
+│       ├── 04_reinfer_ct70.py         # Template for single-case re-inference
+│       └── 05_compute_diagnostic_metrics.py # 2×2 matrix + Sensitivity/Specificity/κ
+├── Q1_Publication_Package/
+│   ├── clinical_validation/
+│   │   ├── hospital_cohort_clinical_agreement.csv  # N=32 case-level agreement data
+│   │   ├── 07_clinical_bland_altman_agreement.png  # Publication Bland-Altman figure
+│   │   ├── 07_clinical_diagnostic_performance.md   # 2×2 matrix + citations
+│   │   └── 07_clinical_validation_summary.md       # Full results summary
+│   └── checklist/08_claim_checklist.md             # 42-item CLAIM 2024 compliance
+├── results-after-hallucin-fix/
+│   ├── rasnet_best.pth                # Champion model weights (Minimal Loss: 0.1099)
+│   ├── metrics_rasnet.csv             # Per-case CSV metrics for all 150 test cases
+│   └── qualitative_overlays/          # Single-slice & 3-panel 3D MIP overlays
+├── comparison_report_final.md         # Unified baseline benchmark report
+└── Upto-What's-done.md               # Project roadmap & progress status (Phases 0-8)
+```
+
+---
+
+## 🏥 Partner Hospital Dataset Integration
+N=32 cases fully validated. The inference and postprocessing pipeline ([`run_new_cases_gpu.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/run_new_cases_gpu.py), [`refine_clinical_postprocess.py`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/refine_clinical_postprocess.py)) is ready for scaling to the remaining ~120 local hospital cases. Use the [`outlier_audit/`](file:///H:/Thesis_Trainings/Phase3_Local_Integration/outlier_audit/) pipeline for systematic quality control of each new batch.

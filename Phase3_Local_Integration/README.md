@@ -1,105 +1,20 @@
-# Phase 3 Local Integration: Coronary Artery Segmentation Evaluation
+# Phase 3 Local Integration — Core RASNet Model, Loss & Split Manifest
 
-This directory contains the scripts and configurations to run inference, evaluate outputs, and generate comparison assets for the coronary artery segmentation task on the ImageCAS dataset.
-
----
-
-## 1. Setup and Environment
-
-All scripts are configured to execute in the local virtual environment:
-- **Executable**: `c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe`
-- **Dependencies**: Python libraries including PyTorch (with CUDA 12.4), MONAI, SimpleITK, Matplotlib, Pandas, and NumPy (see [requirements_cuda.txt](../requirements_cuda.txt) for full list).
+> **Archival Notice (`2026-11-10`)**: To keep the active thesis repository strictly focused on the verified 5-model 200-epoch ImageCAS segmentation benchmark, all historical pre-200-epoch evaluation scripts (`00_dataset_audit.py`..`10_plot_comparison_bar.py`), clinical hospital QCA scripts (`production_qca_engine.py`, `refine_clinical_postprocess.py`, `run_hospital_cohort_pipeline.py`, `outlier_audit/`), and legacy scratch files previously located in `Phase3_Local_Integration/` have been archived to `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Phase3_Local_Integration/` (indexed with SHA-256 hashes in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/ARCHIVE_INDEX.csv`).
 
 ---
 
-## 2. Directory Structure
+## Active Files in `Phase3_Local_Integration/`
 
-The files inside `Phase3_Local_Integration/` are organized sequentially:
+1. **`rasnet_model.py`** (`SHA-256: 4f2372ec25081f483d21150129730bdc98f4edfa2714d4493735187a744a305c`):
+   - Defines `AttentionGate3D` (3D additive attention gate with `GroupNorm(1, 1)` before `Sigmoid`) and `RASNet` (subclass of MONAI `SegResNet` with `init_filters=16`, encoder blocks `[1, 2, 2, 4]`, decoder additive skip fusion after `AttentionGate3D`, and multi-scale deep supervision heads `aux2` at Level 2 [`1/4` resolution] and `aux3` at Level 1 [`1/2` resolution]).
+   - Used directly by `Q1_Publication_Package/matched_200ep_benchmark/train_rasnet_200ep.py` and `benchmark/adapters/monai_models.py`.
+2. **`rasnet_loss.py`**:
+   - Defines `StenosisAwareLoss(alpha=0.4, gamma=2.5)`, combining `0.4 * DiceLoss(smooth_nr=0.0, smooth_dr=1e-5, to_onehot_y=True, softmax=True)` and `0.6 * FocalLoss(gamma=2.5, to_onehot_y=True)`.
+3. **`splits_final.json`** (`SHA-256: efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c`):
+   - Canonical ImageCAS split manifest (`train = 690`, `val = 94`, `test = 150` [`IDs 851–1000`]; `0` overlaps).
+4. **`dataset_paths.py`**:
+   - Path resolution helper for local ImageCAS NIfTI volumes.
 
-- **`dataset_paths.py`**: Shared utility containing absolute path mappings for local CT volumes and annotations.
-- **`eval_utils.py`**: Core metrics computation script (Dice coefficient, IoU, Precision, Recall, and Hausdorff Distance 95) using SimpleITK.
-- **`00_dataset_audit.py`**: Validates paths and verifies that all images and ground-truth labels exist.
-- **`01_create_splits.py`**: Generates training, validation, and test splits, saving them to `splits_final.json`.
-- **`03_eval_3dunet.py`**: Performs test-set evaluation for the 3D U-Net model.
-- **`04_run_nnunet_inference.py`**: Triggers batch inference for the nnU-Net baseline.
-- **`05_eval_nnunet.py`**: Evaluates nnU-Net prediction masks against the ground truth.
-- **`06_run_segresnet_inference.py`**: Performs SegResNet sliding window inference on the GPU using MONAI's `Invertd` transform to guarantee physical space coordinate alignment.
-- **`07_eval_segresnet.py`**: Multi-core parallel metric evaluation script for SegResNet test predictions.
-- **`07_local_data_qc.py`**: Audits predictions to verify voxel orientation and bounding boxes.
-- **`08_build_comparison_table.py`**: Compiles metrics from all models into `unified_comparison_table.csv`.
-- **`08_plot_training_curves.py`**: Extracts loss curves and plots training/validation progress.
-- **`09_plot_slice_overlays.py`**: Generates qualitative slice overlay visualizations showing ground-truth vs. predicted contours.
-- **`10_plot_comparison_bar.py`**: Renders a grouped bar chart comparing overlap metrics and 95% Hausdorff Distance.
+For running the verified 5-model benchmark, see [`LAB_RUN_PLAN.md`](../LAB_RUN_PLAN.md) and [`CURRENT_EVIDENCE_INDEX.md`](../CURRENT_EVIDENCE_INDEX.md).
 
----
-
-## 3. Running the Evaluation Pipeline
-
-To execute the entire post-processing and analysis pipeline, run the scripts in sequence:
-
-```bash
-# Step 1: Run SegResNet Inference (requires GPU)
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\06_run_segresnet_inference.py
-
-# Step 2: Evaluate SegResNet metrics (parallel CPU execution)
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\07_eval_segresnet.py
-
-# Step 3: Compile final comparison table
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\08_build_comparison_table.py
-
-# Step 4: Plot training curves
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\08_plot_training_curves.py
-
-# Step 5: Plot qualitative slice overlays
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\09_plot_slice_overlays.py
-
-# Step 6: Plot comparative bar charts
-c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\10_plot_comparison_bar.py
-```
-
----
-
-## 4. Key Outputs
-
-All generated assets are stored in:
-- **Metrics Table**: `c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\all_four_validations\unified_comparison_table.csv`
-- **Visual Artifacts**: `c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\Final_Generated_assets\`
-  - `training_curves.png`
-  - `slice_overlays.png`
-  - `grouped_metrics_barchart.png`
-- **Decision Log**: `c:\Thesis_RASNET\Thesis_Trainings\Thesis_Trainings\main_thesis_decision_log.md`
-
----
-
-## 5. Clinical Validation Pipeline (Phase 8 — N=32 Hospital Cohort)
-
-Scripts for the local hospital CCTA clinical stenosis validation against radiologist PACS measurements:
-
-- **`run_new_cases_gpu.py`**: Runs 4-pass TTA AMP FP16 inference on RTX 3060 Ti for new local CCTA cases (automatic DICOM series selection + NIfTI conversion + GPU segmentation).
-- **`refine_clinical_postprocess.py`**: Extracts 3D vessel centerlines via skeletonization, computes per-branch EDT radii, identifies minimum lumen diameter (MLD), and generates a 2-panel vessel overlay PNG + Bland-Altman agreement figure.
-- **`hospital_cohort_automated_stenosis.csv`**: Raw AI-only stenosis outputs (backup, before radiologist comparison).
-
-### Running a New Local Case
-```bash
-# Run GPU inference on a new case (e.g. CT95)
-H:\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\run_new_cases_gpu.py
-# Then run postprocessing
-H:\Thesis_Trainings\.venv_cuda\Scripts\python.exe Phase3_Local_Integration\refine_clinical_postprocess.py
-```
-
----
-
-## 6. Outlier Audit Pipeline (`outlier_audit/`)
-
-When expanding the clinical cohort (e.g. from N=32 to N=150+), use this ordered pipeline to systematically identify and correct data errors without touching global algorithm parameters:
-
-| Script | Purpose | When to Use |
-|--------|---------|-------------|
-| `01_pull_top_outliers.py` | Sort CSV by `\|difference\|` descending | First step after any new batch run |
-| `02_audit_outliers_detail.py` | Document root cause per outlier case | For each case with `\|diff\|` > 20% |
-| `03_apply_case_corrections.py` | Apply CSV corrections + reconvert DICOM if needed | After root cause is confirmed |
-| `04_reinfer_ct70.py` | Template to re-run single-case GPU inference | When DICOM series was wrong |
-| `05_compute_diagnostic_metrics.py` | 2×2 confusion matrix + Sensitivity/Specificity/κ | After any full cohort correction cycle |
-
-> [!IMPORTANT]
-> **Do NOT modify global algorithm parameters** (percentile cutoffs, diameter thresholds) when fixing outliers. All corrections must be case-specific (target branch string, DICOM series, or local mask repair in 3D Slicer). Changing global parameters risks overfitting the postprocessing logic to the validation set.

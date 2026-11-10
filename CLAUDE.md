@@ -8,3 +8,4 @@
 - Write tests first and show the failing test, then fix.
 - Never commit data or checkpoints. Record checkpoint SHA-256 in CHECKPOINTS.md.
 - Mark what cannot be verified here as LAB-CHECK. Do not push without explicit authorization.
+- **2026-11-10 Lab Verification Note**: On the lab workstation (`C:\Thesis_RASNET`), all LAB-CHECK items have been verified and resolved (see `CURRENT_EVIDENCE_INDEX.md`, `CHECKPOINTS.md`, `INFERENCE_SPEC.md`, and `results/audits/2026-11-10_verification_audit/`). Historical/superseded scripts and outside-scope pipelines have been archived to `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`).

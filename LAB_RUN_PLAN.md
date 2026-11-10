@@ -26,7 +26,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath `
 
 ### Pass / Fail Criteria (Stage 1)
 - **PASS**:
-  - `Python 3.12.9`, `torch 2.14.1+cu126`, `CUDA: True (NVIDIA GeForce RTX 4080 SUPER)`, `monai 1.6.1`, `SimpleITK 2.5.7`, `scipy 1.18.1`, `scikit-image 0.26.0`, `nibabel 5.4.2`, `nnunetv2 2.8.1`.
+  - `Python 3.12.10`, `torch 2.14.1+cu126`, `CUDA: True (NVIDIA GeForce RTX 4080 SUPER)`, `monai 1.6.1`, `SimpleITK 2.5.7`, `scipy 1.18.1`, `scikit-image 0.26.0`, `nibabel 5.4.2`, `nnunetv2 2.8.1`.
   - Disjoint splits verified in `Phase3_Local_Integration/splits_final.json` (`sha256: efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c`): `690 train`, `94 val`, `150 test` (`851–1000`), `0` overlaps.
   - All 1,000 ImageCAS image/label pairs verified on disk with `0` physical geometry (`size`, `origin`, `spacing`, `direction`) mismatches (`atol=1e-4`).
   - All 5 BEST checkpoints verified (`CHECKPOINTS.md`):
@@ -47,7 +47,7 @@ C:\Thesis_RASNET_env\bench\Scripts\python.exe -B -m pytest -v -p no:cacheprovide
 ```
 
 ### Pass / Fail Criteria (Stage 4a)
-- **PASS**: `29 passed` (`0 failed`). Covers brute-force and anisotropic surface distances (`surface-v1`), empty-mask/skeleton status handling, paired Wilcoxon + Holm correction + bootstrap CIs + direction-aware wins/ties/losses, connected-component volume logging, validation-only threshold selection & tie-breaking, real MONAI architectures (`RASNet`, `SegResNet`, `VNet`, `3DUNet`) + explicit `_SyntheticNNUNetPredictor` test double, coordinate inversion, `3D U-Net` `128³` resizing, `V-Net` `%16` padding, and fail-closed checks on non-best checkpoints, split leakage, and stale output directories.
+- **PASS**: `31 passed` (`0 failed`). Covers brute-force `cdist` and anisotropic surface distances (`surface-v1`), asymmetric non-zero-origin/flipped-direction 3D phantom round-trip alignment, empty-mask/skeleton status handling, paired Wilcoxon + Holm correction + paired difference bootstrap 95% CIs (`diff_ci95_lo`, `diff_ci95_hi`) + median/IQR + NaN-exclusion tracking (`allow_nan_filtering`), connected-component volume logging, validation-only threshold selection & tie-breaking, real MONAI architectures (`RASNet`, `SegResNet`, `VNet`, `3DUNet`) + explicit `_SyntheticNNUNetPredictor` test double, coordinate inversion, `3D U-Net` `128³` resizing, `V-Net` `%16` padding, and fail-closed checks on non-best checkpoints, split leakage, and stale output directories.
 
 ---
 
@@ -127,3 +127,25 @@ C:\Thesis_RASNET_env\bench\Scripts\python.exe -m benchmark.run_benchmark `
   - Complete per-case and summary tables written for Arms `A`, `B`, and `C` (`per_case_arm_{A,B,C}.csv`, `summary_arm_{A,B,C}.csv`, `metrics_{model}_arm_{A,B,C}.csv`), plus `diagnostic_rasnet_historical_recipe_tau060_tta_top2.csv`.
   - Pre-declared primary (`paired_stats_primary_arm_{A,B,C}.csv`) and 32-test exploratory (`paired_stats_full32_arm_{A,B,C}.csv`) Wilcoxon signed-rank tables with Holm-Bonferroni correction and rank-biserial effect sizes written.
   - Per-case historical comparison CSVs (`diff_vs_historical_{model}_arm_{A,B,C}.csv`, `diff_vs_historical_rasnet_recipe_tau060_tta_top2.csv`) and `diff_vs_historical_summary.json` generated with pre-declared tolerance `1e-4`.
+
+---
+
+## 6. Stage 4f — Post-Unification Verification Smoke Run (`smoke_verified_v2`) & Audit (`2026-11-10`)
+
+```powershell
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -m benchmark.run_benchmark `
+  --config config.lab.yaml `
+  --split val `
+  --arm A `
+  --models all `
+  --smoke `
+  --export-masks `
+  --run-id smoke_verified_v2
+```
+
+### Expected Outputs & Pass / Fail Criteria (Stage 4f)
+- **Output Directory**: `results/benchmark_runs/smoke_verified_v2/` and `results/audits/2026-11-10_verification_audit/`
+- **PASS**:
+  - `manifest.json` records `source_tree_sha256: 179d8188047ad596e18b7c32fb66ff4c4997c1fc6407eb59e616e4aa58520af1`.
+  - `RASNet`, `SegResNet`, and `V-Net` match `val_full_94` with `0.00e+00` maximum absolute difference across all 8 metrics; `nnU-Net V2` batch iterator matches single-case `infer_nnunet_probability` (`smoke_val_all5`) within `7.75e-06` on Dice (`< 1e-4` tolerance).
+  - Multi-planar 2D slice overlays saved in `results/audits/2026-11-10_verification_audit/smoke_overlays/smoke_case_{14,45,47}_armA_5models_overlay.png`.

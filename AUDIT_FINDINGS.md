@@ -80,3 +80,12 @@ This is a triage ranking based on direct code reach and potential impact, not an
 10. **T1:** incomplete resumption alters weights when training was interrupted.
 
 Before drawing conclusions about actual reported numerical changes, reconstruct each table's exact generating script, arguments, case IDs, checkpoint hash and mask provenance on the lab PC; rerun the relevant corrected measurements against locked references. **NEEDS-LAB-CHECK** applies to all such impact claims.
+
+---
+
+## Resolution & Archival Addendum (`2026-11-10`)
+
+All segmentation benchmark findings (`E1–E4`, `E6`, `D1`, `D3`, `D4`, `T1–T4`, `I1–I5`) have been verified on the lab workstation (`NVIDIA GeForce RTX 4080 SUPER`) and resolved in the active `benchmark/` evaluation package (`31/31` unit and synthetic integration tests passing in `tests/`):
+1. **Metric & Statistical Fixes (`E1–E4`)**: True 6-connected surface-to-surface distances (`surface-v1`) in `benchmark/metrics.py`; explicit empty-prediction status (`prediction_empty` with `hd95=NaN, asd=NaN`) and NaN-exclusion tracking (`allow_nan_filtering`); cryptographic cache & manifest validation in `benchmark/preflight.py`; and strict `case_id`-aligned paired Wilcoxon + Holm-Bonferroni + paired difference bootstrap 95% CIs in `benchmark/stats.py`.
+2. **Symmetric 3-Arm Inference & Validation-Only Thresholds (`I1–I5`, `T4`)**: All 5 models are evaluated on their training-consistent validation transforms without unverified `Orientationd(axcodes="RAS")` in `benchmark/adapters/monai_models.py` and native `nnUNetPredictor` in `benchmark/adapters/nnunet_adapter.py`, across three pre-registered symmetric arms (`Arm A`, `Arm B`, `Arm C`) with validation-only threshold selection (`results/thresholds.json`).
+3. **Archival of Historical & Outside-Scope Scripts (`S1–S6`, `E5`, `D1`, `D2`, `D4`, `I2`)**: All historical evaluation scripts (`evaluate_matched_200ep_models.py`, `evaluate_ablation_suite.py`), Unseen-66 / 3D-CAS scripts, and local hospital QCA scripts (`production_qca_engine.py`, `07_stenosis_agreement.py`) have been moved to `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`). Full issue-by-issue resolution details are recorded in `results/audits/2026-11-10_verification_audit/issues.csv` and `CURRENT_EVIDENCE_INDEX.md`.

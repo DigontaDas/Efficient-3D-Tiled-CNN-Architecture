@@ -24,7 +24,7 @@ def bootstrap_ci(values, seed=42, n_boot=2000, confidence=.95):
     return tuple(float(x) for x in np.quantile(means,[alpha,1-alpha]))
 
 
-def paired_analysis(a,b,metric,tie_tolerance=0.0):
+def paired_analysis(a,b,metric,tie_tolerance=0.0,seed=42,n_boot=2000):
     for df in (a,b):
         if 'case_id' not in df or metric not in df or df['case_id'].isna().any() or df['case_id'].duplicated().any():
             raise ValueError('Missing or duplicate case IDs/metric')
@@ -39,19 +39,79 @@ def paired_analysis(a,b,metric,tie_tolerance=0.0):
         p=float(stats.wilcoxon(d,alternative='two-sided').pvalue)
     else:
         effect=0.0; p=1.0
-    return {'n':len(d), 'mean_difference':float(d.mean()),'p':p,'effect_size_rank_biserial':effect,
-            'wins':int((d>tie_tolerance).sum()),'ties':int((abs(d)<=tie_tolerance).sum()),'losses':int((d < -tie_tolerance).sum())}
+    ci_lo, ci_hi = bootstrap_ci(d, seed=seed, n_boot=n_boot, confidence=0.95)
+    q25 = float(np.quantile(d, 0.25))
+    q75 = float(np.quantile(d, 0.75))
+    return {
+        'n': len(d),
+        'mean_difference': float(d.mean()),
+        'diff_ci95_lo': ci_lo,
+        'diff_ci95_hi': ci_hi,
+        'median_difference': float(np.median(d)),
+        'q25_difference': q25,
+        'q75_difference': q75,
+        'iqr_difference': float(q75 - q25),
+        'p': p,
+        'effect_size_rank_biserial': effect,
+        'wins': int((d > tie_tolerance).sum()),
+        'ties': int((abs(d) <= tie_tolerance).sum()),
+        'losses': int((d < -tie_tolerance).sum()),
+    }
 
 
-def analyze_family(tables, hypotheses):
+def analyze_family(tables, hypotheses, allow_nan_filtering=False):
     if not hypotheses: raise ValueError('Hypothesis family must be declared')
     results=[]
     for h in hypotheses:
-        r=paired_analysis(tables[h['a']],tables[h['b']],h['metric'],h.get('tie_tolerance',0.0))
         direction=h.get('direction','higher')
         if direction not in ('higher','lower'): raise ValueError('Invalid metric direction')
-        if direction == 'lower': r['wins'],r['losses']=r['losses'],r['wins']
+        ta, tb = tables[h['a']], tables[h['b']]
+        metric = h['metric']
+        if allow_nan_filtering:
+            for df in (ta, tb):
+                if 'case_id' not in df or metric not in df or df['case_id'].isna().any() or df['case_id'].duplicated().any():
+                    raise ValueError('Missing or duplicate case IDs/metric')
+            if set(ta.case_id) != set(tb.case_id):
+                raise ValueError('Case ID sets differ')
+            merged = ta[['case_id', metric]].merge(tb[['case_id', metric]], on='case_id', validate='one_to_one', suffixes=('_a', '_b'))
+            finite_ids = set(merged.dropna()['case_id'])
+            ta_f = ta[ta['case_id'].isin(finite_ids)]
+            tb_f = tb[tb['case_id'].isin(finite_ids)]
+            n_excl = int(len(ta) - len(ta_f))
+            if len(ta_f) == 0:
+                r = {
+                    'n': 0,
+                    'mean_difference': np.nan,
+                    'diff_ci95_lo': np.nan,
+                    'diff_ci95_hi': np.nan,
+                    'median_difference': np.nan,
+                    'q25_difference': np.nan,
+                    'q75_difference': np.nan,
+                    'iqr_difference': np.nan,
+                    'p': 1.0,
+                    'effect_size_rank_biserial': np.nan,
+                    'wins': 0,
+                    'ties': 0,
+                    'losses': 0,
+                    'a_mean': np.nan,
+                    'b_mean': np.nan,
+                    'n_excluded_nan': n_excl,
+                }
+            else:
+                r = paired_analysis(ta_f, tb_f, metric, h.get('tie_tolerance', 0.0))
+                if direction == 'lower':
+                    r['wins'], r['losses'] = r['losses'], r['wins']
+                r['a_mean'] = float(ta_f[metric].mean())
+                r['b_mean'] = float(tb_f[metric].mean())
+                r['n_excluded_nan'] = n_excl
+        else:
+            r=paired_analysis(ta,tb,metric,h.get('tie_tolerance',0.0))
+            if direction == 'lower': r['wins'],r['losses']=r['losses'],r['wins']
+            r['a_mean'] = float(ta[metric].mean())
+            r['b_mean'] = float(tb[metric].mean())
+            r['n_excluded_nan'] = 0
         r.update(h); results.append(r)
     for r,p in zip(results,holm_adjust([r['p'] for r in results])): r['holm_p']=p
     return results
+
 

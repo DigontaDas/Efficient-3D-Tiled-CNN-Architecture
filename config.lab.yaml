@@ -24,11 +24,11 @@ nnunet_fold: 0
 nnunet_checkpoint_name: 'checkpoint_best.pth'
 
 historical_csvs:
-  rasnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_rasnet_200ep.csv'
-  segresnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_segresnet_200ep.csv'
-  vnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_v_net_200ep.csv'
-  3dunet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_3d_u_net_200ep.csv'
-  nnunet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_nnu_net_v2_200ep.csv'
+  rasnet: '_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_rasnet_200ep.csv'
+  segresnet: '_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_segresnet_200ep.csv'
+  vnet: '_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_v_net_200ep.csv'
+  3dunet: '_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_3d_u_net_200ep.csv'
+  nnunet: '_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_nnu_net_v2_200ep.csv'
 
 # Primary pre-specified hypothesis family (K=3); Wilcoxon is two-sided with Holm correction.
 hypotheses:

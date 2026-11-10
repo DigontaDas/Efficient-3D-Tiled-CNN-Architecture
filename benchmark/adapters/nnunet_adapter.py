@@ -88,6 +88,8 @@ def infer_nnunet_probability(predictor, image_path: str, tta: bool = False) -> n
     fg_prob = np.asarray(probs[1], dtype=np.float32)
     if fg_prob.shape != arr_zyx.shape:
         raise RuntimeError(f"nnU-Net probability shape {fg_prob.shape} != image shape {arr_zyx.shape}")
+    if not np.all(np.isfinite(fg_prob)):
+        raise RuntimeError(f"Non-finite probability output from nnU-Net on {image_path}")
     return fg_prob
 
 

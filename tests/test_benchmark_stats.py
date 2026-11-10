@@ -22,5 +22,20 @@ def test_lower_is_better_and_declared_family():
     a=frame([1,2,3],[1,2,3]); b=frame([1,2,3],[2,3,3])
     r=analyze_family({'ours':a,'baseline':b},[{'a':'ours','b':'baseline','metric':'dice','direction':'lower'}])[0]
     assert (r['wins'],r['ties'],r['losses'])==(2,1,0)
+    assert 'diff_ci95_lo' in r and 'diff_ci95_hi' in r and 'median_difference' in r
+    assert r['n_excluded_nan'] == 0
     with pytest.raises(ValueError): analyze_family({'ours':a,'baseline':b},[])
+
+
+def test_allow_nan_filtering_tracks_exclusions():
+    from benchmark.stats import analyze_family
+    a = frame([1, 2, 3, 4], [0.8, float('nan'), 0.7, 0.9])
+    b = frame([1, 2, 3, 4], [0.6, 0.5, 0.6, 0.7])
+    with pytest.raises(ValueError):
+        analyze_family({'a': a, 'b': b}, [{'a': 'a', 'b': 'b', 'metric': 'dice', 'direction': 'higher'}], allow_nan_filtering=False)
+    res = analyze_family({'a': a, 'b': b}, [{'a': 'a', 'b': 'b', 'metric': 'dice', 'direction': 'higher'}], allow_nan_filtering=True)[0]
+    assert res['n'] == 3
+    assert res['n_excluded_nan'] == 1
+    assert res['wins'] == 3
+
 

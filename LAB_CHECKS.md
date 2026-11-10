@@ -470,3 +470,9 @@ In `_Archive_Historical_Experiments_and_Logs/legacy_pre_200ep_scripts/train_and_
      ```
    - `Final_Generated_assets/imagecas_pipeline_validation/rasnet_development/metrics_rasnet_v3_10ep.csv` (exact copy of `_Archive_Historical_Experiments_and_Logs/legacy_pre_200ep_scripts/metrics_rasnet_v3_10ep.csv`).
 
+---
+
+## Post-Archival Update (`2026-11-10`)
+- All historical scripts, legacy evaluation CSVs, ablation scripts, Unseen-66 / 3D-CAS folders, `Final_Generated_assets/`, and clinical QCA scripts referenced in Checks 1–7 above were archived with 100% SHA-256 verification into `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (see `ARCHIVE_INDEX.csv`).
+- The active repository now retains only the verified 5-model 200-epoch ImageCAS trainers, model definitions (`Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py`), split manifest (`Phase3_Local_Integration/splits_final.json`), the fail-closed `benchmark/` package, `tests/` (`31/31` passing), and verified run outputs (`results/benchmark_runs/{val_full_94,test_retrospective_150,smoke_val_all5,smoke_verified_v2}`, `results/audits/2026-11-10_verification_audit/`, `results/thesis_outputs/`). See `CURRENT_EVIDENCE_INDEX.md`.
+

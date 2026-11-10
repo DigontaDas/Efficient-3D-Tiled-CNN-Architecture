@@ -1,80 +1,73 @@
-# 🧠 RASNet Thesis Project — Master Context & Agent Briefing
+# 🧠 RASNet Thesis Project — Master Context & Verified Benchmark Briefing
 
 > **Auto-Loaded Project Memory**: Antigravity automatically reads this file upon launching in this workspace.
+> **Canonical Index**: Always consult [`CURRENT_EVIDENCE_INDEX.md`](CURRENT_EVIDENCE_INDEX.md) for the exact file paths and SHA-256 digests of all verified benchmark runs, audit tables, and thesis outputs.
 
 ---
 
 ## 📌 Project Overview
 - **Repository**: `Efficient-3D-Tiled-CNN-Architecture` / `Thesis_RASNET`
-- **Topic**: RASNet (Residual Attention Segmentation Network with Deep Supervision & StenosisAwareLoss) for 3D Coronary Artery CCTA Segmentation.
+- **Topic**: RASNet (Residual Attention Segmentation Network with Multi-Scale Deep Supervision & `StenosisAwareLoss`) — A Symmetric 3-Arm Retrospective Reassessment of 5 Matched 200-Epoch 3D Coronary Artery CCTA Segmentation Models on ImageCAS.
 - **Author**: Nafis Mehedi (`Rytnix786 <nafismehedi37@gmail.com>`)
+- **Methodological Status**: **Retrospective Reassessment** (`BENCHMARK_PREREGISTRATION.md`). Because historical development sweeps ($\tau = 0.60$, $\alpha=0.4, \gamma=2.5$) previously inspected the 150-case ImageCAS test split (`IDs 851–1000`), all evaluations on `851–1000` are reported as retrospective reassessments rather than untouched confirmatory tests.
 
 ---
 
-## 🟢 Current Project Status & Completed Milestones
-1. **Matched 200-Epoch Benchmark Comparisons (N=150 ImageCAS Test Cases)**:
-   - **RASNet (Ours, Champion)**: Dice `0.7765 ± 0.0695`, IoU `0.6396 ± 0.0864`, Precision `0.8801 ± 0.0530`, Recall `0.7016 ± 0.0976`, HD95 `10.29 ± 10.49 mm`, ASD `1.598 ± 1.824 mm`, clDice `0.8592 ± 0.0719`, Centerline Recall `0.8018 ± 0.1022`.
-   - **nnU-Net V2**: Dice `0.7687 ± 0.0668`, IoU `0.6289 ± 0.0856`, Precision `0.7391 ± 0.0967`, Recall `0.8106 ± 0.0680`, HD95 `21.10 ± 17.10 mm`, ASD `3.097 ± 2.642 mm`, clDice `0.8201 ± 0.0766`, Centerline Recall `0.9111 ± 0.0556`.
-   - **V-Net (Gradient-clip stabilized, converged)**: Dice `0.7474 ± 0.0633`, IoU `0.6006 ± 0.0786`, Precision `0.7545 ± 0.0982`, Recall `0.7499 ± 0.0678`, HD95 `21.81 ± 19.14 mm`, ASD `3.176 ± 2.771 mm`, clDice `0.8075 ± 0.0759`, Centerline Recall `0.8571 ± 0.0613`.
-   - **SegResNet**: Dice `0.7469 ± 0.0640`, IoU `0.6001 ± 0.0788`, Precision `0.7313 ± 0.0911`, Recall `0.7713 ± 0.0654`, HD95 `31.48 ± 18.16 mm`, ASD `4.661 ± 2.718 mm`, clDice `0.7769 ± 0.0819`, Centerline Recall `0.8866 ± 0.0579`.
-   - **3D U-Net**: Dice `0.5561 ± 0.0458`, IoU `0.3865 ± 0.0429`, Precision `0.6069 ± 0.0646`, Recall `0.5178 ± 0.0536`, HD95 `9.88 ± 7.18 mm`, ASD `1.690 ± 1.044 mm`, clDice `0.7027 ± 0.0611`, Centerline Recall `0.6534 ± 0.0739`.
-2. **Statistical Rigor**:
-   - Paired two-sided Wilcoxon signed-rank tests across $N=150$ with Holm-Bonferroni correction. RASNet achieves statistically significant superior Precision ($p = 7.36 \times 10^{-25}$), boundary accuracy (HD95 $p = 8.05 \times 10^{-10}$, ASD $p = 1.51 \times 10^{-11}$), and topological connectivity (clDice $p = 6.60 \times 10^{-09}$) over nnU-Net V2, and outperforms SegResNet (+14.9% Precision $p = 7.36 \times 10^{-25}$, +8.2% clDice $p = 8.72 \times 10^{-20}$, HD95 3× lower error $p = 8.72 \times 10^{-20}$), V-Net (+12.6% Precision, +5.2% clDice $p = 4.03 \times 10^{-14}$), and 3D U-Net across key metrics.
-   - Percentile Bootstrap 95% CIs ($B=2000$).
-3. **Q1 Publication Package Ready (`Q1_Publication_Package/`)**:
-   - Step 1: Significance testing (`stats/01_significance_testing.py`)
-   - Step 2: Component ablation study (`ablation/02_ablation_study.py`)
-   - Step 3: Computational efficiency & Pareto plots (`efficiency/03_efficiency_benchmark.py` — 4.71M params, 123.39 GFLOPs, 1.85s latency)
-   - Step 4: Multi-panel distribution plots (`figures/04_distribution_figures.py`)
-   - Step 5: Vector architecture diagram (`figures/05_architecture_diagram.py`)
-   - Step 6: 3D Attention map heatmaps (`figures/06_attention_visualization.py`)
-   - Step 7 ✅ DONE: Clinical stenosis validation — N=32 hospital cohort (see below)
-   - Step 8: CLAIM 2024 checklist (42 items compliant in `checklist/08_claim_checklist.md`)
-   - Step 9: Failure analysis (`figures/failure_analysis.md`)
-4. **Phase 8: Clinical Stenosis Validation — PROVENANCE AUDITED & DUAL-MODE REFINED (N=21 Verified)**:
-   - Cohort: Ibrahim Cardiac Hospital & Research Institute, Dhaka
-   - **Step 0 Provenance Audit**: 21 verified cases (both patient ID and stenosis badge visible); 11 unverified cases permanently quarantined pending the 150-case expansion.
-   - **Step 1 Leakage Audit**: All string-matching cheats and overrides (`is_patent`, `occlusion`) completely eliminated. `test_perfect_balance.py` audited and quarantined to `_archive_legacy_postprocess/`. Single authoritative engine: `Phase3_Local_Integration/production_qca_engine.py`.
-   - **Dual-Mode Clinical Results (N=21 Verified — Modernized Engine)**:
-     - **Selective Notch Sharpening & Area Stenosis Upgrade**:
-       - **Mode A (Targeted Quantification)**: Spearman ρ = **0.5410** (**p = 0.0113, statistically significant p < 0.05**), Pearson R² = **0.2000** (r = 0.447, p = 0.0421), Mean Bias = **−12.14%**, 95% LoA Span = **66.1%** (−45.2% to +20.9%), Zero Proportional Bias (p = 0.9752), **Sensitivity = 78.9%** (15/19), Specificity = 50.0% (1/2), **PPV = 93.8%** (15/16), **Overall Accuracy = 76.2%** (16/21), **Adjacent (±1 Tier) CAD-RADS Accuracy = 95.2%** (20/21), **PABAK = 0.524**, **Area Stenosis Exact Accuracy = 57.1%**.
-     - **Mode B (Autonomous Whole-Tree)**: Sensitivity = **84.2%** (16/19), Specificity = 50.0% (1/2), **PPV = 94.1%** (16/17), **Overall Accuracy = 81.0%** (17/21), Mean Bias = **−3.53%**, LoA Span = **71.3%** (−39.2% to +32.1%), Zero Proportional Bias (p = 0.7491), **Adjacent (±1 Tier) CAD-RADS Accuracy = 95.2%** (20/21), **PABAK = 0.619** (Substantial Agreement).
-   - **Adjudications**: CT4 ground truth formally resolved to **85.0% (CAD-RADS 4, Severe)** under SCCT CAD-RADS 2.0 worst-lesion rule (4.2.png shows proximal LCx 70–99%).
-   - All legacy postprocessing scripts moved to `Phase3_Local_Integration/_archive_legacy_postprocess/` and scratch scripts moved to `_archive_scratch/`.
-   - Primary deliverables: `production_qca_engine.py`, `qca_production_results_targeted.csv`, `qca_production_results_autonomous.csv`, `production_dual_mode_comparison.csv`, and `07_clinical_bland_altman_agreement.png/.svg`.
+## 🟢 Verified 200-Epoch 5-Model ImageCAS Benchmark (`N = 150` Test, `N = 94` Val)
+
+All five models were trained for 200 epochs on the identical `N = 690` ImageCAS training split (`Phase3_Local_Integration/splits_final.json`, `sha256: efe3f06cfe...`) and evaluated on the `N = 94` validation split (`results/benchmark_runs/val_full_94/`) and `N = 150` test split (`results/benchmark_runs/test_retrospective_150/`) using true 6-connected physical surface distances (`surface-v1`) and native SimpleITK `(Z, Y, X)` coordinate inversion (`INFERENCE_SPEC.md`).
+
+### 1. Arm A — Raw Single Pass ($\tau = 0.50$, No TTA, No Post-Processing; `N = 150`)
+*Measures intrinsic network calibration and raw segmentation quality without heuristic cleanup:*
+- **RASNet (Ours, 4.71M params)**: **Dice `0.7736 ± 0.0616`**, **IoU `0.6348 ± 0.0787`**, **Precision `0.8032 ± 0.0830`**, Recall `0.7521 ± 0.0718`, HD95 `14.83 ± 13.89 mm`, ASD `2.431 ± 1.916 mm`, **clDice `0.8389 ± 0.0686`**, Centerline Recall `0.8655 ± 0.0648`.
+- **nnU-Net V2 (30.79M params)**: Dice `0.7687 ± 0.0668`, IoU `0.6289 ± 0.0856`, Precision `0.7391 ± 0.0967`, **Recall `0.8106 ± 0.0680`**, HD95 `21.10 ± 17.10 mm`, ASD `3.168 ± 2.636 mm`, clDice `0.8202 ± 0.0765`, **Centerline Recall `0.9111 ± 0.0556`**.
+- **V-Net (45.60M params)**: Dice `0.7492 ± 0.0693`, IoU `0.6037 ± 0.0856`, Precision `0.7524 ± 0.1037`, Recall `0.7555 ± 0.0694`, HD95 `22.10 ± 18.62 mm`, ASD `3.335 ± 2.762 mm`, clDice `0.8164 ± 0.0780`, Centerline Recall `0.8561 ± 0.0627`.
+- **SegResNet (4.70M params)**: Dice `0.7481 ± 0.0654`, IoU `0.6018 ± 0.0809`, Precision `0.7253 ± 0.0945`, Recall `0.7811 ± 0.0640`, HD95 `30.41 ± 18.11 mm`, ASD `4.571 ± 2.685 mm`, clDice `0.7941 ± 0.0790`, Centerline Recall `0.8950 ± 0.0561`.
+- **3D U-Net (4.81M params)**: Dice `0.5517 ± 0.0480`, IoU `0.3824 ± 0.0449`, Precision `0.7269 ± 0.0722`, Recall `0.4484 ± 0.0526`, **HD95 `10.88 ± 7.25 mm`**, **ASD `1.999 ± 1.036 mm`**, clDice `0.7103 ± 0.0652`, Centerline Recall `0.6311 ± 0.0821`.
+
+### 2. Arm B — Documented Native / Standard TTA ($\tau = 0.50$, No Post-Processing; `N = 150`)
+*`RASNet` uses documented 4-pass spatial flip TTA; `nnU-Net V2` uses native 8-pass 3D mirroring; `SegResNet`, `V-Net`, and `3D U-Net` have no documented TTA (`1-pass`):*
+- **RASNet (4-pass TTA)**: **Dice `0.7807 ± 0.0606`**, **IoU `0.6442 ± 0.0783`**, **Precision `0.8138 ± 0.0813`**, Recall `0.7563 ± 0.0724`, HD95 `13.69 ± 13.88 mm`, ASD `2.270 ± 1.863 mm`, **clDice `0.8453 ± 0.0677`**, Centerline Recall `0.8715 ± 0.0644`.
+- **nnU-Net V2 (8-pass Mirroring)**: Dice `0.7760 ± 0.0641`, IoU `0.6384 ± 0.0833`, Precision `0.7536 ± 0.0936`, **Recall `0.8090 ± 0.0681`**, HD95 `19.25 ± 16.93 mm`, ASD `2.914 ± 2.487 mm`, clDice `0.8264 ± 0.0750`, **Centerline Recall `0.9096 ± 0.0562`**.
+
+### 3. Arm C — Validation-Tuned Thresholds ($\tau^*$) + Identical Top-2 CC Pruning (`N = 150`)
+*Single pass, validation-selected threshold $\tau^* \in [0.30..0.70]$ (`results/thresholds.json`: `0.30` for RASNet/V-Net/3D U-Net, `0.35` for nnU-Net/SegResNet), and identical 26-connected top-2 connected-component pruning across all 5 models:*
+- **nnU-Net V2 ($\tau^*=0.35$, Top-2 CC)**: **Dice `0.8055 ± 0.0633`**, **IoU `0.6786 ± 0.0821`**, Precision `0.8207 ± 0.0676`, **Recall `0.7977 ± 0.0913`**, **HD95 `8.26 ± 9.81 mm`**, **ASD `1.395 ± 1.862 mm`**, **clDice `0.8739 ± 0.0679`**, **Centerline Recall `0.8752 ± 0.0908`**.
+- **RASNet (Ours, $\tau^*=0.30$, Top-2 CC)**: Dice `0.7899 ± 0.0677`, IoU `0.6575 ± 0.0859`, **Precision `0.8252 ± 0.0650`**, Recall `0.7649 ± 0.0982`, HD95 `9.94 ± 11.25 mm`, ASD `1.671 ± 2.382 mm`, clDice `0.8646 ± 0.0759`, Centerline Recall `0.8256 ± 0.1049`.
+- **SegResNet ($\tau^*=0.35$, Top-2 CC)**: Dice `0.7884 ± 0.0700`, IoU `0.6556 ± 0.0868`, Precision `0.8095 ± 0.0750`, Recall `0.7751 ± 0.0949`, HD95 `9.84 ± 11.35 mm`, ASD `1.717 ± 2.688 mm`, clDice `0.8664 ± 0.0776`, Centerline Recall `0.8463 ± 0.0994`.
+- **V-Net ($\tau^*=0.30$, Top-2 CC)**: Dice `0.7710 ± 0.0736`, IoU `0.6328 ± 0.0914`, Precision `0.8054 ± 0.0765`, Recall `0.7488 ± 0.1048`, HD95 `12.38 ± 13.20 mm`, ASD `2.032 ± 2.490 mm`, clDice `0.8508 ± 0.0795`, Centerline Recall `0.8009 ± 0.1050`.
+- **3D U-Net ($\tau^*=0.30$, Top-2 CC)**: Dice `0.6064 ± 0.0532`, IoU `0.4371 ± 0.0532`, Precision `0.5877 ± 0.0615`, Recall `0.6336 ± 0.0752`, HD95 `11.85 ± 8.74 mm`, ASD `2.158 ± 1.442 mm`, clDice `0.7664 ± 0.0705`, Centerline Recall `0.7206 ± 0.0947`.
+
+*(Historical Asymmetric Recipe Diagnostic — `RASNet` with 4-pass TTA, $\tau=0.60$, Top-2 CC (`diagnostic_rasnet_historical_recipe_tau060_tta_top2.csv`): Dice `0.7769 ± 0.0694`, Precision `0.8805 ± 0.0528`, Recall `0.7019 ± 0.0977`, HD95 `10.30 ± 10.67 mm`, ASD `1.564 ± 1.812 mm`, clDice `0.8594 ± 0.0720`.)*
+
+### 4. Paired Statistical Testing (`K = 3` Primary Family & `K = 32` Secondary Family)
+- **Arm A (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
+  - `Precision`: $\Delta = +0.0642$ (95% CI $[+0.0565, +0.0728]$), $p = 6.42 \times 10^{-25}$, $p_{\text{Holm}} = 1.93 \times 10^{-24}$ (`139W / 0T / 11L`, $r_{rb} = +0.970$).
+  - `HD95`: $\Delta = -6.27\text{ mm}$ (95% CI $[-8.43, -4.38]$), $p = 1.98 \times 10^{-9}$, $p_{\text{Holm}} = 3.96 \times 10^{-9}$ (`107W / 0T / 43L`, $r_{rb} = -0.565$).
+  - `ASD`: $\Delta = -0.737\text{ mm}$ (95% CI $[-0.995, -0.503]$), $p = 2.37 \times 10^{-8}$, $p_{\text{Holm}} = 2.37 \times 10^{-8}$ (`107W / 0T / 43L`, $r_{rb} = -0.525$).
+- **Arm B (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
+  - `Precision`: $\Delta = +0.0602$ (95% CI $[+0.0527, +0.0680]$), $p_{\text{Holm}} = 5.39 \times 10^{-24}$ (`141W / 0T / 9L`).
+  - `HD95`: $\Delta = -5.56\text{ mm}$ (95% CI $[-7.67, -3.63]$), $p_{\text{Holm}} = 4.34 \times 10^{-8}$ (`103W / 0T / 47L`).
+  - `ASD`: $\Delta = -0.644\text{ mm}$ (95% CI $[-0.885, -0.422]$), $p_{\text{Holm}} = 4.17 \times 10^{-7}$ (`98W / 0T / 52L`).
+- **Arm C (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
+  - `Precision`: $\Delta = +0.0046$ (95% CI $[-0.0046, +0.0124]$), $p_{\text{Holm}} = 0.160$ (`84W / 0T / 66L`, no significant difference; `RASNet` numerically higher).
+  - `HD95`: $\Delta = +1.68\text{ mm}$ (95% CI $[+0.50, +3.08]$), $p_{\text{Holm}} = 4.20 \times 10^{-4}$ (`55W / 1T / 94L` in favor of `nnU-Net V2`).
+  - `ASD`: $\Delta = +0.277\text{ mm}$ (95% CI $[-0.058, +0.713]$), $p_{\text{Holm}} = 1.54 \times 10^{-4}$ (`51W / 0T / 99L` in favor of `nnU-Net V2`).
+- **Arm C (`RASNet` vs. `SegResNet` Backbone, $N=150$, $K=32$ Secondary Family)**:
+  - `Precision`: $\Delta = +0.0158$ (95% CI $[+0.0109, +0.0209]$), $p = 3.22 \times 10^{-9}$, $p_{\text{Holm}} = 4.50 \times 10^{-8}$ (`107W / 0T / 43L`).
+  - `Dice`: $\Delta = +0.0016$ (95% CI $[-0.0020, +0.0053]$), $p = 0.0887$ (`88W / 0T / 62L`).
 
 ---
 
-## 🎯 Current Focus & Immediate Next Steps
-
-### 1. Decision Point: Scale to 120+ Cases?
-- The N=32 audit is frozen and audited. The pipeline is validated and trustworthy.
-- **Condition for scaling**: The current LoA span (54.2%) is clinically defensible vs. literature inter-reader variability (ACCURACY trial: ±6–8% 1SD → ~32% LoA span from experts).
-- **Option A** (Recommended): Scale to the remaining ~120 cases from the local hospital cohort to strengthen the clinical evidence base. Follow the workflow in Phase 8.
-- **Option B**: Proceed to paper writing with N=32 as a pilot validation cohort.
-
-### 2. Paper Writing (When Ready)
-- All sections have source data except the Discussion/Limitations draft.
-- The 2×2 confusion matrix, LoA span, and literature citations are in `07_clinical_diagnostic_performance.md`.
-- Inter-reader variability citation: *Budoff et al. (ACCURACY trial, JACC 2008)* — inter-observer κ=0.79, ±6–8% %DS variance.
-
-### 3. The 3D Volume & Local Hospital Annotation Workflow (For Scaling)
-- Radiologists do not manually paint 3D voxels from scratch (takes 4h/scan).
-- **Workflow**:
-  1. Convert DICOM to NIfTI: `Phase3_Local_Integration/dicom_to_nifti.py`.
-  2. Run pre-trained `rasnet_best.pth` to generate a high-quality draft 3D segmentation mask (`pred_mask.nii.gz`).
-  3. Open `image.nii.gz` and `pred_mask.nii.gz` in 3D Slicer (Preset: `CT-Cardiac`, Window: 700, Level: 250).
-  4. Use 3D Slicer **Segment Editor** to inspect and touch up the stenosis site identified in the radiologist's screenshot (~10 mins).
-  5. Save as `label.nii.gz` and run `07_local_data_qc.py` → `finetune_segresnet.py`.
-
----
-
-## 📂 Key File Locations
-- Champion Checkpoint (200-Epoch Matched): `Thesis_Trainings/Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth`
-- Archived Historical Checkpoints: `Thesis_Trainings/_Archive_Historical_Experiments_and_Logs/archived_rasnet_checkpoints/`
-- Full Progress Document: `Thesis_Trainings/Upto-What's-done.md`
-- Q1 Publication Artifacts: `Q1_Publication_Package/`
-- Local Data QC & Fine-Tuning: `Thesis_Trainings/Phase3_Local_Integration/`
-- Clinical Validation Results: `Q1_Publication_Package/clinical_validation/`
-- Outlier Audit Scripts: `Phase3_Local_Integration/outlier_audit/`
-- CCTA Labeled Screenshots: `H:\Thesis_CT_scans_Labeled\CT{id}\`
+## 📂 Key Active File Locations
+- **Canonical Evidence Index**: `CURRENT_EVIDENCE_INDEX.md`
+- **Verified Benchmark Package**: `benchmark/` (`run_benchmark.py`, `metrics.py`, `postprocess.py`, `stats.py`, `thresholds.py`, `adapters/`)
+- **Unit & Synthetic Dry-Run Tests (`31/31` passing)**: `tests/`
+- **Core RASNet Architecture & Loss**: `Phase3_Local_Integration/rasnet_model.py`, `Phase3_Local_Integration/rasnet_loss.py`
+- **Canonical Split Manifest**: `Phase3_Local_Integration/splits_final.json` (`690 train`, `94 val`, `150 test`)
+- **200-Epoch Trainers & Verified Checkpoints**: `Q1_Publication_Package/matched_200ep_benchmark/` (`CHECKPOINTS.md`)
+- **Verified Benchmark Runs**: `results/benchmark_runs/{val_full_94,test_retrospective_150,smoke_val_all5,smoke_verified_v2}/`
+- **Frozen Validation Thresholds**: `results/thresholds.json`
+- **2026-11-10 Verification Audit**: `results/audits/2026-11-10_verification_audit/`
+- **Thesis Tables, Figures & Narrative**: `results/thesis_outputs/`
+- **Archived Historical & Outside-Scope Assets**: `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`)

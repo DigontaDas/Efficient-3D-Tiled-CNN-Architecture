@@ -19,6 +19,7 @@ from benchmark.adapters.monai_models import (
     build_model,
     build_random_model,
     build_transform,
+    infer_monai_both_passes as _infer_monai_both_passes,
     infer_probability,
     model_constructor_args,
     transform_recipe,
@@ -81,7 +82,19 @@ def sha256_file(path: str | Path) -> str:
     return h.hexdigest()
 
 
+def source_tree_sha256(repo_root: Path) -> str:
+    h = hashlib.sha256()
+    bench_dir = repo_root / "benchmark"
+    if bench_dir.is_dir():
+        for p in sorted(bench_dir.rglob("*.py")):
+            rel = p.relative_to(repo_root).as_posix()
+            h.update(rel.encode("utf-8") + b"\0")
+            h.update(p.read_bytes() + b"\0")
+    return h.hexdigest()
+
+
 def git_info(repo_root: Path) -> dict:
+    src_sha = source_tree_sha256(repo_root)
     try:
         commit = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=str(repo_root), text=True
@@ -92,9 +105,19 @@ def git_info(repo_root: Path) -> dict:
         status = subprocess.check_output(
             ["git", "status", "--porcelain"], cwd=str(repo_root), text=True
         ).strip()
-        return {"commit": commit, "branch": branch, "dirty": bool(status)}
+        return {
+            "commit": commit,
+            "branch": branch,
+            "dirty": bool(status),
+            "source_tree_sha256": src_sha,
+        }
     except Exception:
-        return {"commit": "unknown", "branch": "unknown", "dirty": True}
+        return {
+            "commit": "unknown",
+            "branch": "unknown",
+            "dirty": True,
+            "source_tree_sha256": src_sha,
+        }
 
 
 def package_versions() -> dict:
@@ -124,95 +147,6 @@ def package_versions() -> dict:
         "pandas": pd.__version__,
         "cc3d": getattr(cc3d, "__version__", "installed"),
     }
-
-
-def _infer_monai_both_passes(
-    name: str,
-    net,
-    image_path: str,
-    device: str,
-    roi_size: tuple[int, int, int] = (96, 96, 96),
-    sw_batch_size: int = 8,
-    need_tta: bool = False,
-    transform=None,
-    batch: dict | None = None,
-) -> tuple[np.ndarray, np.ndarray | None]:
-    """
-    Run MONAI preprocessing once and return (prob_1pass_zyx, prob_tta_zyx or None).
-    Guarantees 1-pass and 4-pass TTA share the exact same loaded/preprocessed tensor.
-    """
-    from monai.inferers import sliding_window_inference
-    from monai.transforms import Invertd
-
-    if hasattr(net, "eval"):
-        net.eval()
-    if name == "vnet":
-        roi_size = tuple(((int(r) + 15) // 16) * 16 for r in roi_size)
-
-    if transform is None:
-        transform = build_transform(name)
-    if batch is None:
-        batch = transform({"image": str(image_path)})
-    x = batch["image"].unsqueeze(0).to(device)
-
-    use_amp = str(device).startswith("cuda")
-
-    def predict(tensor):
-        with torch.amp.autocast("cuda", enabled=use_amp):
-            out = (
-                net(tensor)
-                if name == "3dunet"
-                else sliding_window_inference(
-                    tensor, roi_size, sw_batch_size, net, overlap=0.25
-                )
-            )
-            if isinstance(out, (list, tuple)):
-                out = out[0]
-            probs = (
-                torch.sigmoid(out)
-                if name == "3dunet"
-                else torch.softmax(out.float(), dim=1)[:, 1:2]
-            )
-        return probs.float()
-
-    with torch.no_grad():
-        p_raw = predict(x)
-        p_tta = None
-        if need_tta:
-            acc = p_raw.clone()
-            for axis in (2, 3, 4):
-                acc += torch.flip(predict(torch.flip(x, (axis,))), (axis,))
-            p_tta = acc / 4.0
-
-    batch_raw = dict(batch)
-    batch_raw["pred"] = p_raw.squeeze(0)
-    inv_raw = Invertd(
-        keys=["pred"],
-        transform=transform,
-        orig_keys=["image"],
-        nearest_interp=False,
-        to_tensor=True,
-    )(batch_raw)["pred"]
-    prob_1pass = np.transpose(
-        inv_raw.squeeze(0).detach().cpu().numpy(), (2, 1, 0)
-    ).astype(np.float32, copy=False)
-
-    prob_tta_zyx = None
-    if p_tta is not None:
-        batch_tta = dict(batch)
-        batch_tta["pred"] = p_tta.squeeze(0)
-        inv_tta = Invertd(
-            keys=["pred"],
-            transform=transform,
-            orig_keys=["image"],
-            nearest_interp=False,
-            to_tensor=True,
-        )(batch_tta)["pred"]
-        prob_tta_zyx = np.transpose(
-            inv_tta.squeeze(0).detach().cpu().numpy(), (2, 1, 0)
-        ).astype(np.float32, copy=False)
-
-    return prob_1pass, prob_tta_zyx
 
 
 def _evaluate_binary_mask(
@@ -292,51 +226,11 @@ def compute_arm_statistics(df: pd.DataFrame, primary_hypotheses: list[dict]) -> 
     if "rasnet" not in tables:
         return pd.DataFrame(), pd.DataFrame()
 
-    # For boundary/skeleton metrics that can be NaN if a prediction is empty,
-    # filter paired comparisons to cases finite in both or handle cleanly
     def safe_analyze(hyps: list[dict]) -> pd.DataFrame:
         valid_hyps = [h for h in hyps if h["a"] in tables and h["b"] in tables]
         if not valid_hyps:
             return pd.DataFrame()
-        # Filter per-pair finite rows if needed
-        filtered_tables = {}
-        records = []
-        from benchmark.stats import holm_adjust, paired_analysis
-
-        for h in valid_hyps:
-            ta = tables[h["a"]]
-            tb = tables[h["b"]]
-            metric = h["metric"]
-            merged = ta[["case_id", metric]].merge(tb[["case_id", metric]], on="case_id", suffixes=("_a", "_b"))
-            finite_ids = set(merged.dropna()["case_id"])
-            ta_f = ta[ta["case_id"].isin(finite_ids)]
-            tb_f = tb[tb["case_id"].isin(finite_ids)]
-            if len(ta_f) == 0:
-                r = {
-                    "n": 0,
-                    "mean_difference": np.nan,
-                    "p": 1.0,
-                    "effect_size_rank_biserial": np.nan,
-                    "wins": 0,
-                    "ties": 0,
-                    "losses": 0,
-                    "a_mean": np.nan,
-                    "b_mean": np.nan,
-                    "n_excluded_nan": int(len(ta)),
-                }
-            else:
-                r = paired_analysis(ta_f, tb_f, metric, h.get("tie_tolerance", 0.0))
-                direction = h.get("direction", "higher")
-                if direction == "lower":
-                    r["wins"], r["losses"] = r["losses"], r["wins"]
-                r["a_mean"] = float(ta_f[metric].mean())
-                r["b_mean"] = float(tb_f[metric].mean())
-                r["n_excluded_nan"] = int(len(ta) - len(ta_f))
-            r.update(h)
-            records.append(r)
-        for r, p_adj in zip(records, holm_adjust([x["p"] for x in records])):
-            r["holm_p"] = p_adj
-        return pd.DataFrame(records)
+        return pd.DataFrame(analyze_family(tables, valid_hyps, allow_nan_filtering=True))
 
     primary_df = safe_analyze(primary_hypotheses)
     full_hyps = [
@@ -385,7 +279,7 @@ def _run_nnunet_batch_probabilities(
     Yield (cid, prob_1pass_zyx, prob_tta_zyx_or_None) for each case_id using native
     nnUNet preprocessing_iterator_fromfiles and convert_predicted_logits_to_segmentation_with_correct_shape.
     """
-    if len(case_ids) <= 3 or isinstance(predictor, _SyntheticNNUNetPredictor):
+    if isinstance(predictor, _SyntheticNNUNetPredictor):
         for cid in case_ids:
             img_p, _ = pairs[cid]
             prob_1 = infer_nnunet_probability(predictor, str(img_p), tta=False)
@@ -399,10 +293,11 @@ def _run_nnunet_batch_probabilities(
     )
 
     list_of_lists = [[str(pairs[cid][0])] for cid in case_ids]
+    expected_tokens = [str(int(cid)) for cid in case_ids]
     iterator = preprocessing_iterator_fromfiles(
         list_of_lists=list_of_lists,
         list_of_segs_from_prev_stage_files=None,
-        output_filenames_truncated=None,
+        output_filenames_truncated=expected_tokens,
         plans_manager=predictor.plans_manager,
         dataset_json=predictor.dataset_json,
         configuration_manager=predictor.configuration_manager,
@@ -411,7 +306,13 @@ def _run_nnunet_batch_probabilities(
         verbose=False,
     )
 
+    yielded_count = 0
     for cid, dct in zip(case_ids, iterator):
+        ofile = dct.get("ofile")
+        if ofile is None or int(ofile) != int(cid):
+            raise RuntimeError(
+                f"nnU-Net iterator case identity mismatch: expected case_id={cid}, got ofile={ofile}"
+            )
         data_tensor = dct["data"]
         props = dct["data_properties"]
 
@@ -427,6 +328,8 @@ def _run_nnunet_batch_probabilities(
             num_threads_torch=8,
         )
         prob_1pass = np.asarray(probs_1[1], dtype=np.float32)
+        if not np.all(np.isfinite(prob_1pass)):
+            raise RuntimeError(f"Non-finite nnU-Net 1-pass probability on case {cid}")
 
         prob_tta = None
         if need_tta:
@@ -442,8 +345,16 @@ def _run_nnunet_batch_probabilities(
                 num_threads_torch=8,
             )
             prob_tta = np.asarray(probs_tta[1], dtype=np.float32)
+            if not np.all(np.isfinite(prob_tta)):
+                raise RuntimeError(f"Non-finite nnU-Net TTA probability on case {cid}")
 
+        yielded_count += 1
         yield cid, prob_1pass, prob_tta
+
+    if yielded_count != len(case_ids):
+        raise RuntimeError(
+            f"nnU-Net iterator yielded {yielded_count} cases, expected {len(case_ids)}"
+        )
 
 
 def _evaluate_case_all_arms(

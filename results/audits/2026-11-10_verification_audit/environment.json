@@ -1,0 +1,23 @@
+{
+  "python_executable": "C:\\Thesis_RASNET_env\\bench\\Scripts\\python.exe",
+  "git_at_audit": {
+    "commit": "d81485d50043c543563129a8eec6598d22dd0f60",
+    "branch": "main",
+    "dirty": true,
+    "source_tree_sha256": "179d8188047ad596e18b7c32fb66ff4c4997c1fc6407eb59e616e4aa58520af1"
+  },
+  "package_versions": {
+    "torch": "2.14.1+cu126",
+    "cuda_available": true,
+    "gpu_name": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "SimpleITK": "2.5.7",
+    "nibabel": "5.4.2",
+    "scikit_image": "0.26.0",
+    "scipy": "1.18.1",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "cc3d": "installed"
+  }
+}
