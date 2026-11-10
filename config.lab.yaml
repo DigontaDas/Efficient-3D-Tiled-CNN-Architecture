@@ -1,0 +1,37 @@
+dataset_root: 'C:\Thesis_RASNET\secondary-imagcas-dataset'
+split_file: 'Phase3_Local_Integration/splits_final.json'
+output_root: 'results/benchmark_runs'
+cache_dir: 'results/prob_cache'
+thresholds_file: 'results/thresholds.json'
+seed: 42
+sw_batch_size: 8
+historical_tolerance: 0.0001
+
+threshold_grid: [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+postprocess:
+  keep_top_k: 2
+  connectivity: 26
+
+checkpoints:
+  rasnet: 'Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth'
+  segresnet: 'Q1_Publication_Package/matched_200ep_benchmark/checkpoints/segresnet_best.pt'
+  vnet: 'Q1_Publication_Package/matched_200ep_benchmark/checkpoints/vnet_best.pt'
+  3dunet: 'Q1_Publication_Package/matched_200ep_benchmark/checkpoints/3dunet_best.pth'
+  nnunet: 'Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/fold_0/checkpoint_best.pth'
+
+nnunet_model_folder: 'Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres'
+nnunet_fold: 0
+nnunet_checkpoint_name: 'checkpoint_best.pth'
+
+historical_csvs:
+  rasnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_rasnet_200ep.csv'
+  segresnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_segresnet_200ep.csv'
+  vnet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_v_net_200ep.csv'
+  3dunet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_3d_u_net_200ep.csv'
+  nnunet: 'Q1_Publication_Package/matched_200ep_benchmark/evaluation_results/metrics_nnu_net_v2_200ep.csv'
+
+# Primary pre-specified hypothesis family (K=3); Wilcoxon is two-sided with Holm correction.
+hypotheses:
+  - {a: rasnet, b: nnunet, metric: precision, direction: higher}
+  - {a: rasnet, b: nnunet, metric: hd95, direction: lower}
+  - {a: rasnet, b: nnunet, metric: asd, direction: lower}

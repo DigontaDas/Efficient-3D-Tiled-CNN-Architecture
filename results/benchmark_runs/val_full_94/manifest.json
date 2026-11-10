@@ -1,0 +1,297 @@
+{
+  "arms": [
+    "A"
+  ],
+  "case_count": 94,
+  "case_ids": [
+    14,
+    45,
+    47,
+    51,
+    53,
+    69,
+    71,
+    111,
+    113,
+    121,
+    122,
+    132,
+    139,
+    140,
+    148,
+    152,
+    153,
+    172,
+    193,
+    209,
+    226,
+    230,
+    233,
+    234,
+    242,
+    263,
+    270,
+    281,
+    287,
+    290,
+    292,
+    295,
+    300,
+    305,
+    317,
+    337,
+    340,
+    348,
+    351,
+    363,
+    367,
+    411,
+    415,
+    419,
+    430,
+    434,
+    437,
+    440,
+    446,
+    454,
+    456,
+    496,
+    499,
+    526,
+    531,
+    537,
+    540,
+    584,
+    613,
+    616,
+    625,
+    632,
+    641,
+    658,
+    670,
+    671,
+    683,
+    685,
+    690,
+    700,
+    710,
+    717,
+    721,
+    730,
+    732,
+    744,
+    753,
+    759,
+    766,
+    774,
+    781,
+    785,
+    800,
+    804,
+    810,
+    816,
+    821,
+    825,
+    826,
+    830,
+    835,
+    838,
+    841,
+    845
+  ],
+  "checkpoints": {
+    "3dunet": {
+      "constructor_args": {
+        "channels": [
+          16,
+          32,
+          64,
+          128,
+          256
+        ],
+        "dropout": 0.15,
+        "in_channels": 1,
+        "norm": "instance",
+        "num_res_units": 2,
+        "out_channels": 1,
+        "spatial_dims": 3,
+        "strides": [
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\3dunet_best.pth",
+      "sha256": "d8a8f5ec95b5f34e2afe0b807ac49bb36d136f9d864238c27a763a29a800a60f",
+      "transform_recipe": [
+        "LoadImaged",
+        "EnsureChannelFirstd",
+        "ScaleIntensityRanged",
+        "Resized",
+        "EnsureTyped"
+      ]
+    },
+    "nnunet": {
+      "constructor_args": {
+        "checkpoint_name": "checkpoint_best.pth",
+        "dataset_sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+        "fold": 0,
+        "model_folder": "Q1_Publication_Package\\matched_200ep_benchmark\\nnUNet_results\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres",
+        "plans_sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8"
+      },
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\nnUNet_results\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\fold_0\\checkpoint_best.pth",
+      "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711",
+      "transform_recipe": [
+        "nnUNetPredictor_3d_fullres"
+      ]
+    },
+    "rasnet": {
+      "constructor_args": {
+        "dropout_prob": 0.1,
+        "in_channels": 1,
+        "init_filters": 16,
+        "out_channels": 2,
+        "spatial_dims": 3
+      },
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\rasnet_best.pth",
+      "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8",
+      "transform_recipe": [
+        "LoadImaged",
+        "EnsureChannelFirstd",
+        "CropForegroundd",
+        "Spacingd",
+        "ScaleIntensityRanged",
+        "EnsureTyped"
+      ]
+    },
+    "segresnet": {
+      "constructor_args": {
+        "dropout_prob": 0.1,
+        "in_channels": 1,
+        "init_filters": 16,
+        "out_channels": 2,
+        "spatial_dims": 3
+      },
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\segresnet_best.pt",
+      "sha256": "b8ea61d95106a0bbe15e1ce9f9e5af1a38d9508e59d0639d32bc883d93c6e109",
+      "transform_recipe": [
+        "LoadImaged",
+        "EnsureChannelFirstd",
+        "CropForegroundd",
+        "Spacingd",
+        "ScaleIntensityRanged",
+        "EnsureTyped"
+      ]
+    },
+    "vnet": {
+      "constructor_args": {
+        "act": "elu",
+        "bias": true,
+        "dropout_prob_down": 0.1,
+        "dropout_prob_up": [
+          0.1,
+          0.1
+        ],
+        "in_channels": 1,
+        "out_channels": 2,
+        "spatial_dims": 3
+      },
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\vnet_best.pt",
+      "sha256": "a89d71bd41c3e773c68e3f4b5e27c5a067f959154aa049eead76f1642c5c1063",
+      "transform_recipe": [
+        "LoadImaged",
+        "EnsureChannelFirstd",
+        "CropForegroundd",
+        "Spacingd",
+        "ScaleIntensityRanged",
+        "EnsureTyped"
+      ]
+    }
+  },
+  "device": "cuda",
+  "git": {
+    "branch": "main",
+    "commit": "8eb28bb93222fd906a5cd0765b712252a936b34a",
+    "dirty": true
+  },
+  "historical_tolerance": 0.0001,
+  "metric_version": "surface-v1",
+  "models": [
+    "rasnet",
+    "segresnet",
+    "vnet",
+    "3dunet",
+    "nnunet"
+  ],
+  "nnunet_metadata": {
+    "checkpoint_name": "checkpoint_best.pth",
+    "dataset_sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+    "fold": 0,
+    "model_folder": "Q1_Publication_Package\\matched_200ep_benchmark\\nnUNet_results\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres",
+    "plans_sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8"
+  },
+  "package_versions": {
+    "SimpleITK": "2.5.7",
+    "cc3d": "installed",
+    "cuda_available": true,
+    "gpu_name": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nibabel": "5.4.2",
+    "nnunetv2": "2.8.1",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "scikit_image": "0.26.0",
+    "scipy": "1.18.1",
+    "torch": "2.14.1+cu126"
+  },
+  "postprocessing": {
+    "arm_A": {
+      "keep_top_k": null,
+      "threshold": 0.5,
+      "tta": false
+    },
+    "arm_B": {
+      "keep_top_k": null,
+      "threshold": 0.5,
+      "tta_policy": {
+        "3dunet": "none (1-pass; no documented standard TTA)",
+        "nnunet": "native nnUNetPredictor 3D mirroring on axes (0,1,2)",
+        "rasnet": "4-pass flip TTA on spatial axes (2,3,4)",
+        "segresnet": "none (1-pass; no documented standard TTA)",
+        "vnet": "none (1-pass; no documented standard TTA)"
+      }
+    },
+    "arm_C": {
+      "connectivity": 26,
+      "keep_top_k": 2,
+      "threshold_source": "validation split grid search (0.30..0.70 step 0.05)",
+      "tta": false
+    }
+  },
+  "retrospective_evaluation": true,
+  "retrospective_notice": "ImageCAS 851-1000 and unseen-66 were previously inspected during historical threshold/post-processing sweeps; this evaluation is retrospective.",
+  "roi_size": [
+    96,
+    96,
+    96
+  ],
+  "run_id": "val_full_94",
+  "seed": 42,
+  "smoke": false,
+  "split": "val",
+  "splits_file": "Phase3_Local_Integration\\splits_final.json",
+  "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+  "sw_batch_size": 8,
+  "synthetic_dry_run": false,
+  "thresholds_file": "C:\\Thesis_RASNET\\results\\thresholds.json",
+  "thresholds_sha256": "4f66ac1d415c5ca9bc09ca0e900e9f8f5d106b3620a20d5916f472d1ba0d3acb",
+  "thresholds_used": {
+    "3dunet": 0.3,
+    "nnunet": 0.35,
+    "rasnet": 0.3,
+    "segresnet": 0.35,
+    "vnet": 0.3
+  },
+  "timestamp_utc": "20261108T071452Z"
+}
