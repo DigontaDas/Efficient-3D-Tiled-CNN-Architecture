@@ -20,9 +20,14 @@ never gets duplicated.
 from __future__ import annotations
 import os
 
-# ── Root of the ImageCAS dataset ─────────────────────────────────────────────
-LOCAL_ARCHIVE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "archive"))
-IMGCAS_BASE = LOCAL_ARCHIVE_PATH if os.path.exists(LOCAL_ARCHIVE_PATH) else r"C:\Thesis_RASNET\archive"
+# ── Root of the ImageCAS dataset candidate locations ──────────────────────────
+CANDIDATE_BASES = [
+    r"H:\3D CT Images for Coronary Artery Segmentation (200 Samples)",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "archive")),
+    r"C:\Thesis_RASNET\archive",
+    r"H:\archive",
+]
+IMGCAS_BASE = next((b for b in CANDIDATE_BASES if os.path.exists(b)), r"C:\Thesis_RASNET\archive")
 
 # Range-subdir mapping for format B (inclusive ranges)
 _RANGE_SUBDIRS: list[tuple[int, int, str]] = [
@@ -36,34 +41,42 @@ _RANGE_SUBDIRS: list[tuple[int, int, str]] = [
 
 def find_image(case_id: int) -> str | None:
     """Return the absolute path to the image NIfTI, or None if not found."""
-    # Format A — nested directory
-    p = os.path.join(IMGCAS_BASE, f"{case_id}.img.nii", "diao_0.nii")
-    if os.path.exists(p):
-        return p
+    for base in CANDIDATE_BASES:
+        if not os.path.exists(base):
+            continue
+        # Format A — nested directory (check diao_0.nii and dia_0.nii)
+        for fname in ["diao_0.nii", "dia_0.nii", "diao_0.nii.gz", "dia_0.nii.gz"]:
+            p = os.path.join(base, f"{case_id}.img.nii", fname)
+            if os.path.exists(p):
+                return p
 
-    # Format B — flat .nii.gz in range subdirectory
-    subdir = _subdir_for(case_id)
-    if subdir:
-        p = os.path.join(IMGCAS_BASE, subdir, f"{case_id}.img.nii.gz")
-        if os.path.exists(p):
-            return p
+        # Format B — flat .nii.gz in range subdirectory
+        subdir = _subdir_for(case_id)
+        if subdir:
+            p = os.path.join(base, subdir, f"{case_id}.img.nii.gz")
+            if os.path.exists(p):
+                return p
 
     return None
 
 
 def find_label(case_id: int) -> str | None:
     """Return the absolute path to the label NIfTI, or None if not found."""
-    # Format A — nested directory
-    p = os.path.join(IMGCAS_BASE, f"{case_id}.label.nii", "label.nii")
-    if os.path.exists(p):
-        return p
+    for base in CANDIDATE_BASES:
+        if not os.path.exists(base):
+            continue
+        # Format A — nested directory
+        for fname in ["label.nii", "label.nii.gz"]:
+            p = os.path.join(base, f"{case_id}.label.nii", fname)
+            if os.path.exists(p):
+                return p
 
-    # Format B — flat .nii.gz in range subdirectory
-    subdir = _subdir_for(case_id)
-    if subdir:
-        p = os.path.join(IMGCAS_BASE, subdir, f"{case_id}.label.nii.gz")
-        if os.path.exists(p):
-            return p
+        # Format B — flat .nii.gz in range subdirectory
+        subdir = _subdir_for(case_id)
+        if subdir:
+            p = os.path.join(base, subdir, f"{case_id}.label.nii.gz")
+            if os.path.exists(p):
+                return p
 
     return None
 
