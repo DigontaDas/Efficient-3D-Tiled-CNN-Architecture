@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-11-11T11:27:45Z",
+  "gate2": {
+    "status": "PASS",
+    "val20_sha256": "cd29dd64242cc26ee6e2c44f0c930bf96b3a6c2d6675f3faea60ab38b0f084ac",
+    "cache_summary": {
+      "n_target": 3,
+      "built": 0,
+      "skipped": 3,
+      "min_shape_xyz": [
+        466,
+        466,
+        275
+      ],
+      "max_shape_xyz": [
+        586,
+        586,
+        275
+      ],
+      "fg_norm_mean_avg": 0.056389644742012024,
+      "fg_norm_std_avg": 1.0537223815917969
+    },
+    "plans_spacing_zyx_verified": [
+      0.5,
+      0.349609375,
+      0.349609375
+    ],
+    "overlays": [
+      "C:\\Thesis_RASNET\\Rasnet-v2\\logs\\patch_overlays\\patch_overlay_case_0014.png",
+      "C:\\Thesis_RASNET\\Rasnet-v2\\logs\\patch_overlays\\patch_overlay_case_0045.png",
+      "C:\\Thesis_RASNET\\Rasnet-v2\\logs\\patch_overlays\\patch_overlay_case_0047.png"
+    ]
+  },
+  "gate3": {
+    "status": "PASS",
+    "f16_peak_vram_mb": 9322.2,
+    "f32_peak_vram_mb": 8131.2,
+    "cpu_deterministic_resume_max_weight_diff": 0.0,
+    "cpu_deterministic_resume_max_exp_avg_diff": 0.0,
+    "cpu_mid_epoch_resume_max_weight_diff": 0.0,
+    "cpu_mid_epoch_resume_max_exp_avg_diff": 0.0,
+    "cpu_mid_epoch_resume_max_loss_diff": 0.0,
+    "cuda_resume_max_weight_diff": 0.003909779712557793,
+    "monai_lr_exact_match": true,
+    "nnunet_snapshots_verified": [
+      "checkpoint_epoch_2.pth",
+      "checkpoint_epoch_4.pth",
+      "checkpoint_best.pth"
+    ],
+    "nnunet_predictor_load_ok": true,
+    "nnunet_2case_batch_1pass_plus_tta_sec": 161.53,
+    "nnunet_batch_vs_single_1pass_max_diff": 0.0,
+    "nnunet_batch_vs_single_tta_max_diff": 0.0
+  },
+  "gate4": {
+    "status": "PASS",
+    "case_0014_native_shape_zyx": [
+      275,
+      512,
+      512
+    ],
+    "case_0014_surface_v1_max_diff": 0.0,
+    "case_0014_nonempty_surface_v1_max_diff": 0.0,
+    "csv_per_case_resume_max_diff": 3.552713678800501e-15
+  }
+}

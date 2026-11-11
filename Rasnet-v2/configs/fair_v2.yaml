@@ -1,0 +1,89 @@
+study:
+  name: rasnet_v2_fair_study
+  version: "2.0.0"
+  root_dir: "C:/Thesis_RASNET/Rasnet-v2"
+  dataset_root: "C:/Thesis_RASNET/secondary-imagcas-dataset"
+  splits_file: "C:/Thesis_RASNET/Phase3_Local_Integration/splits_final.json"
+  val_armA_baseline_csv: "C:/Thesis_RASNET/results/benchmark_runs/val_full_94/per_case_arm_A.csv"
+  val20_ids_file: "C:/Thesis_RASNET/Rasnet-v2/configs/val20_curves_ids.json"
+  seeds: [42, 123, 456]
+
+preprocessing:
+  axis_order_monai: "XYZ"
+  pixdim_xyz: [0.349609375, 0.349609375, 0.5]
+  patch_size_xyz: [160, 160, 96]
+  body_crop_hu: -950.0
+  ct_clip_hu: [-166.0, 727.0]
+  ct_mean: 147.97113
+  ct_std: 179.68488
+  pad_image_val: -1.747343
+  pad_label_val: 0
+  bg_coords_max_per_case: 50000
+
+training_budget:
+  epochs: 200
+  pilot_epochs: 50
+  steps_per_epoch: 250
+  effective_batch_size: 2
+  patches_per_epoch: 500
+  total_optimizer_steps: 50000
+  total_patches: 100000
+  foreground_ratio: 0.333333
+  pos_neg_weights: [1, 2]
+  optimizer: "AdamW"
+  weight_decay: 1.0e-5
+  scheduler: "CosineAnnealingLR_per_step"
+  scheduler_eta_min: 1.0e-6
+  grad_clip_norm: 1.0
+  val_interval: 20
+  val_subset: "val20_curves"
+  mid_epoch_ckpt_every_steps: 50
+  epoch_snapshots: [50, 100, 150, 200]
+  max_vram_gb_threshold: 10.5
+
+microbatch_policy:
+  segresnet_f16: {micro_batch_size: 2, grad_accum: 1}
+  rasnet_v2_f16: {micro_batch_size: 2, grad_accum: 1}
+  segresnet_f32: {micro_batch_size: 1, grad_accum: 2}
+  rasnet_v2_f32: {micro_batch_size: 1, grad_accum: 2}
+  vnet_v2:       {micro_batch_size: 2, grad_accum: 1}
+  unet3d_v2:     {micro_batch_size: 2, grad_accum: 1}
+
+loss:
+  rasnet_v2:
+    w_dice: 0.5
+    w_focal: 0.3
+    w_cldice: 0.2
+    focal_gamma: 1.5
+    cl_iter: 3
+    ds_weights: [0.25, 0.5]
+    ds_include_cldice: false
+  base_dice_focal:
+    w_dice: 0.5
+    w_focal: 0.5
+    w_cldice: 0.0
+    focal_gamma: 1.5
+    cl_iter: 0
+    ds_weights: [0.0, 0.0]
+
+inference_eval:
+  roi_size_xyz: [160, 160, 96]
+  sw_overlap: 0.50
+  sw_mode: "gaussian"
+  sw_batch_size: 4
+  metric_version: "surface-v1"
+  tau_grid: [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+  seeded_filter_grid:
+    tau_seed: [0.50, 0.55]
+    min_seed_voxels: [50, 100]
+    min_comp_vol_mm3: [25.0, 50.0, 100.0]
+
+nnunet_v2:
+  dataset_id: 501
+  dataset_name: "Dataset501_CoronarySeg"
+  configuration: "3d_fullres"
+  fold: 0
+  trainer_base: "nnUNetTrainer_200epochs"
+  epoch_snapshots: [50, 100, 150, 200]
+  mirroring_tta: true
+

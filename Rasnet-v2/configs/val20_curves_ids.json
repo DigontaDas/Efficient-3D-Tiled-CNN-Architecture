@@ -1,0 +1,106 @@
+{
+  "n_cases": 20,
+  "seed": 42,
+  "method": "4 GT-voxel quartiles x 5 evenly spaced v1-Dice difficulty ranks",
+  "case_ids": [
+    47,
+    53,
+    69,
+    113,
+    209,
+    234,
+    270,
+    295,
+    300,
+    348,
+    415,
+    434,
+    499,
+    526,
+    537,
+    690,
+    717,
+    774,
+    821,
+    845
+  ],
+  "strata": [
+    {
+      "quartile": 0,
+      "n_pool": 24,
+      "gt_vox_range": [
+        54584,
+        86499
+      ],
+      "dice_range": [
+        0.6041,
+        0.8515
+      ],
+      "selected_case_ids": [
+        209,
+        300,
+        348,
+        434,
+        526
+      ]
+    },
+    {
+      "quartile": 1,
+      "n_pool": 23,
+      "gt_vox_range": [
+        88406,
+        105389
+      ],
+      "dice_range": [
+        0.6679,
+        0.8491
+      ],
+      "selected_case_ids": [
+        295,
+        499,
+        537,
+        690,
+        821
+      ]
+    },
+    {
+      "quartile": 2,
+      "n_pool": 23,
+      "gt_vox_range": [
+        105403,
+        121399
+      ],
+      "dice_range": [
+        0.6947,
+        0.8472
+      ],
+      "selected_case_ids": [
+        47,
+        234,
+        415,
+        774,
+        845
+      ]
+    },
+    {
+      "quartile": 3,
+      "n_pool": 24,
+      "gt_vox_range": [
+        123799,
+        214824
+      ],
+      "dice_range": [
+        0.6122,
+        0.8713
+      ],
+      "selected_case_ids": [
+        53,
+        69,
+        113,
+        270,
+        717
+      ]
+    }
+  ],
+  "sha256_case_ids": "cd29dd64242cc26ee6e2c44f0c930bf96b3a6c2d6675f3faea60ab38b0f084ac"
+}

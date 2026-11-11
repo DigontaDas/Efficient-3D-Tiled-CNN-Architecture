@@ -1,0 +1,12 @@
+{
+  "current_index": 3,
+  "total_jobs": 16,
+  "current_job": "pilot2a_segresnet_f16_lr1e-3_seed42",
+  "free_gb": 142.15,
+  "cache_fp16_gb": 153.57,
+  "nnunet_preprocessed_gb": 118.76,
+  "checkpoints_gb": 0.18,
+  "nnunet_results_gb": 0.0,
+  "val94_tmp_probs_gb": 0.0,
+  "updated_at": "2026-11-11T17:14:04Z"
+}

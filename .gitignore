@@ -22,6 +22,11 @@ Q1_Publication_Package/matched_200ep_benchmark/checkpoints_best_and_last/*.zip
 Q1_Publication_Package/matched_200ep_benchmark/nnUNet_raw/
 Q1_Publication_Package/matched_200ep_benchmark/nnUNet_preprocessed/
 Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/
+Rasnet-v2/cache_fp16/
+Rasnet-v2/nnUNet_work/nnUNet_raw/
+Rasnet-v2/nnUNet_work/nnUNet_preprocessed/
+Rasnet-v2/results/val94_final/_tmp_probs/
+.pytest_cache/
 Thesis_Trainings/Thesis_Trainings/
 *.b2nd
 *.pkl
