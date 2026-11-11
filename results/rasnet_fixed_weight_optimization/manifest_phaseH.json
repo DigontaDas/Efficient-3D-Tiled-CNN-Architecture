@@ -1,0 +1,21 @@
+{
+  "phase": "Phase H - Fixed-Weight RASNet Optimization",
+  "timestamp": "2026-11-11T06:07:02Z",
+  "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+  "sw_batch_size": 8,
+  "checkpoint": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\rasnet_best.pth",
+  "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+  "metric_version": "surface-v1",
+  "val_cases": 94,
+  "test_cases": 150,
+  "total_candidates_evaluated_on_val": 152,
+  "val_parity_max_dice_diff_vs_arm_A": 0.0,
+  "test_parity_max_dice_diff_vs_arm_A": 0.0,
+  "locked_winners": {
+    "winner_overall": "sw050_gauss_tta4__single_tau0.40_top2cc",
+    "winner_1pass": "sw050_gauss_1pass__single_tau0.40_top2cc",
+    "winner_hyst_no_topk": "sw025_const_tta4__hyst_lo0.30_hi0.55_seed50_nocc",
+    "winner_hyst_top2": "sw050_gauss_1pass__hyst_lo0.30_hi0.55_seed50_top2cc"
+  },
+  "total_runtime_seconds": 6134.62
+}

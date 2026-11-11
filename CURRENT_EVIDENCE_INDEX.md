@@ -87,3 +87,17 @@ This file is the **single authoritative index** of every active, verified eviden
 - **Archive Root**: [`_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/`](_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/)
 - **Manifest & SHA-256 Index (`306` files)**: [`ARCHIVE_INDEX.csv`](_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/ARCHIVE_INDEX.csv)
 
+---
+
+## 7. Phase H: Fixed-Weight RASNet Optimization Results (`results/rasnet_fixed_weight_optimization/`)
+
+- **Optimization Report**: [`PHASE_H_OPTIMIZATION_REPORT.md`](results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md)
+- **Run Manifest & Parity Digest**: [`manifest_phaseH.json`](results/rasnet_fixed_weight_optimization/manifest_phaseH.json)
+- **Validation (`N = 94`) Summaries**:
+  - [`val_94_all_candidates_summary.csv`](results/rasnet_fixed_weight_optimization/val_94_all_candidates_summary.csv) (`152` candidate recipes)
+  - [`val_94_selected_summary.csv`](results/rasnet_fixed_weight_optimization/val_94_selected_summary.csv) (`11` selected recipes backfilled with complete `HD95`/`ASD`/`clDice`)
+- **Retrospective Test (`N = 150`) & Paired Statistics**:
+  - [`test_150_locked_winners_summary.csv`](results/rasnet_fixed_weight_optimization/test_150_locked_winners_summary.csv)
+  - [`paired_stats_test_150_winner_vs_arms_ABC.csv`](results/rasnet_fixed_weight_optimization/paired_stats_test_150_winner_vs_arms_ABC.csv)
+- **Pareto Figure**: [`fig_phaseH_recall_precision_pareto.png`](results/rasnet_fixed_weight_optimization/fig_phaseH_recall_precision_pareto.png) / [`.svg`](results/rasnet_fixed_weight_optimization/fig_phaseH_recall_precision_pareto.svg)
+

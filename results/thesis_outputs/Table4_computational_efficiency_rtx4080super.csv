@@ -1,6 +1,6 @@
-model_key,Model,Parameters,Parameters_M,Checkpoint_Size_MB,Inference_Patch_Size,GFLOPs_per_Patch,Patch_Latency_FP32_ms_Mean_SD,Patch_Latency_AMP_ms_Mean_SD,Patch_Latency_AMP_ms_Mean,Peak_Patch_VRAM_MB,Test_ArmA_Dice,Test_ArmC_Dice,Test_ArmA_Precision,Test_ArmC_Precision
-rasnet,RASNet (Ours),4706772,4.707,18.0,96x96x96,123.39,15.64 ± 0.36,13.55 ± 0.06,13.55,390.7,0.7736,0.7899,0.8032,0.8252
-nnunet,nnU-Net V2,30785994,30.786,235.05,128x192x192,2149.13,115.74 ± 0.19,63.04 ± 0.18,63.04,2381.1,0.7687,0.8055,0.7391,0.8207
-segresnet,SegResNet,4700914,4.701,17.96,96x96x96,122.56,13.64 ± 0.08,11.81 ± 0.10,11.81,402.0,0.7481,0.7884,0.7253,0.8095
-vnet,V-Net,45599452,45.599,174.03,96x96x96,617.23,25.64 ± 0.19,13.77 ± 0.13,13.77,1028.9,0.7492,0.771,0.7524,0.8054
-3dunet,3D U-Net,4805534,4.806,18.36,128x128x128,23.48,4.20 ± 0.16,4.29 ± 0.19,4.29,756.3,0.5517,0.6064,0.7269,0.5877
+model_key,Model,Parameters,Parameters_M,Checkpoint_Size_MB,Inference_Patch_Size,GFLOPs_per_Patch,GFLOPs_Equal_96x96x96,Patch_Latency_FP32_ms_Mean_SD,Patch_Latency_AMP_ms_Mean_SD,Patch_Latency_AMP_ms_Mean,Peak_Patch_VRAM_MB,Test_ArmA_Dice,Test_ArmC_Dice,Test_ArmA_Precision,Test_ArmC_Precision
+rasnet,RASNet (Ours),4706772,4.707,18.0,96x96x96,123.39,123.39,15.68 ± 0.32,13.71 ± 0.12,13.71,390.7,0.7736,0.7899,0.8032,0.8252
+nnunet,nnU-Net V2,30785994,30.786,235.05,96x160x160,1119.34,402.96,59.56 ± 0.41,31.52 ± 0.30,31.52,1926.5,0.7687,0.8055,0.7391,0.8207
+segresnet,SegResNet,4700914,4.701,17.96,96x96x96,122.56,122.56,13.47 ± 0.11,11.78 ± 0.08,11.78,403.5,0.7481,0.7884,0.7253,0.8095
+vnet,V-Net,45599452,45.599,174.03,96x96x96,617.23,617.23,25.52 ± 0.08,13.78 ± 0.07,13.78,1032.4,0.7492,0.771,0.7524,0.8054
+3dunet,3D U-Net,4805534,4.806,18.36,128x128x128,23.48,9.9,4.26 ± 0.25,4.41 ± 0.32,4.41,756.3,0.5517,0.6064,0.7269,0.5877

@@ -52,6 +52,8 @@ def infer_monai_both_passes(
     transform=None,
     batch: dict | None = None,
     use_amp: bool | None = None,
+    overlap: float = 0.25,
+    sw_mode: str = 'constant',
 ):
     """
     Unified MONAI preprocessing + inference returning (prob_1pass_zyx, prob_tta_zyx or None)
@@ -82,7 +84,12 @@ def infer_monai_both_passes(
                 net(tensor)
                 if name == '3dunet'
                 else sliding_window_inference(
-                    tensor, roi_size, sw_batch_size, net, overlap=0.25
+                    tensor,
+                    roi_size,
+                    sw_batch_size,
+                    net,
+                    overlap=float(overlap),
+                    mode=str(sw_mode),
                 )
             )
             if isinstance(out, (list, tuple)):
@@ -138,7 +145,18 @@ def infer_monai_both_passes(
     return prob_1pass, prob_tta_zyx
 
 
-def infer_probability(name, net, image_path, device, roi_size=(96,96,96), sw_batch_size=1, tta=False, use_amp=None):
+def infer_probability(
+    name,
+    net,
+    image_path,
+    device,
+    roi_size=(96, 96, 96),
+    sw_batch_size=1,
+    tta=False,
+    use_amp=None,
+    overlap=0.25,
+    sw_mode='constant',
+):
     """Return foreground probabilities in the original SimpleITK z,y,x grid via unified infer_monai_both_passes."""
     prob_1pass, prob_tta = infer_monai_both_passes(
         name=name,
@@ -149,6 +167,8 @@ def infer_probability(name, net, image_path, device, roi_size=(96,96,96), sw_bat
         sw_batch_size=sw_batch_size,
         need_tta=bool(tta),
         use_amp=use_amp,
+        overlap=overlap,
+        sw_mode=sw_mode,
     )
     return prob_tta if tta else prob_1pass
 
