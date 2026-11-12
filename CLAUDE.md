@@ -61,6 +61,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 | v1 locked results | `results/benchmark_runs/{val_full_94,test_retrospective_150}/`, `results/thresholds.json`, `results/thesis_outputs/Table1–4` |
 | Phase H (RASNet-only inference exploration) | `results/rasnet_fixed_weight_optimization/` |
 | Rasnet-v2 (controlled multi-seed study) | `Rasnet-v2/` (`PREREGISTRATION_V2.md`, `configs/fair_v2.yaml`, `src/run_queue.py`) |
+| **Lab PC manual — start here** | `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md` (step-by-step for the lab PC, including instructions for the IDE agent) |
 | Next-step plans (2026-11-12) | `docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs-for-next-v2-gen/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md` |
 | Archived / superseded material | `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`) |
 
@@ -68,8 +69,10 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 
 - **2026-11-10:** all v1 LAB-CHECK items were verified on the lab PC (`CURRENT_EVIDENCE_INDEX.md`, `results/audits/2026-11-10_verification_audit/`).
 - **2026-11-12 (lab-reported, LAB-CHECK):** Rasnet-v2 Stage 2A is paused at 14/16 pilots. Job 15's resume state is saved at epoch 30, step 200; see `Rasnet-v2/STATE_HANDOFF.md` on the lab PC.
-- **Open work** (not yet run, LAB-CHECK), in this order (`docs-for-next-v2-gen/03_…`):
-  1. **Option A:** symmetric re-evaluation of the frozen v1 RASNet / SegResNet / V-Net / nnU-Net.
+- **Open work** (not yet run, LAB-CHECK), in this order. On the lab PC follow `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`; the full plan is in `docs-for-next-v2-gen/03_…`:
+  1. **Option A (next):** symmetric re-evaluation of the frozen v1 RASNet / SegResNet / V-Net / nnU-Net. Stage 2A stays paused until Option A is done.
+     - Create the Option A code only with the manual's extractor (§5), never by retyping.
+     - Manifests record `git.dirty_code`, which must be `false`, and `git.dirty_any`, which is informational: training logs are git-tracked.
   2. **Rasnet-v2 Amendment A1:** matched clDice weight, binding Stage 2B gates, 8-pass TTA, F32 LR grid incl. 1e-4, 3-seed DS ablation. It needs the user's sign-off and must be committed before Stage 2A resumes.
 
 ## 6. Known technical pitfalls

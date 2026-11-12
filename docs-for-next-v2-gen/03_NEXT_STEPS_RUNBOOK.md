@@ -9,9 +9,10 @@
 - To move work to the lab PC, either:
   - commit on the home PC, push yourself, then on the lab PC run `git pull`, then check `git log -1`; or
   - copy the changed files across.
-- Never start a GPU stage on a lab tree that differs from the commit you intend to report: the manifest records `git.dirty`.
+- Never start a GPU stage on a lab tree that differs from the commit you intend to report: the manifest records `git.dirty_code`.
 **Companion docs:**
 
+- `00_LAB_PC_OPERATOR_MANUAL.md` — **start here on the lab PC**: the step-by-step for Option A, with IDE-agent instructions
 - `01_OPTION_A_SYMMETRIC_V1_EVAL.md` — Option A code and protocol
 - `02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md` — Rasnet-v2 fixes
 
@@ -77,7 +78,7 @@ Write the commit hash into your lab notebook. Both manifests will reference it.
    & $PY -m pytest tests -q 2>&1 | Tee-Object results/audits/optionA_tests_PASSING_after_impl.txt
    ```
 
-4. **Commit the code.** Do this before any GPU run, so the manifest's `git.dirty` is `false`:
+4. **Commit the code.** Do this before any GPU run, so the manifest's `git.dirty_code` is `false`:
 
    ```powershell
    git add benchmark/symmetric_eval.py scripts/run_optionA_symmetric_v1_eval.py tests/test_optionA_symmetric_eval.py results/audits/optionA_tests_*.txt; git commit -m "Option A: symmetric 8-pass TTA evaluation (tests first)"
@@ -236,6 +237,6 @@ Stop and decide before continuing if any of these happen:
 - Option A parity fails (> 1e-4).
 - Any test file fails after a patch.
 - Stage 2B `all_gates_passed` is `false`.
-- Any manifest shows `git.dirty: true` for a result you intend to report.
+- Any Option A manifest shows `git.dirty_code: true` for a result you intend to report. `dirty_any` can be `true` on the lab PC because training logs are git-tracked; that is expected and harmless.
 - Disk free drops below 100 GB during Stage 3.
 - You notice you want to change a threshold, LR, seed or recipe **after** seeing Val-94 or Test-150 numbers. That is the moment to write it down as an exploratory note, not to change the protocol.

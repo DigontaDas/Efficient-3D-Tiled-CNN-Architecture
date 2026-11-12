@@ -11,7 +11,7 @@
 **Patch validation (2026-11-12, scratch copy on the H: machine, CPU only):**
 
 - Every patch in §3 was applied mechanically, exactly as written, to a copy of `Rasnet-v2/`.
-- `tests/test_amendment_a1.py`: **fails before** the patches (KeyError / AttributeError), **11 / 11 pass after**. This includes the Stage 5 3-seed DS contrast and the D9 diagnostic helper (`src/diag_vnet_bn.py`).
+- `tests/test_amendment_a1.py`: **fails before** the patches (10 fail; the 1 that passes is a negative check that is trivially true before patching), **11 / 11 pass after**. The patched Stage 2A queue keeps jobs 1–16 in their existing positions (Job 15 is still `pilot2a_rasnet_v2_f32_lr3e-4_seed42`); the two new pilots are jobs 17–18. This includes the Stage 5 3-seed DS contrast and the D9 diagnostic helper (`src/diag_vnet_bn.py`).
 - Full v2 suite after patching (including the new file): 40 passed, 3 failed. All 3 failures are environment-only on that machine:
   - `fair_v2.yaml` hard-codes `C:\Thesis_RASNET`
   - `nnunetv2` is not installed
@@ -150,6 +150,10 @@ def test_f32_lr_grid_matches_f16():
         f32 = sorted(j["lr"] for j in jobs if j["lr_key"] == f"{arch}_f32")
         assert f16 == f32 == [1e-4, 3e-4, 1e-3]
     assert len(jobs) == 18
+    names = [j["run_name"] for j in jobs]
+    # the paused Job 15 / Job 16 must resume before the two new pilots
+    assert names[-2:] == ["pilot2a_segresnet_f32_lr1e-4_seed42", "pilot2a_rasnet_v2_f32_lr1e-4_seed42"]
+    assert names.index("pilot2a_rasnet_v2_f32_lr3e-4_seed42") < len(names) - 2
 
 
 # D2 -----------------------------------------------------------------------------
@@ -336,20 +340,42 @@ The existing test `tests/test_v2_pipeline_cpu.py` asserts 20 Stage 3 runs (lines
 
 Also update the docstring count ("Exact 20-run Stage 3 matrix" becomes 22 runs) and any test that asserts 20.
 
-### 3.3 Patch D5 — `src/study_registry.py:119`
+### 3.3 Patch D5 — `src/study_registry.py`, end of `build_stage2a_jobs`
+
+**Leave the existing F32 loop at lines 117-135 untouched**, including `for lr in (3e-4, 1e-3):`. Instead, insert this block immediately before that function's `return jobs` (line ~136):
 
 ```python
+    # Amendment A1.4 — the F32 LR grid gains 1e-4 so it matches the F16 grid {1e-4, 3e-4, 1e-3}.
+    # Appended LAST on purpose: run_queue executes jobs in list order, so the paused
+    # Job 15 (rasnet_v2_f32 lr3e-4, mid_epoch_state.pt) and Job 16 resume first.
+    # Job order never changes any result (each job is seeded per (seed, global_idx)).
     for arch in ("segresnet", "rasnet_v2"):
-        lr_key = f"{arch}_f32"
-        for lr in (1e-4, 3e-4, 1e-3):      # Amendment A1.4: identical to the F16 grid
+        lr = 1e-4
+        jobs.append({
+            "kind": "monai",
+            "stage": "stage2a",
+            "lr_key": f"{arch}_f32",
+            "run_name": f"pilot2a_{arch}_f32_lr{lr_tag(lr)}_seed42",
+            "arch": arch,
+            "init_filters": 32,
+            "lr": float(lr),
+            "seed": 42,
+            "epochs": ep,
+            "gate_mode": "conv_bias",
+            "enable_ds": True,
+            "loss_name": "rasnet_v2",
+            "w_cldice": float(cfg["loss"]["rasnet_v2"]["w_cldice"]),
+        })
 ```
 
-The queue skips jobs that have `DONE.flag`, so this only **adds** two 50-epoch pilots:
+The queue skips jobs that have `DONE.flag`, so this only **adds** two 50-epoch pilots, at the end of the queue:
 
 - `pilot2a_segresnet_f32_lr1e-4_seed42`
 - `pilot2a_rasnet_v2_f32_lr1e-4_seed42`
 
-They run after the paused Job 15 and Job 16.
+Resume order on the lab PC: Job 15 (`pilot2a_rasnet_v2_f32_lr3e-4_seed42`, resumes from `mid_epoch_state.pt`), Job 16 (`…_f32_lr1e-3_seed42`), then the two new pilots.
+
+Job 15's resume check (`config_sha256`, `train_fair_v2.py:319-340`) hashes only that job's own settings. Those are unchanged, so the resume is accepted.
 
 ### 3.4 Patch D2 — `src/run_queue.py`
 

@@ -6,7 +6,7 @@
 **Code validation (2026-11-12, done on a scratch copy of the repo on the H: machine, CPU only, MONAI 1.5.1, no data):**
 
 - The three code blocks below were extracted verbatim and compiled.
-- `tests/test_optionA_symmetric_eval.py`: **17 / 17 pass**. This includes 8-flip TTA correctness on a synthetic NIfTI, nnU-Net mirroring via the synthetic predictor, lock immutability, the protected-folder guard, the timing helper and figure writing. The existing 33 v1 tests are unaffected.
+- `tests/test_optionA_symmetric_eval.py`: **18 / 18 pass**. This includes 8-flip TTA correctness on a synthetic NIfTI, nnU-Net mirroring via the synthetic predictor, lock immutability, the protected-folder guard, the timing helper, figure writing, and the code-scoped `git_info` dirty flag. Whole `tests/` suite: **51 / 51** (33 existing + 18 new).
 - The `stats` stage, the generated `OPTION_A_RESULTS.md` and the three figures were exercised on fabricated per-case rows. The figures were rendered and inspected for label collisions and fixed. Those rows were deleted and are not results.
 - **Not yet verified:** GPU inference on real data and parity with locked numbers. That is exactly what the `parity` stage checks on the lab PC. Treat it as a LAB-CHECK.
 
@@ -347,6 +347,36 @@ def test_make_figures_writes_png_and_pdf(tmp_path):
                         "GFLOPs_per_Patch": [123.39, 122.56, 617.23, 1119.34]})
     files = se.make_figures(se.summarize(per_case), per_case, eff, tmp_path)
     assert len(files) == 6 and all(Path(f).is_file() and Path(f).stat().st_size > 0 for f in files)
+
+
+# ---------------------------------------------------------------- provenance: code-scoped dirty flag
+def test_git_info_ignores_run_logs_but_flags_code_changes(tmp_path):
+    import shutil
+    import subprocess
+    if shutil.which("git") is None:
+        pytest.skip("git not available")
+
+    def git(*a):
+        subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *a], cwd=tmp_path,
+                       check=True, capture_output=True)
+
+    (tmp_path / "benchmark").mkdir()
+    (tmp_path / "benchmark" / "m.py").write_text("x = 1\n")
+    (tmp_path / "Rasnet-v2" / "logs").mkdir(parents=True)
+    (tmp_path / "Rasnet-v2" / "logs" / "queue_status.json").write_text("{}\n")
+    git("init", "-q")
+    git("add", "-A")
+    git("commit", "-q", "-m", "init")
+    assert se.git_info(tmp_path)["dirty_code"] is False
+
+    (tmp_path / "Rasnet-v2" / "logs" / "queue_status.json").write_text('{"done": 15}\n')
+    info = se.git_info(tmp_path)
+    assert info["dirty_code"] is False and info["dirty_any"] is True     # training logs don't count
+
+    (tmp_path / "benchmark" / "m.py").write_text("x = 2\n")
+    assert se.git_info(tmp_path)["dirty_code"] is True                   # code changes do
+
+    assert se.git_info(tmp_path / "no_such_dir")["dirty_code"] is None   # git unavailable -> None, not True
 ```
 
 Run on the lab PC from the repo root. The module does not exist yet, so this **must fail** with `ModuleNotFoundError: benchmark.symmetric_eval`. Keep that output for the record:
@@ -423,13 +453,27 @@ def sha256_file(path) -> str:
     return h.hexdigest()
 
 
-def git_info(repo: Path) -> dict:
+# Folders whose state defines the Option A result. Rasnet-v2 run logs (queue_status.json,
+# training_log.csv, DONE.flag) are git-tracked and change while training runs on the lab PC;
+# they must not make an Option A manifest look "dirty".
+CODE_PATHS = ("benchmark", "scripts", "tests", "Phase3_Local_Integration", "config.lab.yaml")
+
+
+def git_info(repo: Path, code_paths=CODE_PATHS) -> dict:
+    """Commit + two dirty flags: dirty_code (only the folders above; the one that matters) and
+    dirty_any (whole repo, informational). None means git was unavailable."""
     def _run(*a):
         try:
             return subprocess.run(["git", *a], cwd=repo, capture_output=True, text=True, check=True).stdout.strip()
         except Exception:
-            return "unavailable"
-    return {"commit": _run("rev-parse", "HEAD"), "dirty": bool(_run("status", "--porcelain"))}
+            return None
+    commit = _run("rev-parse", "HEAD")
+    any_changes = _run("status", "--porcelain")
+    code_changes = _run("status", "--porcelain", "--", *code_paths)
+    return {"commit": commit if commit is not None else "unavailable",
+            "dirty_code": None if code_changes is None else bool(code_changes),
+            "dirty_any": None if any_changes is None else bool(any_changes),
+            "code_paths": list(code_paths)}
 
 
 def env_info() -> dict:
