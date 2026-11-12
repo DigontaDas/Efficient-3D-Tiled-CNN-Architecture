@@ -54,3 +54,23 @@
   3. **Tier 3 — Exploratory Efficiency & Parameter Pareto**:
      Full `Dice vs. Parameter Count` curve across `{4.70M, 4.71M, 12.86M, 18.80M, 30.79M, 45.60M}` with measured RTX 4080 SUPER patch latency, GFLOPs, and peak VRAM.
 
+---
+
+## Amendment A1 (dated 2026-11-13, before Stage 2A LR lock, before any Stage 2B / Stage 3 run)
+1. Matched loss (D1): every Stage 3 job trained with loss `rasnet_v2` uses the clDice weight
+   locked in Stage 2B (`w_cldice*`), for RASNet-v2, SegResNet-v2, V-Net-v2, UNet3D-v2 and the
+   RASNet ablations alike. `s3_segresnet_f16_baseloss` keeps `base_dice_focal` (loss control).
+2. Binding gates (D2, D3): a Stage 2B candidate qualifies only if (a) zero empty predictions on
+   Val-94, (b) strict precision (empty prediction counted as 0) >= 0.80, and (c) mean components
+   <= matched-width SegResNet-v2. If no candidate qualifies, Stage 3 does NOT start automatically;
+   a written amendment is required before `--allow-gate-failure` may be used.
+3. Symmetric TTA (D4): Arm B uses 8-pass mirroring (identity + all 7 flip-axis combinations,
+   logit-averaged before softmax) for every MONAI model, matching nnU-Net V2's native mirroring.
+4. LR grid (D5): F32 LR grids for SegResNet and RASNet-v2 are {1e-4, 3e-4, 1e-3}, identical to F16.
+   The two new F32 lr=1e-4 pilots are appended at the END of the Stage 2A queue (jobs 17-18), so
+   paused Job 15 and Job 16 resume first; job order does not affect any result.
+5. DS ablation seeds (D6): `rasnet_fixed_ag_nods_f16` is trained with all three seeds {42, 123, 456}.
+Rationale: each change removes an asymmetry; none was chosen after observing any validation or
+test outcome of the affected comparisons.
+
+**Sign-off:** all five items approved by the user on 2026-11-13. At that time Stage 2A was paused at 14/16 pilots (lab-reported). No Stage 2A LR lock, Stage 2B, Stage 3 or Test-150 result of Rasnet-v2 existed. Implementation: `src/study_registry.py`, `src/run_queue.py`, `src/stage2_pilot_eval.py`, `src/stage4b_val94_lock.py`, `src/eval_fair_v2.py`, `src/stage5_stats_and_efficiency.py`, plus diagnostic `src/diag_vnet_bn.py`. Contract tests: `tests/test_amendment_a1.py`.
