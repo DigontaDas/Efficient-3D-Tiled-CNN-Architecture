@@ -133,6 +133,28 @@ def build_stage2a_jobs(cfg: dict[str, Any]) -> list[dict[str, Any]]:
                 "loss_name": "rasnet_v2",
                 "w_cldice": float(cfg["loss"]["rasnet_v2"]["w_cldice"]),
             })
+    # Amendment A1.4 — the F32 LR grid gains 1e-4 so it matches the F16 grid {1e-4, 3e-4, 1e-3}.
+    # Appended LAST on purpose: run_queue executes jobs in list order, so the paused
+    # Job 15 (rasnet_v2_f32 lr3e-4, mid_epoch_state.pt) and Job 16 resume first.
+    # Job order never changes any result (each job is seeded per (seed, global_idx)).
+    for arch in ("segresnet", "rasnet_v2"):
+        lr = 1e-4
+        jobs.append({
+            "kind": "monai",
+            "stage": "stage2a",
+            "lr_key": f"{arch}_f32",
+            "run_name": f"pilot2a_{arch}_f32_lr{lr_tag(lr)}_seed42",
+            "arch": arch,
+            "init_filters": 32,
+            "lr": float(lr),
+            "seed": 42,
+            "epochs": ep,
+            "gate_mode": "conv_bias",
+            "enable_ds": True,
+            "loss_name": "rasnet_v2",
+            "w_cldice": float(cfg["loss"]["rasnet_v2"]["w_cldice"]),
+        })
+
     return jobs
 
 
@@ -218,7 +240,7 @@ def build_stage3_jobs(
     locked_lrs: dict[str, Any],
     pilot_lock: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    """Exact 20-run Stage 3 matrix: 1+3+3+1+1+3+3+1+1 MONAI runs + 3 nnU-Net V2 seeds."""
+    """Exact 22-run Stage 3 matrix: 1+3+3+1+3+3+3+1+1 MONAI runs + 3 nnU-Net V2 seeds (Amendment A1: DS ablation x3 seeds)."""
     lrs = validate_locked_lrs(locked_lrs)
     seeds = [int(s) for s in cfg["study"]["seeds"]]
     ep = int(cfg["training_budget"]["epochs"])
@@ -289,21 +311,22 @@ def build_stage3_jobs(
             "enable_ds": True,
             "loss_name": "rasnet_v2",
         },
-        {
+    ])
+    for s in seeds:
+        jobs.append({
             "kind": "monai",
             "stage": "stage3",
             "family": "rasnet_fixed_ag_nods_f16",
-            "run_name": "s3_rasnet_fixed_ag_f16_nods_v2loss_seed42",
+            "run_name": f"s3_rasnet_fixed_ag_f16_nods_v2loss_seed{s}",
             "arch": "rasnet_v2",
             "init_filters": 16,
             "lr": lrs["rasnet_v2_f16"],
-            "seed": 42,
+            "seed": s,
             "epochs": ep,
             "gate_mode": "conv_bias",
             "enable_ds": False,
             "loss_name": "rasnet_v2",
-        },
-    ])
+        })
     for s in seeds:
         jobs.append({
             "kind": "monai",
@@ -378,6 +401,11 @@ def build_stage3_jobs(
             "seed": s,
             "epochs": ep,
         })
+    # Amendment A1.1 — one loss for every architecture trained with the v2 loss (matched Family 1).
+    for j in jobs:
+        if j.get("kind") == "monai" and j.get("loss_name") == "rasnet_v2":
+            j["w_cldice"] = lead_w_cl
+
     return jobs
 
 

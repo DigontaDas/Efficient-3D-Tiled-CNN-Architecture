@@ -229,6 +229,20 @@ def build_stage2b_jobs(cfg: dict[str, Any], locked_lrs: dict[str, Any]) -> list[
     return jobs
 
 
+def assert_stage3_allowed(pilot_lock: dict, allow_gate_failure: bool) -> None:
+    """Amendment A1.2: Stage 3 starts only if a Stage 2B candidate passed every pre-registered gate."""
+    if bool(pilot_lock.get("all_gates_passed", False)):
+        return
+    if allow_gate_failure:
+        print("[WARN] Stage 2B gates FAILED; proceeding under an explicit written amendment.", flush=True)
+        return
+    raise RuntimeError(
+        "Stage 2B: no RASNet-v2 candidate passed the pre-registered gates "
+        "(zero empty predictions, strict precision >= 0.80, fragmentation <= SegResNet). "
+        "Write a dated amendment, then re-run with --allow-gate-failure."
+    )
+
+
 def execute_jobs(config_path: str | Path, jobs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     root_dir = Path(cfg["study"]["root_dir"])
@@ -328,6 +342,8 @@ def main() -> None:
         ],
     )
     parser.add_argument("--locked-lrs-json", default=None)
+    parser.add_argument("--allow-gate-failure", action="store_true",
+                        help="Only after a dated written amendment when Stage 2B gates failed")
     parser.add_argument("--workers", type=int, default=6, help="Cache builder worker count for --stage cache")
     parser.add_argument("--auto-cache", action="store_true", help="Auto-build missing cache_fp16 cases before training")
     args = parser.parse_args()
@@ -379,6 +395,7 @@ def main() -> None:
         if not lock_doc.is_file():
             raise FileNotFoundError(f"Missing Stage 2B lock decision: {lock_doc}. Run stage2b_eval first.")
         pilot_lock = json.loads(lock_doc.read_text(encoding="utf-8"))
+        assert_stage3_allowed(pilot_lock, allow_gate_failure=args.allow_gate_failure)
         lrs = _load_locked_lrs(cfg, args.locked_lrs_json)
         execute_jobs(args.config, build_stage3_jobs(cfg, lrs, pilot_lock=pilot_lock))
     elif args.stage == "stage4a":

@@ -1,0 +1,141 @@
+# Rasnet-v2 Amendment A1 contract tests BEFORE the patches — home PC, 2026-11-12T19:12:26Z, Python 3.14.0
+C:\Users\Mehedi D Nafis\AppData\Roaming\Python\Python314\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFFFFFFF.F                                                              [100%]
+================================== FAILURES ===================================
+____________ test_stage3_loss_matched_across_all_v2loss_jobs[0.0] _____________
+
+w_cl = 0.0
+
+    @pytest.mark.parametrize("w_cl", [0.0, 0.2])
+    def test_stage3_loss_matched_across_all_v2loss_jobs(w_cl):
+        lock = {"all_gates_passed": True, "locked_design": {"gate_mode": "conv_bias", "w_cldice": w_cl}}
+        jobs = build_stage3_jobs(_cfg(), LOCKED, pilot_lock=lock)
+        v2 = [j for j in jobs if j.get("kind") == "monai" and j.get("loss_name") == "rasnet_v2"]
+        assert len(v2) >= 10
+>       assert {round(float(j["w_cldice"]), 6) for j in v2} == {w_cl}
+E       KeyError: 'w_cldice'
+
+tests\test_amendment_a1.py:37: KeyError
+____________ test_stage3_loss_matched_across_all_v2loss_jobs[0.2] _____________
+
+w_cl = 0.2
+
+    @pytest.mark.parametrize("w_cl", [0.0, 0.2])
+    def test_stage3_loss_matched_across_all_v2loss_jobs(w_cl):
+        lock = {"all_gates_passed": True, "locked_design": {"gate_mode": "conv_bias", "w_cldice": w_cl}}
+        jobs = build_stage3_jobs(_cfg(), LOCKED, pilot_lock=lock)
+        v2 = [j for j in jobs if j.get("kind") == "monai" and j.get("loss_name") == "rasnet_v2"]
+        assert len(v2) >= 10
+>       assert {round(float(j["w_cldice"]), 6) for j in v2} == {w_cl}
+E       KeyError: 'w_cldice'
+
+tests\test_amendment_a1.py:37: KeyError
+____________________ test_ds_ablation_has_all_three_seeds _____________________
+
+    def test_ds_ablation_has_all_three_seeds():
+        lock = {"all_gates_passed": True, "locked_design": {"gate_mode": "conv_bias", "w_cldice": 0.2}}
+        jobs = build_stage3_jobs(_cfg(), LOCKED, pilot_lock=lock)
+        nods = [j for j in jobs if j.get("family") == "rasnet_fixed_ag_nods_f16"]
+>       assert sorted(j["seed"] for j in nods) == sorted(int(s) for s in _cfg()["study"]["seeds"])
+E       assert [42] == [42, 123, 456]
+E         
+E         Right contains 2 more items, first extra item: 123
+E         Use -v to get more diff
+
+tests\test_amendment_a1.py:47: AssertionError
+________________________ test_f32_lr_grid_matches_f16 _________________________
+
+    def test_f32_lr_grid_matches_f16():
+        jobs = build_stage2a_jobs(_cfg())
+        for arch in ("segresnet", "rasnet_v2"):
+            f16 = sorted(j["lr"] for j in jobs if j["lr_key"] == f"{arch}_f16")
+            f32 = sorted(j["lr"] for j in jobs if j["lr_key"] == f"{arch}_f32")
+>           assert f16 == f32 == [1e-4, 3e-4, 1e-3]
+E           assert [0.0001, 0.0003, 0.001] == [0.0003, 0.001]
+E             
+E             At index 0 diff: 0.0001 != 0.0003
+E             Left contains one more item: 0.001
+E             Use -v to get more diff
+
+tests\test_amendment_a1.py:56: AssertionError
+____________________ test_stage3_refuses_when_gates_failed ____________________
+
+    def test_stage3_refuses_when_gates_failed():
+        with pytest.raises(RuntimeError, match="gates"):
+>           run_queue.assert_stage3_allowed({"all_gates_passed": False}, allow_gate_failure=False)
+E           AttributeError: module 'run_queue' has no attribute 'assert_stage3_allowed'
+
+tests\test_amendment_a1.py:67: AttributeError
+_________ test_gate_metrics_count_empty_predictions_against_candidate _________
+
+    def test_gate_metrics_count_empty_predictions_against_candidate():
+        df = pd.DataFrame({
+            "case_id": [1, 2, 3, 4],
+            "status": ["ok", "ok", "ok", "prediction_empty"],
+            "precision": [0.9, 0.9, 0.9, float("nan")],
+            "components_total": [3, 3, 3, 0],
+        })
+>       g = stage2_pilot_eval.gate_metrics(df)
+E       AttributeError: module 'stage2_pilot_eval' has no attribute 'gate_metrics'
+
+tests\test_amendment_a1.py:80: AttributeError
+____________ test_mirror_average_logits_is_8_pass_and_equivariant _____________
+
+    def test_mirror_average_logits_is_8_pass_and_equivariant():
+        calls = []
+    
+        def pointwise(t):                      # flip-equivariant "network"
+            calls.append(1)
+            return torch.cat([t * 0.5, -t * 0.5], dim=1)
+    
+        x = torch.randn(1, 1, 6, 7, 8)
+>       lg_1, lg_8 = eval_fair_v2.mirror_average_logits(pointwise, x)
+E       AttributeError: module 'eval_fair_v2' has no attribute 'mirror_average_logits'
+
+tests\test_amendment_a1.py:97: AttributeError
+_________________ test_override_ids_reject_locked_test_range __________________
+
+    def test_override_ids_reject_locked_test_range():
+        with pytest.raises(ValueError, match="851"):
+>           stage2_pilot_eval.guard_val_ids([10, 851])
+E           AttributeError: module 'stage2_pilot_eval' has no attribute 'guard_val_ids'
+
+tests\test_amendment_a1.py:111: AttributeError
+________________ test_stage5_ds_contrast_uses_all_three_seeds _________________
+
+tmp_path = WindowsPath('C:/Users/Mehedi D Nafis/AppData/Local/Temp/pytest-of-Mehedi D Nafis/pytest-45/test_stage5_ds_contrast_uses_a0')
+
+    def test_stage5_ds_contrast_uses_all_three_seeds(tmp_path):
+        import stage5_stats_and_efficiency as s5
+        jobs = _write_family_csvs(tmp_path, (42, 123, 456))
+        out = s5._run_family1(s5._load_family_tables(tmp_path, jobs, arms=("A",)), ("A",))
+        ds = out[out["family_id"] == "Ablation_DS_3seed_K4"]
+>       assert len(ds) == 8                                    # 4 metrics x 2 aggregations
+E       assert 0 == 8
+E        +  where 0 = len(Empty DataFrame\nColumns: [n, n_excluded_nan, a_mean, b_mean, mean_diff, ci95_lo, ci95_hi, median_diff, q25_diff, q75_d..., wins, ties, losses, family_id, contrast, arm, aggregation, metric, direction, p_holm, significant_holm_005]\nIndex: [])
+
+tests\test_amendment_a1.py:136: AssertionError
+---------------------------- Captured stderr call -----------------------------
+W1113 01:12:40.461000 3216 torch\utils\flop_counter.py:113] triton not found; flop counting will not work for triton kernels
+__________ test_batchstats_wrapper_keeps_bn_training_and_dropout_off __________
+
+    def test_batchstats_wrapper_keeps_bn_training_and_dropout_off():
+>       import diag_vnet_bn
+E       ModuleNotFoundError: No module named 'diag_vnet_bn'
+
+tests\test_amendment_a1.py:149: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_amendment_a1.py::test_stage3_loss_matched_across_all_v2loss_jobs[0.0]
+FAILED tests/test_amendment_a1.py::test_stage3_loss_matched_across_all_v2loss_jobs[0.2]
+FAILED tests/test_amendment_a1.py::test_ds_ablation_has_all_three_seeds - ass...
+FAILED tests/test_amendment_a1.py::test_f32_lr_grid_matches_f16 - assert [0.0...
+FAILED tests/test_amendment_a1.py::test_stage3_refuses_when_gates_failed - At...
+FAILED tests/test_amendment_a1.py::test_gate_metrics_count_empty_predictions_against_candidate
+FAILED tests/test_amendment_a1.py::test_mirror_average_logits_is_8_pass_and_equivariant
+FAILED tests/test_amendment_a1.py::test_override_ids_reject_locked_test_range
+FAILED tests/test_amendment_a1.py::test_stage5_ds_contrast_uses_all_three_seeds
+FAILED tests/test_amendment_a1.py::test_batchstats_wrapper_keeps_bn_training_and_dropout_off
+10 failed, 1 passed in 11.92s

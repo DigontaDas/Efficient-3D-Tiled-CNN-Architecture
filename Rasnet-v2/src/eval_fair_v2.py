@@ -10,6 +10,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 import gc
+import itertools
 import json
 import math
 import os
@@ -562,6 +563,21 @@ def build_monai_invert_op(transform) -> Invertd:
     )
 
 
+def mirror_average_logits(logits_fn, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return (identity logits, 8-pass mirror-averaged logits).
+
+    Identity + all 7 non-empty combinations of the 3 spatial axes; logits averaged before softmax.
+    This is exactly nnUNetPredictor._internal_maybe_mirror_and_predict.
+    """
+    axes_all = (2, 3, 4)
+    combos = [c for r in range(1, 4) for c in itertools.combinations(axes_all, r)]
+    identity = logits_fn(x).float()
+    acc = identity.clone()
+    for axes in combos:
+        acc += torch.flip(logits_fn(torch.flip(x, axes)).float(), axes)
+    return identity, acc / float(len(combos) + 1)
+
+
 def infer_monai_native_zyx(
     net: torch.nn.Module,
     image_path: str | Path,
@@ -584,7 +600,7 @@ def infer_monai_native_zyx(
     amp_ok = sw_dev.type == "cuda"
     amp_dtype = torch.bfloat16 if (amp_ok and torch.cuda.is_bf16_supported()) else torch.float16
 
-    def _pred(tensor_cpu: torch.Tensor) -> torch.Tensor:
+    def _logits(tensor_cpu: torch.Tensor) -> torch.Tensor:
         with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=amp_ok):
             out = sliding_window_inference(
                 tensor_cpu,
@@ -598,16 +614,17 @@ def infer_monai_native_zyx(
             )
             if isinstance(out, (tuple, list)):
                 out = out[0]
-        return torch.softmax(out.float(), dim=1)[:, 1:2]
+        return out.float()
 
     with torch.no_grad():
-        p_raw = _pred(x_cpu)
-        p_tta = None
         if need_tta:
-            acc = p_raw.clone()
-            for axis in (2, 3, 4):
-                acc += torch.flip(_pred(torch.flip(x_cpu, (axis,))), (axis,))
-            p_tta = acc / 4.0
+            lg_1, lg_8 = mirror_average_logits(_logits, x_cpu)
+            p_raw = torch.softmax(lg_1, dim=1)[:, 1:2]
+            p_tta = torch.softmax(lg_8, dim=1)[:, 1:2]
+            del lg_1, lg_8
+        else:
+            p_raw = torch.softmax(_logits(x_cpu), dim=1)[:, 1:2]
+            p_tta = None
 
     if inv_op is None:
         inv_op = build_monai_invert_op(transform)

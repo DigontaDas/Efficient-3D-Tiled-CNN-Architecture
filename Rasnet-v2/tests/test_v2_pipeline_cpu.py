@@ -288,9 +288,9 @@ def test_run_queue_preflight_dedup_and_stage3_manifest(tmp_path: Path):
 
     # Stage 2A covers both SegResNet F=32 & RASNet-v2 F=32 (16 jobs total)
     s2a = run_queue.build_stage2a_jobs(cfg)
-    assert len(s2a) == 16
-    assert sum(1 for j in s2a if j["lr_key"] == "segresnet_f32") == 2
-    assert sum(1 for j in s2a if j["lr_key"] == "rasnet_v2_f32") == 2
+    assert len(s2a) == 18
+    assert sum(1 for j in s2a if j["lr_key"] == "segresnet_f32") == 3
+    assert sum(1 for j in s2a if j["lr_key"] == "rasnet_v2_f32") == 3
 
     # Stage 2B deduplicates identical (F, lr, conv_bias, w_cldice=0.2) runs from Stage 2A
     locked = {
@@ -312,7 +312,7 @@ def test_run_queue_preflight_dedup_and_stage3_manifest(tmp_path: Path):
         build_stage3_jobs(cfg, bad_lrs)
 
     s3 = build_stage3_jobs(cfg, locked)
-    assert len(s3) == 20
+    assert len(s3) == 22
 
 
 def test_stages_2_4_5_6_end_to_end_synthetic_cpu(tmp_path: Path):
@@ -392,7 +392,7 @@ def test_stages_2_4_5_6_end_to_end_synthetic_cpu(tmp_path: Path):
     m4a = stage4a_val20_curves.run_stage4a_val20_curves(
         cfg_p, epochs_override=[50, 200], case_ids_override=val_ids[:2], precomputed_probs_by_key=s4a_probs, pairs_override=pairs_dset
     )
-    assert m4a["n_runs"] == 20 and (v2_root / "results" / "val20_curves" / "fig_val20_convergence_curves.png").is_file()
+    assert m4a["n_runs"] == 22 and (v2_root / "results" / "val20_curves" / "fig_val20_convergence_curves.png").is_file()
 
     s4b_probs = {}
     s4c_probs = {}
@@ -404,7 +404,7 @@ def test_stages_2_4_5_6_end_to_end_synthetic_cpu(tmp_path: Path):
     t4b = stage4b_val94_lock.run_stage4b_val94_lock(
         cfg_p, case_ids_override=val_ids, precomputed_probs_by_run=s4b_probs, pairs_override=pairs_dset
     )
-    assert len(t4b["per_run"]) == 20 and (v2_root / "results" / "val94_final" / "thresholds_v2.json").is_file()
+    assert len(t4b["per_run"]) == 22 and (v2_root / "results" / "val94_final" / "thresholds_v2.json").is_file()
 
     m4c = stage4c_test150_eval.run_stage4c_test150(
         cfg_p, case_ids_override=test_ids, precomputed_probs_by_run=s4c_probs, pairs_override=pairs_dset

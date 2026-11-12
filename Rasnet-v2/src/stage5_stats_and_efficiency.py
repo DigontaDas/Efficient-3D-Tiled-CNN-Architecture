@@ -158,6 +158,31 @@ def _run_family1(
                 r["significant_holm_005"] = bool(hp < 0.05)
                 rows.append(r)
 
+        # Amendment A1.5 — deep-supervision isolation with all 3 seeds (secondary family, own Holm).
+        ds_a, ds_b = "rasnet_v2_f16", "rasnet_fixed_ag_nods_f16"
+        if (ds_a, arm) in fam_tables and (ds_b, arm) in fam_tables:
+            seeds_a = set(fam_tables[(ds_a, arm)]["per_seed"])
+            seeds_b = set(fam_tables[(ds_b, arm)]["per_seed"])
+            if len(seeds_a & seeds_b) >= 3:
+                for agg in ("seed_averaged", "seed_pooled"):
+                    df_a = fam_tables[(ds_a, arm)][agg]
+                    df_b = fam_tables[(ds_b, arm)][agg]
+                    if set(df_a["case_id"]) != set(df_b["case_id"]):
+                        raise RuntimeError(f"DS 3-seed case_id/seed mismatch ({arm}, {agg})")
+                    fam_res = []
+                    for m in k4_metrics:
+                        st = eval_fair_v2.paired_with_noninferiority(
+                            df_a, df_b, metric=m, allow_nan_filtering=True, direction=METRIC_DIRECTIONS[m]
+                        )
+                        st.update({"family_id": "Ablation_DS_3seed_K4", "contrast": "Abl_DS_Full_vs_NoDS_3seed",
+                                   "arm": arm, "aggregation": agg, "metric": m, "direction": METRIC_DIRECTIONS[m]})
+                        fam_res.append(st)
+                    holm_ps = eval_fair_v2.holm_adjust([r["p_wilcoxon"] for r in fam_res])
+                    for r, hp in zip(fam_res, holm_ps):
+                        r["p_holm"] = float(hp)
+                        r["significant_holm_005"] = bool(hp < 0.05)
+                        rows.append(r)
+
     return pd.DataFrame(rows)
 
 

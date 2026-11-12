@@ -7,6 +7,7 @@ native-(Z,Y,X) probabilities for the 143-config sweep and final Arm C surface-v1
 """
 from __future__ import annotations
 
+from stage2_pilot_eval import guard_val_ids
 import argparse
 import hashlib
 import json
@@ -149,7 +150,7 @@ def run_stage4b_val94_lock(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     splits = load_validated_splits(cfg["study"]["splits_file"])
-    val_ids = sorted(int(c) for c in (case_ids_override if case_ids_override is not None else splits["val"]))
+    val_ids = sorted(guard_val_ids(case_ids_override if case_ids_override is not None else splits["val"]))
 
     ie = cfg["inference_eval"]
     tau_grid = [round(float(t), 4) for t in ie["tau_grid"]]

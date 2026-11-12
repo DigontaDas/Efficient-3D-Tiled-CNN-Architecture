@@ -49,6 +49,32 @@ def _summarize_df(df: pd.DataFrame) -> dict[str, Any]:
     return out
 
 
+LOCKED_TEST_IDS = set(range(851, 1001))
+
+
+def guard_val_ids(ids) -> list[int]:
+    ids = [int(c) for c in ids]
+    bad = sorted(set(ids) & LOCKED_TEST_IDS)
+    if bad:
+        raise ValueError(f"Locked test IDs 851-1000 passed to a validation-only stage: {bad[:5]}")
+    return ids
+
+
+def gate_metrics(df: pd.DataFrame) -> dict[str, float]:
+    """Gate inputs where an empty prediction can never help a candidate."""
+    status = df["status"] if "status" in df else pd.Series(["ok"] * len(df))
+    n_empty = int((status == "prediction_empty").sum())
+    prec_strict = float(df["precision"].fillna(0.0).mean()) if len(df) else float("nan")
+    comps = float(df["components_total"].mean()) if "components_total" in df and len(df) else float("nan")
+    return {"n_empty_pred": n_empty, "precision_mean_strict": prec_strict, "components_total_mean": comps}
+
+
+def candidate_qualifies(g: dict, seg_components: float) -> bool:
+    return bool(g["n_empty_pred"] == 0
+                and g["precision_mean_strict"] >= 0.8000
+                and g["components_total_mean"] <= float(seg_components) + 1e-9)
+
+
 def _resolve_pilot_ckpt(root_dir: Path, run_name: str, pilot_epochs: int, ckpt_kind: str) -> Path:
     ckpt_dir = root_dir / "checkpoints" / run_name
     if ckpt_kind == "best":
@@ -75,7 +101,7 @@ def evaluate_stage2a_pilots(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     splits = load_validated_splits(cfg["study"]["splits_file"])
-    val_ids = [int(c) for c in (case_ids_override or sorted(splits["val"]))]
+    val_ids = guard_val_ids(case_ids_override or sorted(splits["val"]))
     pilot_ep = int(cfg["training_budget"]["pilot_epochs"])
     jobs = build_stage2a_jobs(cfg)
 
@@ -179,7 +205,7 @@ def evaluate_stage2b_pilots(
     locked_lrs = validate_locked_lrs(lrs_obj["locked_lrs"] if "locked_lrs" in lrs_obj else lrs_obj)
 
     splits = load_validated_splits(cfg["study"]["splits_file"])
-    val_ids = [int(c) for c in (case_ids_override or sorted(splits["val"]))]
+    val_ids = guard_val_ids(case_ids_override or sorted(splits["val"]))
     pilot_ep = int(cfg["training_budget"]["pilot_epochs"])
 
     # Reference matched-width SegResNet-v2 fragmentation baselines from Stage 2A
@@ -262,9 +288,10 @@ def evaluate_stage2b_pilots(
         seg_dice = float(seg_ref_stats[w]["dice_mean"])
         seg_prec = float(seg_ref_stats[w]["precision_mean"])
 
-        pass_prec = bool(summ["precision_mean"] >= 0.8000)
-        pass_frag = bool(summ["components_total_mean"] <= seg_comp + 1e-9)
-        qualifies = bool(pass_prec and pass_frag)
+        g = gate_metrics(df)
+        pass_prec = bool(g["precision_mean_strict"] >= 0.8000)
+        pass_frag = bool(g["components_total_mean"] <= seg_comp + 1e-9)
+        qualifies = candidate_qualifies(g, seg_comp)
 
         rows.append({
             "candidate_name": rname,
@@ -282,6 +309,7 @@ def evaluate_stage2b_pilots(
             "qualifies": qualifies,
             "ckpt_sha256": ckpt_sha,
             **summ,
+            **g,
         })
 
     df_2b = pd.DataFrame(rows)

@@ -1,0 +1,15 @@
+# Rasnet-v2 Amendment A1 contract tests AFTER the patches — home PC, 2026-11-12T19:13:16Z, Python 3.14.0
+C:\Users\Mehedi D Nafis\AppData\Roaming\Python\Python314\site-packages\pytest_asyncio\plugin.py:207: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...........                                                              [100%]
+11 passed in 13.26s
+
+# Full Rasnet-v2/tests suite on the patched tree (home PC copy with the hard-coded
+# C:\Thesis_RASNET test root pointed at the copy; code identical to this commit):
+#   40 passed, 3 failed. The 3 failures are environment-only on the home PC:
+#   - test_run_queue_preflight_dedup_and_stage3_manifest: fair_v2.yaml hard-codes C:/Thesis_RASNET splits path
+#   - test_sw_batch_size_and_nnunet_batch_iterators: nnunetv2 not installed on the home PC
+#   - test_fused_focal_nonzero_grad_and_monai_parity: MONAI 1.5.1 here vs 1.6.1 on the lab PC (SoftclDiceLoss signature)
+# LAB-CHECK: re-run `& $PY -m pytest Rasnet-v2/tests -q` on the lab PC; all must pass there.
