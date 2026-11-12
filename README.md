@@ -4,7 +4,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.14.1%2Bcu126-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![MONAI](https://img.shields.io/badge/MONAI-1.6.1-5C2D91.svg)](https://monai.io/)
 [![nnU-Net](https://img.shields.io/badge/nnUNetv2-2.8.1-008080.svg)](https://github.com/MIC-DKFZ/nnUNet)
-[![Tests](https://img.shields.io/badge/Pytest-31%2F31_Passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-33%2F33_Passing-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **RASNet (Residual Attention Segmentation Network)** is a lightweight (`4.71M` parameters) 3D residual encoder–decoder architecture for coronary artery segmentation in contrast-enhanced Computed Tomography Angiography (CCTA). Built on MONAI's `SegResNet` backbone, RASNet integrates 3D additive skip-connection attention gates (`AttentionGate3D`), multi-scale deep supervision (`aux2`, `aux3`), and a calibrated two-component compound loss (`StenosisAwareLoss`: $\alpha = 0.4$ Dice + $0.6$ Focal with $\gamma = 2.5$).
@@ -165,7 +165,7 @@ Full 32-test exploratory tables comparing `RASNet` against all four baselines ac
 
 ## 🚀 Reproducing the Benchmark & Running Tests
 
-### 1. Run the Complete Synthetic Unit & Integration Test Suite (`31/31` Passing)
+### 1. Run the Complete Synthetic Unit & Integration Test Suite (`33/33` passing on 2026-11-13; re-run on the lab PC after adding new tests)
 ```powershell
 C:\Thesis_RASNET_env\bench\Scripts\python.exe -B -m pytest -v -p no:cacheprovider tests
 ```

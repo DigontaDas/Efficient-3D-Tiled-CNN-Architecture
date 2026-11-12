@@ -20,11 +20,13 @@
 
 ## 2. Two machines
 
-| | `H:\Thesis_Trainings` (laptop copy) | `C:\Thesis_RASNET` (lab PC, RTX 4080 SUPER 16 GB) |
+| | `H:\Thesis_Trainings` (home PC) | `C:\Thesis_RASNET` (lab PC, RTX 4080 SUPER 16 GB) |
 | :--- | :--- | :--- |
 | Data / checkpoints | **Not present** | Present |
 | Allowed work | Code reading, synthetic CPU tests | Training, evaluation, GPU runs |
 | Python env | Varies (MONAI may differ, no `nnunetv2`) | `C:\Thesis_RASNET_env\bench` (Python 3.12, torch cu126, MONAI 1.6.1, nnunetv2 2.8.1) |
+
+Everything that runs for real runs on the lab PC. All commands, settings and performance tuning target it: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`. The v1 synthetic suite (`tests/`) collects 33 tests, all passing on the home PC on 2026-11-13.
 
 Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 
@@ -52,7 +54,7 @@ Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 8. **GPU:** one GPU job at a time. Before launching, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`. Another agent may own the GPU.
 9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`.
 10. **Claims:**
-    - Thesis wording is chosen from the pre-written outcome tables (`docs/01_…` §7, `docs/02_…` §5) that match the numbers. Never write a stronger claim.
+    - Thesis wording is chosen from the pre-written outcome tables (`docs-for-next-v2-gen/01_…` §7, `docs-for-next-v2-gen/02_…` §5) that match the numbers. Never write a stronger claim.
     - "Not significant" ≠ "equal".
     - Phase H (RASNet-only tuning) is not a fair comparison with nnU-Net.
 11. **Status polling:** do not post repeated status-only messages. Report when a milestone changes (epoch with validation, job finished, error).
@@ -149,7 +151,7 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
   - Family 2: RASNet-v2 vs nnU-Net on precision, HD95, clDice.
   - Dice non-inferiority vs nnU-Net, margin −0.005.
 
-**Defects found 2026-11-12, fixed by proposed Amendment A1** (`docs/02_…`; needs user sign-off, then commit before Stage 2A resumes):
+**Defects found 2026-11-12, fixed by proposed Amendment A1** (`docs-for-next-v2-gen/02_…`; needs user sign-off, then commit before Stage 2A resumes):
 
 - the Stage 3 clDice weight can differ between RASNet and its baselines
 - the Stage 2B gates are not binding, and empty predictions can help a candidate pass them
@@ -163,11 +165,11 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 
 - **2026-11-10:** all v1 LAB-CHECKs were verified on the lab PC (`results/audits/2026-11-10_verification_audit/`). Superseded material is archived in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/`.
 - **2026-11-12 (lab-reported):** Stage 2A is paused at 14/16. Job 15 (`pilot2a_rasnet_v2_f32_lr3e-4_seed42`) has resume state saved at epoch 30, step 200 (`STATE_HANDOFF.md`).
-- **Next, in order** (`docs/03_NEXT_STEPS_RUNBOOK.md`):
-  - **P0:** fix the `CHECKPOINTS.md` loss description (SegResNet and V-Net used `DiceFocalLoss(1.0, 2.0)`, not DiceCELoss), and pre-register Option A and Amendment A1.
-  - **P1:** write the Option A code (`docs/01_…`).
-  - **P2:** apply the Amendment A1 patches.
-  - **P3:** run Option A on the GPU.
+- **Next, in order** (`docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md`):
+  - **P0:** pre-register Option A and Amendment A1. The `CHECKPOINTS.md` loss description was already corrected on 2026-11-13: SegResNet and V-Net used `DiceFocalLoss(1.0, 2.0)`.
+  - **P1:** write the Option A code (`docs-for-next-v2-gen/01_…`).
+  - **P2:** apply the Amendment A1 patches, including the Stage 5 3-seed DS contrast and `src/diag_vnet_bn.py`.
+  - **P3:** run Option A on the GPU: parity, `sw_batch_size` tuning, val, lock, test, timing, stats, figures.
   - **P4:** resume Rasnet-v2 through Stage 5.
   - **P5:** thesis integration.
 
@@ -185,7 +187,7 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 | v1 results | `results/benchmark_runs/`, `results/thresholds.json`, `results/thesis_outputs/` |
 | Phase H | `results/rasnet_fixed_weight_optimization/`, `scripts/run_phaseH_rasnet_optimization.py` |
 | Rasnet-v2 | `Rasnet-v2/` |
-| Plans | `docs/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs/03_NEXT_STEPS_RUNBOOK.md` |
+| Plans | `docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs-for-next-v2-gen/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md` |
 
 ## 8. Technical pitfalls
 

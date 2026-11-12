@@ -10,7 +10,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 
 ## 2. Two machines — know which one you are on
 
-| | This machine (`H:\Thesis_Trainings`) | Lab PC (`C:\Thesis_RASNET`, RTX 4080 SUPER 16 GB) |
+| | Home PC (`H:\Thesis_Trainings`) | Lab PC (`C:\Thesis_RASNET`, RTX 4080 SUPER 16 GB) |
 | :--- | :--- | :--- |
 | Data, checkpoints, patient data | **Not available** | Available |
 | What may run | Synthetic / CPU tests and code reading only | Real training and evaluation |
@@ -18,7 +18,9 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 
 - Never invent paths, results or numbers. If something can only be verified on the lab PC, mark it **LAB-CHECK**.
 - Paths such as `C:\Thesis_RASNET\...` in transcripts and configs map to the same repo-relative path here.
-- `Rasnet-v2/configs/fair_v2.yaml` and the `Rasnet-v2/tests/*` files hard-code `C:/Thesis_RASNET`. On this machine those tests fail for environment reasons only; say so, do not "fix" the paths.
+- `Rasnet-v2/configs/fair_v2.yaml` and the `Rasnet-v2/tests/*` files hard-code `C:/Thesis_RASNET`. On the home PC those tests fail for environment reasons only; say so, do not "fix" the paths.
+- **Everything that runs for real runs on the lab PC.** Write all commands, settings and performance tuning for the lab PC: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`, RTX 4080 SUPER 16 GB. Never tune for the home PC's hardware.
+- v1 synthetic suite status: `tests/` collects 33 tests, all passing on the home PC on 2026-11-13.
 
 ## 3. Hard rules
 
@@ -43,7 +45,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 8. **GPU:** one GPU job at a time on the lab PC. Before launching anything, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`.
 9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`. New analyses write to new folders.
 10. **Claims:**
-    - Choose thesis wording from the pre-written outcome tables (`docs/01_…` §7, `docs/02_…` §5) that match the numbers. Never write a stronger claim.
+    - Choose thesis wording from the pre-written outcome tables (`docs-for-next-v2-gen/01_…` §7, `docs-for-next-v2-gen/02_…` §5) that match the numbers. Never write a stronger claim.
     - "Not significant" is not "equal".
     - A Phase H RASNet-only result is not a fair comparison with nnU-Net.
 
@@ -52,21 +54,21 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 | What | Where |
 | :--- | :--- |
 | Canonical evidence index (paths + SHA-256) | `CURRENT_EVIDENCE_INDEX.md` |
-| Checkpoints + hashes | `CHECKPOINTS.md` (known error: §2 says SegResNet/V-Net used DiceCELoss, but the scripts use `DiceFocalLoss(1.0, 2.0)`. Fix pending; see `docs/03_…` P0) |
+| Checkpoints + hashes | `CHECKPOINTS.md` (§2 loss description corrected 2026-11-13: SegResNet and V-Net used `DiceFocalLoss(lambda_dice=1.0, lambda_focal=2.0)`; the archived ablation variants used `DiceCELoss`) |
 | v1 benchmark code | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `adapters/`) |
 | v1 models / training | `Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py`; `Q1_Publication_Package/matched_200ep_benchmark/train_*_200ep.py` |
 | Splits | `Phase3_Local_Integration/splits_final.json` (690 / 94 / 150) |
 | v1 locked results | `results/benchmark_runs/{val_full_94,test_retrospective_150}/`, `results/thresholds.json`, `results/thesis_outputs/Table1–4` |
 | Phase H (RASNet-only inference exploration) | `results/rasnet_fixed_weight_optimization/` |
 | Rasnet-v2 (controlled multi-seed study) | `Rasnet-v2/` (`PREREGISTRATION_V2.md`, `configs/fair_v2.yaml`, `src/run_queue.py`) |
-| Next-step plans (2026-11-12) | `docs/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs/03_NEXT_STEPS_RUNBOOK.md` |
+| Next-step plans (2026-11-12) | `docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs-for-next-v2-gen/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md` |
 | Archived / superseded material | `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`) |
 
 ## 5. Current state (update this section when it changes)
 
 - **2026-11-10:** all v1 LAB-CHECK items were verified on the lab PC (`CURRENT_EVIDENCE_INDEX.md`, `results/audits/2026-11-10_verification_audit/`).
 - **2026-11-12 (lab-reported, LAB-CHECK):** Rasnet-v2 Stage 2A is paused at 14/16 pilots. Job 15's resume state is saved at epoch 30, step 200; see `Rasnet-v2/STATE_HANDOFF.md` on the lab PC.
-- **Open work** (not yet run, LAB-CHECK), in this order (`docs/03_…`):
+- **Open work** (not yet run, LAB-CHECK), in this order (`docs-for-next-v2-gen/03_…`):
   1. **Option A:** symmetric re-evaluation of the frozen v1 RASNet / SegResNet / V-Net / nnU-Net.
   2. **Rasnet-v2 Amendment A1:** matched clDice weight, binding Stage 2B gates, 8-pass TTA, F32 LR grid incl. 1e-4, 3-seed DS ablation. It needs the user's sign-off and must be committed before Stage 2A resumes.
 

@@ -6,8 +6,8 @@
 **Code validation (2026-11-12, done on a scratch copy of the repo on the H: machine, CPU only, MONAI 1.5.1, no data):**
 
 - The three code blocks below were extracted verbatim and compiled.
-- `tests/test_optionA_symmetric_eval.py`: **14 / 14 pass**. This includes 8-flip TTA correctness on a synthetic NIfTI, nnU-Net mirroring via the synthetic predictor, lock immutability and the protected-folder guard.
-- The `stats` stage and the generated `OPTION_A_RESULTS.md` were exercised on fabricated per-case rows and work end to end. Those rows were deleted and are not results.
+- `tests/test_optionA_symmetric_eval.py`: **17 / 17 pass**. This includes 8-flip TTA correctness on a synthetic NIfTI, nnU-Net mirroring via the synthetic predictor, lock immutability, the protected-folder guard, the timing helper and figure writing. The existing 33 v1 tests are unaffected.
+- The `stats` stage, the generated `OPTION_A_RESULTS.md` and the three figures were exercised on fabricated per-case rows. The figures were rendered and inspected for label collisions and fixed. Those rows were deleted and are not results.
 - **Not yet verified:** GPU inference on real data and parity with locked numbers. That is exactly what the `parity` stage checks on the lab PC. Treat it as a LAB-CHECK.
 
 ---
@@ -56,7 +56,7 @@ Option A is therefore a **supplementary, retrospective inference-parity analysis
 | Patch size | Each model's trained patch: 96³ for MONAI, 96 × 160 × 160 for nnU-Net. |
 | Sliding window | overlap 0.50, Gaussian weighting, σ = 0.125 × patch. This matches nnU-Net's `compute_gaussian(sigma_scale=1/8)`, verified in MIC-DKFZ/nnUNet `predict_from_raw_data.py`. |
 | Mode `sw050_gauss_1pass` | One pass. |
-| Mode `sw050_gauss_tta8` | 8-pass mirroring: identity plus all 7 non-empty combinations of the 3 spatial flips, **logits averaged, then softmax**. This is exactly what `nnUNetPredictor._internal_maybe_mirror_and_predict` does (all `itertools.combinations` of the mirror axes; raw logits summed, divided by the pass count). For nnU-Net the native predictor with `use_mirroring=True` is used. |
+| Mode `sw050_gauss_tta8` | 8-pass mirroring: identity plus all 7 non-empty combinations of the 3 spatial flips, **logits averaged, then softmax**. This is exactly what `nnUNetPredictor._internal_maybe_mirror_and_predict` does (all `itertools.combinations` of the mirror axes; raw logits summed, divided by the pass count). For nnU-Net the native predictor with `use_mirroring=True` is used. **Implementation difference to disclose:** nnU-Net mirrors each tile inside its sliding window, while the MONAI path flips the whole volume and then runs the sliding window. Every mirrored prediction is still a Gaussian-blended average of the same patch predictions, but tile borders fall at different positions, so the results are numerically close rather than bit-identical. State this in the Methods. |
 | AMP | fp16 autocast on CUDA for MONAI (same as the original benchmark). nnU-Net uses its own autocast. |
 | Threshold grid | τ ∈ {0.20, 0.25, …, 0.70} (11 values). The lower bound was widened from 0.30 to remove the boundary clamp. |
 | Post-processing | 26-connected **Top-2 CC** for tuned recipes, none for raw recipes. No hysteresis and no Top-3, to keep the forking paths small and the same for everyone. |
@@ -306,12 +306,54 @@ def test_nnunet_wrapper_returns_1pass_and_mirrored(tmp_path):
     assert cid == 11
     assert float(modes[se.MODES[0]].max()) == pytest.approx(0.70)
     assert float(modes[se.MODES[1]].max()) == pytest.approx(0.80)   # mirroring was enabled
+
+
+# ---------------------------------------------------------------- timing & figures
+def test_monai_tta_false_returns_only_1pass(tmp_path):
+    torch = pytest.importorskip("torch")
+    from benchmark.adapters.monai_models import build_transform
+    p, _, _ = _write_volume(tmp_path)
+    tf = build_transform("rasnet")
+    out = se.infer_monai_symmetric("rasnet", torch.nn.Conv3d(1, 2, 1).eval(), tf({"image": str(p)}), tf,
+                                   "cpu", roi_size=(32, 32, 32), sw_batch_size=2, tta=False)
+    assert list(out) == [se.MODES[0]]
+
+
+def test_time_calls_excludes_warmup_and_times_both_modes():
+    calls = []
+    rows = se._time_calls(lambda cid, tta: calls.append((cid, tta)), "rasnet", [11, 12, 13], "cpu", warmup=1)
+    assert calls[0] == (11, False)                                   # warm-up, untimed
+    assert sorted({r["case_id"] for r in rows}) == [12, 13]
+    assert sorted({r["mode"] for r in rows}) == sorted(se.MODES)
+    s = se.summarize_timing(pd.DataFrame(rows))
+    assert set(s["mode"]) == set(se.MODES) and (s["n"] == 2).all()
+    with pytest.raises(ValueError):
+        se._time_calls(lambda c, t: None, "rasnet", [11], "cpu", warmup=1)
+
+
+def test_make_figures_writes_png_and_pdf(tmp_path):
+    pytest.importorskip("matplotlib")
+    rng = np.random.default_rng(0)
+    rows = []
+    for m in se.MODELS:
+        for cid in range(851, 871):
+            for r in ("R1_raw_1pass", "R4_tuned_tta8_top2"):
+                rows.append({"model": m, "case_id": cid, "recipe": r, "tau": 0.4, "status": "ok",
+                             **{k: float(rng.uniform(0.7, 0.85)) for k in
+                                ("dice", "iou", "precision", "recall", "cldice", "centerline_recall")},
+                             "hd95": 8.0, "asd": 1.5, "components_total": 2})
+    per_case = pd.DataFrame(rows)
+    eff = pd.DataFrame({"model_key": list(se.MODELS), "Parameters_M": [4.707, 4.701, 45.599, 30.786],
+                        "GFLOPs_per_Patch": [123.39, 122.56, 617.23, 1119.34]})
+    files = se.make_figures(se.summarize(per_case), per_case, eff, tmp_path)
+    assert len(files) == 6 and all(Path(f).is_file() and Path(f).stat().st_size > 0 for f in files)
 ```
 
 Run on the lab PC from the repo root. The module does not exist yet, so this **must fail** with `ModuleNotFoundError: benchmark.symmetric_eval`. Keep that output for the record:
 
-```bash
-python -m pytest tests/test_optionA_symmetric_eval.py -q
+```powershell
+$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"; Set-Location C:\Thesis_RASNET
+& $PY -m pytest tests/test_optionA_symmetric_eval.py -q
 ```
 
 ---
@@ -429,11 +471,12 @@ def flip_axis_combinations(spatial_axes=(2, 3, 4)) -> list[tuple[int, ...]]:
 
 
 def infer_monai_symmetric(name, net, batch, transform, device, roi_size=(96, 96, 96),
-                          sw_batch_size=8, use_amp=None) -> dict[str, np.ndarray]:
-    """Return {mode: foreground prob (Z,Y,X) on the native grid} for both symmetric modes.
+                          sw_batch_size=8, use_amp=None, tta=True) -> dict[str, np.ndarray]:
+    """Return {mode: foreground prob (Z,Y,X) on the native grid} for the symmetric modes.
 
     Logits are Gaussian-blended by the sliding window, mirrored-averaged over 8 flips,
-    then soft-maxed: the same order of operations as nnUNetPredictor.
+    then soft-maxed: the same order of operations as nnUNetPredictor. tta=False returns only
+    the 1-pass mode (used by the timing stage).
     """
     import torch
     from monai.inferers import sliding_window_inference
@@ -456,19 +499,22 @@ def infer_monai_symmetric(name, net, batch, transform, device, roi_size=(96, 96,
         return out.float()
 
     combos = flip_axis_combinations()
+    probs = []
     with torch.no_grad():
         identity = logits(x)
-        acc = identity.clone()
-        for axes in combos[1:]:
-            acc += torch.flip(logits(torch.flip(x, axes)), axes)
-        p1 = torch.softmax(identity, dim=1)[:, 1:2]
-        p8 = torch.softmax(acc / float(len(combos)), dim=1)[:, 1:2]
-        del acc, identity
+        probs.append((MODES[0], torch.softmax(identity, dim=1)[:, 1:2]))
+        if tta:
+            acc = identity.clone()
+            for axes in combos[1:]:
+                acc += torch.flip(logits(torch.flip(x, axes)), axes)
+            probs.append((MODES[1], torch.softmax(acc / float(len(combos)), dim=1)[:, 1:2]))
+            del acc
+        del identity
 
     inv = Invertd(keys=["pred"], transform=transform, orig_keys=["image"],
                   nearest_interp=False, to_tensor=True)
     out: dict[str, np.ndarray] = {}
-    for mode, p in ((MODES[0], p1), (MODES[1], p8)):
+    for mode, p in probs:
         b = dict(batch)
         b["pred"] = p.squeeze(0)
         arr = inv(b)["pred"].squeeze(0).detach().cpu().numpy()
@@ -748,6 +794,202 @@ def paired_noninferiority(a: pd.DataFrame, b: pd.DataFrame, metric="dice", margi
     return {"metric": metric, "n": int(len(d)), "mean_diff": float(d.mean()), "ci95_lo": lo,
             "ci95_hi": hi, "margin": float(margin), "non_inferior": bool(lo > margin),
             "superior": bool(lo > 0.0)}
+
+
+# ============================================================ timing (efficiency evidence)
+def _time_calls(run, model: str, case_ids, device: str, warmup: int = 1) -> list[dict]:
+    """Time run(cid, tta) end-to-end for 1-pass and TTA-8 separately (same definition for every model).
+
+    The first `warmup` cases are run once untimed (cuDNN autotune, allocator). CUDA is synchronised
+    around every call; peak allocated VRAM is reset per mode.
+    """
+    import time
+    cuda = str(device).startswith("cuda")
+    if cuda:
+        import torch
+    ids = [int(c) for c in case_ids]
+    if len(ids) <= warmup:
+        raise ValueError("Need more cases than warm-up cases")
+    for cid in ids[:warmup]:
+        run(cid, False)
+    rows = []
+    for tta in (False, True):
+        if cuda:
+            torch.cuda.synchronize()
+            torch.cuda.reset_peak_memory_stats()
+        mode_rows = []
+        for cid in ids[warmup:]:
+            if cuda:
+                torch.cuda.synchronize()
+            t0 = time.perf_counter()
+            run(cid, tta)
+            if cuda:
+                torch.cuda.synchronize()
+            mode_rows.append({"model": model, "case_id": cid, "mode": MODES[1] if tta else MODES[0],
+                              "seconds": time.perf_counter() - t0})
+        peak = float(torch.cuda.max_memory_allocated() / 2 ** 20) if cuda else float("nan")
+        for r in mode_rows:
+            r["peak_vram_mb"] = peak
+        rows.extend(mode_rows)
+    return rows
+
+
+def time_model(model, cfg, repo: Path, case_ids, pairs, device="cuda", sw_batch_size=8, warmup=1):
+    """Per-case wall-clock: preprocessing + inference + native-grid inversion, as a user would run it."""
+    if model == "nnunet":
+        from benchmark.adapters.nnunet_adapter import build_nnunet_predictor, infer_nnunet_probability
+        predictor = build_nnunet_predictor(model_folder=str(Path(repo) / cfg["nnunet_model_folder"]),
+                                           fold=int(cfg["nnunet_fold"]),
+                                           checkpoint_name=str(cfg["nnunet_checkpoint_name"]),
+                                           device=device, use_mirroring=False)
+
+        def run(cid, tta):
+            infer_nnunet_probability(predictor, str(pairs[cid][0]), tta=tta)
+    else:
+        from benchmark.adapters.monai_models import build_model, build_transform
+        net = build_model(model, str(Path(repo) / cfg["checkpoints"][model]), device)
+        tf = build_transform(model)
+
+        def run(cid, tta):
+            batch = tf({"image": str(pairs[cid][0])})
+            infer_monai_symmetric(model, net, batch, tf, device, sw_batch_size=sw_batch_size, tta=tta)
+    return _time_calls(run, model, case_ids, device, warmup)
+
+
+def summarize_timing(df: pd.DataFrame) -> pd.DataFrame:
+    g = df.groupby(["model", "mode"])
+    return pd.DataFrame({
+        "n": g["seconds"].size(),
+        "seconds_median": g["seconds"].median(),
+        "seconds_q25": g["seconds"].quantile(0.25),
+        "seconds_q75": g["seconds"].quantile(0.75),
+        "peak_vram_mb": g["peak_vram_mb"].max(),
+    }).reset_index()
+
+
+# ============================================================ figures (thesis-ready, static)
+# Fixed colour per model (never by rank). Validated with the dataviz palette checker
+# (light surface): CVD/normal-vision separation PASS; aqua/yellow are < 3:1 contrast, so every
+# mark is also identified by a text label (direct labels / axis labels), never colour alone.
+MODEL_LABELS = {"rasnet": "RASNet", "nnunet": "nnU-Net V2", "segresnet": "SegResNet", "vnet": "V-Net"}
+MODEL_COLORS = {"rasnet": "#2a78d6", "nnunet": "#eb6834", "segresnet": "#1baf7a", "vnet": "#eda100"}
+_INK, _INK2, _GRID = "#1f1f1d", "#5f5e5a", "#e6e5e0"
+
+
+def _style(plt):
+    plt.rcParams.update({
+        "font.size": 9, "axes.spines.top": False, "axes.spines.right": False,
+        "axes.edgecolor": "#8a8a86", "axes.labelcolor": _INK2, "xtick.color": _INK2,
+        "ytick.color": _INK2, "axes.titlecolor": _INK, "figure.facecolor": "white",
+        "axes.facecolor": "white", "savefig.bbox": "tight",
+    })
+
+
+def _save(fig, out_dir: Path, name: str) -> list[str]:
+    paths = []
+    for ext in ("png", "pdf"):
+        p = Path(out_dir) / f"{name}.{ext}"
+        fig.savefig(p, dpi=300)
+        paths.append(str(p))
+    return paths
+
+
+def make_figures(summary: pd.DataFrame, per_case: pd.DataFrame, efficiency: pd.DataFrame,
+                 out_dir: Path, primary_recipe: str = "R4_tuned_tta8_top2", ni_margin: float = NI_MARGIN):
+    """Three figures, all computed from the result CSVs:
+    1) Dice vs parameters (accuracy-efficiency, primary recipe)
+    2) per-case Dice distributions, one panel per recipe
+    3) paired per-case Dice difference RASNet - nnU-Net (primary recipe) with the NI margin
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    _style(plt)
+    out_dir = Path(out_dir)
+    written = []
+    models = [m for m in MODELS if m in set(per_case["model"])]
+
+    # 1 -- accuracy vs size
+    s = summary[summary["recipe"] == primary_recipe].set_index("model")
+    e = efficiency.set_index("model_key")
+    from matplotlib.ticker import FixedLocator, NullLocator, ScalarFormatter
+    xs = {m: float(e.loc[m, "Parameters_M"]) for m in models}
+    pos, side = {}, {}
+    for m in models:                                  # dodge models of near-identical size (RASNet/SegResNet)
+        near = [o for o in models if abs(np.log(xs[o] / xs[m])) < 0.1]
+        k, n = near.index(m), len(near)
+        pos[m] = xs[m] * (1.0 + 0.10 * (k - (n - 1) / 2)) if n > 1 else xs[m]
+        side[m] = -1 if (n > 1 and k < (n - 1) / 2) else 1
+    fig, ax = plt.subplots(figsize=(6.2, 3.8))
+    for m in models:
+        x, y = pos[m], float(s.loc[m, "dice_mean"])
+        ax.vlines(x, float(s.loc[m, "dice_q25"]), float(s.loc[m, "dice_q75"]),
+                  color=MODEL_COLORS[m], lw=2, alpha=0.45)
+        ax.scatter([x], [y], s=64, color=MODEL_COLORS[m], edgecolor="white", linewidth=2, zorder=3,
+                   label=MODEL_LABELS[m])
+        ax.annotate(f"{MODEL_LABELS[m]}  {y:.3f}\n{float(e.loc[m, 'GFLOPs_per_Patch']):.0f} GFLOPs/patch",
+                    (x, y), xytext=(8 * side[m], 3), textcoords="offset points", fontsize=8, color=_INK,
+                    ha="left" if side[m] > 0 else "right")
+    ax.set_xscale("log")
+    ax.set_xlim(1.5, 120)
+    ax.xaxis.set_major_locator(FixedLocator([2, 5, 10, 20, 50, 100]))
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_minor_locator(NullLocator())
+    ax.set_xlabel("Parameters (millions, log scale)")
+    ax.set_ylabel("Test Dice (mean; bar = IQR)")
+    ax.grid(True, axis="y", color=_GRID, lw=0.6)
+    ax.set_axisbelow(True)
+    ax.set_title(f"Accuracy vs model size — {primary_recipe}", loc="left", fontsize=10)
+    ax.legend(frameon=False, fontsize=8, loc="upper left", bbox_to_anchor=(1.01, 1.0))
+    written += _save(fig, out_dir, "fig_optionA_dice_vs_params")
+    plt.close(fig)
+
+    # 2 -- per-case Dice distributions (small multiples, shared y)
+    recipes = sorted(per_case["recipe"].unique())
+    fig, axes = plt.subplots(1, len(recipes), figsize=(2.3 * len(recipes), 3.4), sharey=True, squeeze=False)
+    for ax, r in zip(axes[0], recipes):
+        data = [per_case[(per_case["recipe"] == r) & (per_case["model"] == m)]["dice"].dropna().to_numpy()
+                for m in models]
+        bp = ax.boxplot(data, widths=0.55, patch_artist=True, showfliers=True,
+                        medianprops={"color": _INK, "lw": 1.2},
+                        flierprops={"marker": "o", "markersize": 2.5, "alpha": 0.5})
+        for patch, m in zip(bp["boxes"], models):
+            patch.set_facecolor(MODEL_COLORS[m])
+            patch.set_alpha(0.45)
+            patch.set_edgecolor(MODEL_COLORS[m])
+        ax.set_xticks(range(1, len(models) + 1))
+        ax.set_xticklabels([MODEL_LABELS[m] for m in models], rotation=35, ha="right")
+        ax.set_title(r.replace("_", " "), fontsize=9, loc="left")
+        ax.grid(True, axis="y", color=_GRID, lw=0.6)
+        ax.set_axisbelow(True)
+    axes[0][0].set_ylabel("Per-case Dice (Test-150)")
+    written += _save(fig, out_dir, "fig_optionA_dice_distributions")
+    plt.close(fig)
+
+    # 3 -- paired difference RASNet - nnU-Net (single series)
+    sub = per_case[per_case["recipe"] == primary_recipe]
+    a = sub[sub["model"] == "rasnet"][["case_id", "dice"]]
+    b = sub[sub["model"] == "nnunet"][["case_id", "dice"]]
+    if len(a) and len(b):
+        pair = a.merge(b, on="case_id", suffixes=("_r", "_n")).dropna()
+        d = np.sort((pair["dice_r"] - pair["dice_n"]).to_numpy())
+        fig, ax = plt.subplots(figsize=(5.2, 3.2))
+        ax.scatter(np.arange(len(d)), d, s=10, color=MODEL_COLORS["rasnet"], zorder=3)
+        ax.axhline(0, color=_INK2, lw=0.8)
+        ax.axhline(ni_margin, color=_INK2, lw=0.8, ls="--")
+        ax.text(0.98, 0.04, f"dashed line: non-inferiority margin {ni_margin:+.3f}",
+                transform=ax.transAxes, ha="right", va="bottom", fontsize=8, color=_INK2)
+        ax.annotate(f"mean {d.mean():+.4f}  ({int((d > 0).sum())} cases RASNet higher / "
+                    f"{int((d < 0).sum())} lower)", (0.02, 0.95), xycoords="axes fraction",
+                    fontsize=8, color=_INK, va="top")
+        ax.set_xlabel("Test cases, sorted by difference")
+        ax.set_ylabel("Dice: RASNet − nnU-Net V2")
+        ax.grid(True, axis="y", color=_GRID, lw=0.6)
+        ax.set_axisbelow(True)
+        ax.set_title(f"Per-case paired difference — {primary_recipe}", loc="left", fontsize=10)
+        written += _save(fig, out_dir, "fig_optionA_paired_diff_rasnet_vs_nnunet")
+        plt.close(fig)
+    return written
 ```
 
 ---
@@ -764,6 +1006,9 @@ Example (lab PC, repo root):
   python scripts/run_optionA_symmetric_v1_eval.py --stage lock --resume
   python scripts/run_optionA_symmetric_v1_eval.py --stage test --resume
   python scripts/run_optionA_symmetric_v1_eval.py --stage stats --resume
+  python scripts/run_optionA_symmetric_v1_eval.py --stage timing     # efficiency evidence (Val cases)
+  python scripts/run_optionA_symmetric_v1_eval.py --stage stats      # re-run to add the timing table
+  python scripts/run_optionA_symmetric_v1_eval.py --stage figures
 """
 from __future__ import annotations
 
@@ -982,10 +1227,37 @@ def stage_stats(args, cfg, splits, out_dir):
         if len(a) and len(b):
             ni.append({"recipe": r, **se.paired_noninferiority(a, b, "dice")})
     pd.DataFrame(ni).to_csv(out_dir / "noninferiority_rasnet_vs_nnunet_dice.csv", index=False)
-    write_report(out_dir, summ, fam, pd.DataFrame(ni))
+    t_path = out_dir / "timing_summary.csv"
+    write_report(out_dir, summ, fam, pd.DataFrame(ni), pd.read_csv(t_path) if t_path.is_file() else None)
 
 
-def write_report(out_dir, summ, fam, ni):
+def stage_timing(args, cfg, splits, out_dir):
+    """Validation cases only; never test. Run with nothing else on the GPU."""
+    ids = sorted(splits["val"])[: args.timing_cases + 1]          # +1 warm-up case
+    pairs = resolve_case_pairs(cfg["dataset_root"], ids, check_headers=False)
+    rows = []
+    for model in args.models:
+        print(f"[timing] {model}", flush=True)
+        rows += se.time_model(model, cfg, ROOT, ids, pairs, args.device, args.sw_batch_size, warmup=1)
+        import torch
+        torch.cuda.empty_cache()
+    df = pd.DataFrame(rows)
+    df.to_csv(out_dir / "timing_val.csv", index=False)
+    summ = se.summarize_timing(df)
+    summ.to_csv(out_dir / "timing_summary.csv", index=False)
+    print(summ.to_string(index=False))
+
+
+def stage_figures(args, cfg, splits, out_dir):
+    summ = pd.read_csv(out_dir / "summary_test.csv")
+    per_case = pd.read_csv(out_dir / "test_per_case.csv").drop_duplicates(
+        subset=["model", "case_id", "recipe"], keep="last")
+    eff = pd.read_csv(ROOT / "results/thesis_outputs/Table4_computational_efficiency_rtx4080super.csv")
+    for p in se.make_figures(summ, per_case, eff, out_dir):
+        print("[figures]", p)
+
+
+def write_report(out_dir, summ, fam, ni, timing=None):
     """Markdown generated only from the CSVs above (every number traceable to a file)."""
     def fmt(r, m):
         return f"{r[f'{m}_mean']:.4f} ± {r[f'{m}_sd']:.4f}"
@@ -1011,12 +1283,21 @@ def write_report(out_dir, summ, fam, ni):
     for _, r in ni.iterrows():
         lines.append(f"| {r['recipe']} | {r['mean_diff']:+.4f} | [{r['ci95_lo']:+.4f}, {r['ci95_hi']:+.4f}] | "
                      f"{r['non_inferior']} | {r['superior']} |")
+    if timing is not None and len(timing):
+        lines += ["", "## End-to-end inference time per case (Val cases, RTX 4080 SUPER; `timing_summary.csv`)", "",
+                  "| Model | Mode | n | Median s/case [IQR] | Peak allocated VRAM (MB) |",
+                  "| :--- | :--- | :---: | :---: | :---: |"]
+        for _, r in timing.iterrows():
+            lines.append(f"| {r['model']} | {r['mode']} | {int(r['n'])} | {r['seconds_median']:.1f} "
+                         f"[{r['seconds_q25']:.1f}, {r['seconds_q75']:.1f}] | {r['peak_vram_mb']:.0f} |")
     (out_dir / "OPTION_A_RESULTS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", required=True, choices=["parity", "val", "lock", "test", "stats"])
+    ap.add_argument("--stage", required=True,
+                    choices=["parity", "val", "lock", "test", "stats", "timing", "figures"])
+    ap.add_argument("--timing-cases", type=int, default=10, help="Val cases timed per model (+1 warm-up)")
     ap.add_argument("--models", nargs="+", default=list(se.MODELS), choices=list(se.MODELS))
     ap.add_argument("--out", type=Path, default=OUT_DEFAULT)
     ap.add_argument("--resume", action="store_true")
@@ -1028,8 +1309,8 @@ def main():
 
     if args.smoke and args.out == OUT_DEFAULT:
         args.out = OUT_DEFAULT.with_name(OUT_DEFAULT.name + "_SMOKE")
-    if args.stage in ("lock", "test", "stats") and args.models != list(se.MODELS):
-        raise SystemExit("lock/test/stats must cover all four models (symmetry).")
+    if args.stage in ("lock", "test", "stats", "figures", "timing") and args.models != list(se.MODELS):
+        raise SystemExit("lock/test/stats/figures/timing must cover all four models (symmetry).")
 
     import torch
     torch.backends.cuda.matmul.allow_tf32 = True
@@ -1040,8 +1321,9 @@ def main():
     cfg, splits, prov = load_cfg_and_splits()
     out_dir = se.check_out_dir(args.out, ROOT, resume=args.resume or args.stage != "parity")
     prov["checkpoints"] = verify_checkpoints(cfg, args.models)
-    extra = {"parity": stage_parity, "val": stage_val, "lock": stage_lock,
-             "test": stage_test, "stats": stage_stats}[args.stage](args, cfg, splits, out_dir)
+    extra = {"parity": stage_parity, "val": stage_val, "lock": stage_lock, "test": stage_test,
+             "stats": stage_stats, "timing": stage_timing, "figures": stage_figures}[args.stage](
+        args, cfg, splits, out_dir)
     write_manifest(out_dir, args.stage, args, prov, extra)
 
 
@@ -1055,17 +1337,53 @@ if __name__ == "__main__":
 
 ## 6. 4080 SUPER run notes
 
-- **VRAM:**
-  - MONAI at 96³ with `sw_batch_size 8` is what Phase H used on this card, so keep 8.
-  - 8-pass TTA runs the passes **sequentially**, so peak VRAM equals 1-pass. Only time grows, about 8×.
-  - If you see WDDM paging (sudden 3–5× slowdowns), drop to `--sw-batch-size 4`.
-- **RAM:** one case holds about 2 float32 volumes per model plus a bounded queue of 2 cases. That is a few GB, fine.
-- **Timing:** do not guess. Run `--smoke 2` on val first, read the per-case seconds printed, and extrapolate before launching the full run.
-  - 1-pass costs are already in Phase H's logs. TTA-8 costs about 8× a 1-pass.
-  - nnU-Net (96 × 160 × 160 patches, 8 mirrors per tile) will be the slowest model.
-- **Do not run alongside Rasnet-v2 training.** One GPU job at a time.
-- **Windows:** keep `num_processes=4` for the nnU-Net preprocessing iterator (as in the original benchmark). Run from an Anaconda/PowerShell prompt with the bench env activated. Keep the PC awake (disable sleep).
-- **Disk:** no probability caches are written. The CSVs are a few MB.
+Everything below is for the lab PC. On the home PC only the synthetic tests run.
+
+**Prepare the machine (once per session):**
+
+```powershell
+$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"; Set-Location C:\Thesis_RASNET
+powercfg /setactive SCHEME_MIN
+nvidia-smi --query-gpu=name,memory.used,utilization.gpu --format=csv
+```
+
+- `SCHEME_MIN` is Windows' built-in High-performance plan. It stops CPU throttling during long runs.
+- The `nvidia-smi` check must show no other process using the GPU: no Rasnet-v2 queue, no other session's job.
+- Close browsers and other GPU apps. Disable sleep for the duration.
+
+**Speed settings already built into the code:**
+
+| Setting | Why |
+| :--- | :--- |
+| AMP fp16 autocast for MONAI | Same as the locked benchmark |
+| TF32 matmul/cuDNN on | Faster convolutions on the 4080 SUPER |
+| `cudnn.benchmark` on (off only for `parity`) | Picks the fastest conv algorithm after the first case |
+| CPU preprocessing prefetched 2 cases ahead | GPU does not wait for NIfTI loading/resampling |
+| Metrics on a 2-worker thread pool, bounded at 2 cases in flight | GPU inference overlaps CPU metrics without RAM blow-up |
+| No probability caches written | Avoids ~0.3 GB/volume disk I/O; CSVs stay a few MB |
+| 8 TTA passes run sequentially | Peak VRAM ≈ 1-pass plus one logits accumulator |
+
+**Tune `--sw-batch-size` once, before the `val` stage, then freeze it:**
+
+1. Run `parity` with the default 8. It must pass.
+2. Time 2 smoke cases at each candidate size:
+
+   ```powershell
+   foreach ($b in 4, 8, 16) { & $PY scripts/run_optionA_symmetric_v1_eval.py --stage val --smoke 2 --models rasnet --sw-batch-size $b --out results/optionA_tune_bs$b }
+   ```
+
+3. Pick the fastest size whose printed seconds per case are stable. A 3–5× jump means WDDM paging, so that size is too large.
+4. Delete the `results/optionA_tune_bs*` folders.
+5. Use the chosen size for **both** `val` and `test`, and write it in the lab notebook. The manifest also records it.
+
+Batch size changes only speed, not the math, up to floating-point noise. Keeping it fixed across val and test keeps the lock and the test evaluation numerically consistent.
+
+**Other notes:**
+
+- **Run time:** measure, don't guess. Step 3.3 of the runbook extrapolates from the smoke run. nnU-Net will be slowest per case: 96 × 160 × 160 patches with 8 mirrors per tile.
+- **Efficiency evidence:** run `--stage timing` with nothing else on the GPU. It times 10 validation cases per model plus 1 warm-up, end to end (preprocessing + inference + inversion back to the native grid), for 1-pass and TTA-8 separately, and records peak VRAM. The numbers go into `timing_summary.csv` and the report. Never time while another job runs.
+- **nnU-Net preprocessing:** keep `num_processes=4` for nnU-Net's preprocessing workers, as in the original benchmark.
+- **One GPU job at a time.** Never run Option A alongside Rasnet-v2 training.
 
 ---
 
