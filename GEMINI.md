@@ -1,73 +1,195 @@
-# 🧠 RASNet Thesis Project — Master Context & Verified Benchmark Briefing
+# RASNet Thesis — Project Context and Rules for Gemini / Antigravity
 
-> **Auto-Loaded Project Memory**: Antigravity automatically reads this file upon launching in this workspace.
-> **Canonical Index**: Always consult [`CURRENT_EVIDENCE_INDEX.md`](CURRENT_EVIDENCE_INDEX.md) for the exact file paths and SHA-256 digests of all verified benchmark runs, audit tables, and thesis outputs.
-
----
-
-## 📌 Project Overview
-- **Repository**: `Efficient-3D-Tiled-CNN-Architecture` / `Thesis_RASNET`
-- **Topic**: RASNet (Residual Attention Segmentation Network with Multi-Scale Deep Supervision & `StenosisAwareLoss`) — A Symmetric 3-Arm Retrospective Reassessment of 5 Matched 200-Epoch 3D Coronary Artery CCTA Segmentation Models on ImageCAS.
-- **Author**: Nafis Mehedi (`Rytnix786 <nafismehedi37@gmail.com>`)
-- **Methodological Status**: **Retrospective Reassessment** (`BENCHMARK_PREREGISTRATION.md`). Because historical development sweeps ($\tau = 0.60$, $\alpha=0.4, \gamma=2.5$) previously inspected the 150-case ImageCAS test split (`IDs 851–1000`), all evaluations on `851–1000` are reported as retrospective reassessments rather than untouched confirmatory tests.
+> **Auto-loaded project memory.** Antigravity reads this file when it opens this workspace. Claude Code reads `CLAUDE.md`. **The rules in §3 are identical in both files; keep them in sync.**
+> **Single source of truth for paths and hashes:** [`CURRENT_EVIDENCE_INDEX.md`](CURRENT_EVIDENCE_INDEX.md). Numbers below are copied from result files (source given per row). If a file and this summary ever disagree, **the file wins**; fix this summary.
 
 ---
 
-## 🟢 Verified 200-Epoch 5-Model ImageCAS Benchmark (`N = 150` Test, `N = 94` Val)
+## 1. Project
 
-All five models were trained for 200 epochs on the identical `N = 690` ImageCAS training split (`Phase3_Local_Integration/splits_final.json`, `sha256: efe3f06cfe...`) and evaluated on the `N = 94` validation split (`results/benchmark_runs/val_full_94/`) and `N = 150` test split (`results/benchmark_runs/test_retrospective_150/`) using true 6-connected physical surface distances (`surface-v1`) and native SimpleITK `(Z, Y, X)` coordinate inversion (`INFERENCE_SPEC.md`).
+- **Repository:** `Efficient-3D-Tiled-CNN-Architecture` / `Thesis_RASNET`
+- **Author:** Nafis Mehedi (`Rytnix786 <nafismehedi37@gmail.com>`)
+- **Topic:** RASNet is a MONAI SegResNet backbone with 3D attention gates, multi-scale deep supervision and `StenosisAwareLoss` (0.4 Dice + 0.6 Focal, γ = 2.5), at 4.71 M parameters. The thesis evaluates it for 3D coronary artery segmentation in CCTA (ImageCAS).
+- **Baselines (real public implementations):**
+  - nnU-Net V2 (`MIC-DKFZ/nnUNet`, `nnunetv2 2.8.1`, `3d_fullres`, 200-epoch trainer, fold 0)
+  - MONAI `SegResNet`
+  - MONAI `VNet`
+  - MONAI residual `UNet` (Kerfoot 2018 — **not** `wolny/pytorch-3dunet`; trained on 128³ resized volumes)
+- **Goal:** show RASNet is an accurate **and** efficient alternative to these baselines. Aim to beat them, but only under protocols that are identical for every model. Efficiency (6.5× fewer parameters than nnU-Net, about 9× fewer GFLOPs per patch) is always a valid claim. Accuracy claims must come from pre-declared tests.
+- **Methodological status:** v1 test results on IDs 851–1000 are a **retrospective reassessment**, because earlier sweeps (τ = 0.60, loss calibration) and Phase H inspected that split (`BENCHMARK_PREREGISTRATION.md`). Rasnet-v2 is the controlled, pre-registered, multi-seed study.
 
-### 1. Arm A — Raw Single Pass ($\tau = 0.50$, No TTA, No Post-Processing; `N = 150`)
-*Measures intrinsic network calibration and raw segmentation quality without heuristic cleanup:*
-- **RASNet (Ours, 4.71M params)**: **Dice `0.7736 ± 0.0616`**, **IoU `0.6348 ± 0.0787`**, **Precision `0.8032 ± 0.0830`**, Recall `0.7521 ± 0.0718`, HD95 `14.83 ± 13.89 mm`, ASD `2.431 ± 1.916 mm`, **clDice `0.8389 ± 0.0686`**, Centerline Recall `0.8655 ± 0.0648`.
-- **nnU-Net V2 (30.79M params)**: Dice `0.7687 ± 0.0668`, IoU `0.6289 ± 0.0856`, Precision `0.7391 ± 0.0967`, **Recall `0.8106 ± 0.0680`**, HD95 `21.10 ± 17.10 mm`, ASD `3.168 ± 2.636 mm`, clDice `0.8202 ± 0.0765`, **Centerline Recall `0.9111 ± 0.0556`**.
-- **V-Net (45.60M params)**: Dice `0.7492 ± 0.0693`, IoU `0.6037 ± 0.0856`, Precision `0.7524 ± 0.1037`, Recall `0.7555 ± 0.0694`, HD95 `22.10 ± 18.62 mm`, ASD `3.335 ± 2.762 mm`, clDice `0.8164 ± 0.0780`, Centerline Recall `0.8561 ± 0.0627`.
-- **SegResNet (4.70M params)**: Dice `0.7481 ± 0.0654`, IoU `0.6018 ± 0.0809`, Precision `0.7253 ± 0.0945`, Recall `0.7811 ± 0.0640`, HD95 `30.41 ± 18.11 mm`, ASD `4.571 ± 2.685 mm`, clDice `0.7941 ± 0.0790`, Centerline Recall `0.8950 ± 0.0561`.
-- **3D U-Net (4.81M params)**: Dice `0.5517 ± 0.0480`, IoU `0.3824 ± 0.0449`, Precision `0.7269 ± 0.0722`, Recall `0.4484 ± 0.0526`, **HD95 `10.88 ± 7.25 mm`**, **ASD `1.999 ± 1.036 mm`**, clDice `0.7103 ± 0.0652`, Centerline Recall `0.6311 ± 0.0821`.
+## 2. Two machines
 
-### 2. Arm B — Documented Native / Standard TTA ($\tau = 0.50$, No Post-Processing; `N = 150`)
-*`RASNet` uses documented 4-pass spatial flip TTA; `nnU-Net V2` uses native 8-pass 3D mirroring; `SegResNet`, `V-Net`, and `3D U-Net` have no documented TTA (`1-pass`):*
-- **RASNet (4-pass TTA)**: **Dice `0.7807 ± 0.0606`**, **IoU `0.6442 ± 0.0783`**, **Precision `0.8138 ± 0.0813`**, Recall `0.7563 ± 0.0724`, HD95 `13.69 ± 13.88 mm`, ASD `2.270 ± 1.863 mm`, **clDice `0.8453 ± 0.0677`**, Centerline Recall `0.8715 ± 0.0644`.
-- **nnU-Net V2 (8-pass Mirroring)**: Dice `0.7760 ± 0.0641`, IoU `0.6384 ± 0.0833`, Precision `0.7536 ± 0.0936`, **Recall `0.8090 ± 0.0681`**, HD95 `19.25 ± 16.93 mm`, ASD `2.914 ± 2.487 mm`, clDice `0.8264 ± 0.0750`, **Centerline Recall `0.9096 ± 0.0562`**.
+| | `H:\Thesis_Trainings` (laptop copy) | `C:\Thesis_RASNET` (lab PC, RTX 4080 SUPER 16 GB) |
+| :--- | :--- | :--- |
+| Data / checkpoints | **Not present** | Present |
+| Allowed work | Code reading, synthetic CPU tests | Training, evaluation, GPU runs |
+| Python env | Varies (MONAI may differ, no `nnunetv2`) | `C:\Thesis_RASNET_env\bench` (Python 3.12, torch cu126, MONAI 1.6.1, nnunetv2 2.8.1) |
 
-### 3. Arm C — Validation-Tuned Thresholds ($\tau^*$) + Identical Top-2 CC Pruning (`N = 150`)
-*Single pass, validation-selected threshold $\tau^* \in [0.30..0.70]$ (`results/thresholds.json`: `0.30` for RASNet/V-Net/3D U-Net, `0.35` for nnU-Net/SegResNet), and identical 26-connected top-2 connected-component pruning across all 5 models:*
-- **nnU-Net V2 ($\tau^*=0.35$, Top-2 CC)**: **Dice `0.8055 ± 0.0633`**, **IoU `0.6786 ± 0.0821`**, Precision `0.8207 ± 0.0676`, **Recall `0.7977 ± 0.0913`**, **HD95 `8.26 ± 9.81 mm`**, **ASD `1.395 ± 1.862 mm`**, **clDice `0.8739 ± 0.0679`**, **Centerline Recall `0.8752 ± 0.0908`**.
-- **RASNet (Ours, $\tau^*=0.30$, Top-2 CC)**: Dice `0.7899 ± 0.0677`, IoU `0.6575 ± 0.0859`, **Precision `0.8252 ± 0.0650`**, Recall `0.7649 ± 0.0982`, HD95 `9.94 ± 11.25 mm`, ASD `1.671 ± 2.382 mm`, clDice `0.8646 ± 0.0759`, Centerline Recall `0.8256 ± 0.1049`.
-- **SegResNet ($\tau^*=0.35$, Top-2 CC)**: Dice `0.7884 ± 0.0700`, IoU `0.6556 ± 0.0868`, Precision `0.8095 ± 0.0750`, Recall `0.7751 ± 0.0949`, HD95 `9.84 ± 11.35 mm`, ASD `1.717 ± 2.688 mm`, clDice `0.8664 ± 0.0776`, Centerline Recall `0.8463 ± 0.0994`.
-- **V-Net ($\tau^*=0.30$, Top-2 CC)**: Dice `0.7710 ± 0.0736`, IoU `0.6328 ± 0.0914`, Precision `0.8054 ± 0.0765`, Recall `0.7488 ± 0.1048`, HD95 `12.38 ± 13.20 mm`, ASD `2.032 ± 2.490 mm`, clDice `0.8508 ± 0.0795`, Centerline Recall `0.8009 ± 0.1050`.
-- **3D U-Net ($\tau^*=0.30$, Top-2 CC)**: Dice `0.6064 ± 0.0532`, IoU `0.4371 ± 0.0532`, Precision `0.5877 ± 0.0615`, Recall `0.6336 ± 0.0752`, HD95 `11.85 ± 8.74 mm`, ASD `2.158 ± 1.442 mm`, clDice `0.7664 ± 0.0705`, Centerline Recall `0.7206 ± 0.0947`.
-
-*(Historical Asymmetric Recipe Diagnostic — `RASNet` with 4-pass TTA, $\tau=0.60$, Top-2 CC (`diagnostic_rasnet_historical_recipe_tau060_tta_top2.csv`): Dice `0.7769 ± 0.0694`, Precision `0.8805 ± 0.0528`, Recall `0.7019 ± 0.0977`, HD95 `10.30 ± 10.67 mm`, ASD `1.564 ± 1.812 mm`, clDice `0.8594 ± 0.0720`.)*
-
-### 4. Paired Statistical Testing (`K = 3` Primary Family & `K = 32` Secondary Family)
-- **Arm A (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
-  - `Precision`: $\Delta = +0.0642$ (95% CI $[+0.0565, +0.0728]$), $p = 6.42 \times 10^{-25}$, $p_{\text{Holm}} = 1.93 \times 10^{-24}$ (`139W / 0T / 11L`, $r_{rb} = +0.970$).
-  - `HD95`: $\Delta = -6.27\text{ mm}$ (95% CI $[-8.43, -4.38]$), $p = 1.98 \times 10^{-9}$, $p_{\text{Holm}} = 3.96 \times 10^{-9}$ (`107W / 0T / 43L`, $r_{rb} = -0.565$).
-  - `ASD`: $\Delta = -0.737\text{ mm}$ (95% CI $[-0.995, -0.503]$), $p = 2.37 \times 10^{-8}$, $p_{\text{Holm}} = 2.37 \times 10^{-8}$ (`107W / 0T / 43L`, $r_{rb} = -0.525$).
-- **Arm B (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
-  - `Precision`: $\Delta = +0.0602$ (95% CI $[+0.0527, +0.0680]$), $p_{\text{Holm}} = 5.39 \times 10^{-24}$ (`141W / 0T / 9L`).
-  - `HD95`: $\Delta = -5.56\text{ mm}$ (95% CI $[-7.67, -3.63]$), $p_{\text{Holm}} = 4.34 \times 10^{-8}$ (`103W / 0T / 47L`).
-  - `ASD`: $\Delta = -0.644\text{ mm}$ (95% CI $[-0.885, -0.422]$), $p_{\text{Holm}} = 4.17 \times 10^{-7}$ (`98W / 0T / 52L`).
-- **Arm C (`RASNet` vs. `nnU-Net V2`, $N=150$, Holm-Bonferroni $K=3$)**:
-  - `Precision`: $\Delta = +0.0046$ (95% CI $[-0.0046, +0.0124]$), $p_{\text{Holm}} = 0.160$ (`84W / 0T / 66L`, no significant difference; `RASNet` numerically higher).
-  - `HD95`: $\Delta = +1.68\text{ mm}$ (95% CI $[+0.50, +3.08]$), $p_{\text{Holm}} = 4.20 \times 10^{-4}$ (`55W / 1T / 94L` in favor of `nnU-Net V2`).
-  - `ASD`: $\Delta = +0.277\text{ mm}$ (95% CI $[-0.058, +0.713]$), $p_{\text{Holm}} = 1.54 \times 10^{-4}$ (`51W / 0T / 99L` in favor of `nnU-Net V2`).
-- **Arm C (`RASNet` vs. `SegResNet` Backbone, $N=150$, $K=32$ Secondary Family)**:
-  - `Precision`: $\Delta = +0.0158$ (95% CI $[+0.0109, +0.0209]$), $p = 3.22 \times 10^{-9}$, $p_{\text{Holm}} = 4.50 \times 10^{-8}$ (`107W / 0T / 43L`).
-  - `Dice`: $\Delta = +0.0016$ (95% CI $[-0.0020, +0.0053]$), $p = 0.0887$ (`88W / 0T / 62L`).
+Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 
 ---
 
-## 📂 Key Active File Locations
-- **Canonical Evidence Index**: `CURRENT_EVIDENCE_INDEX.md`
-- **Verified Benchmark Package**: `benchmark/` (`run_benchmark.py`, `metrics.py`, `postprocess.py`, `stats.py`, `thresholds.py`, `adapters/`)
-- **Unit & Synthetic Dry-Run Tests (`31/31` passing)**: `tests/`
-- **Core RASNet Architecture & Loss**: `Phase3_Local_Integration/rasnet_model.py`, `Phase3_Local_Integration/rasnet_loss.py`
-- **Canonical Split Manifest**: `Phase3_Local_Integration/splits_final.json` (`690 train`, `94 val`, `150 test`)
-- **200-Epoch Trainers & Verified Checkpoints**: `Q1_Publication_Package/matched_200ep_benchmark/` (`CHECKPOINTS.md`)
-- **Verified Benchmark Runs**: `results/benchmark_runs/{val_full_94,test_retrospective_150,smoke_val_all5,smoke_verified_v2}/`
-- **Frozen Validation Thresholds**: `results/thresholds.json`
-- **2026-11-10 Verification Audit**: `results/audits/2026-11-10_verification_audit/`
-- **Thesis Tables, Figures & Narrative**: `results/thesis_outputs/`
-- **Archived Historical & Outside-Scope Assets**: `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`)
+## 3. Rules (identical to `CLAUDE.md` §3)
+
+1. **Data paths:** the dataset root lives only in config (`config.lab.yaml`, `Rasnet-v2/configs/fair_v2.yaml`), never in code.
+2. **Frozen science:** do not change model architectures, losses, hyperparameters, epoch counts or checkpoints.
+   - The only exception is a **dated pre-registration amendment the user has explicitly approved**, committed before any affected result exists.
+3. **Locked test set:** test cases 851–1000 are locked. Every selection (threshold, recipe, LR, seed, design, checkpoint) uses Val-94 only.
+   - Test inference runs once per frozen recipe, after the validation lock is written and committed.
+4. **Symmetry for every comparison:**
+   - Every model gets the same inference (overlap, blending), the same TTA definition, the same threshold grid and the same selection rule.
+   - Symmetric TTA means 8-pass mirroring: identity + 7 flip-axis combinations, logits averaged before softmax, as in nnU-Net's predictor.
+   - Never tune RASNet alone and compare it with untuned baselines.
+5. **Evidence:**
+   - Every reported number comes from a file produced by a run with a manifest.
+   - Stage 2A pilot numbers (`val20_dice`, 50 epochs, one seed) are for LR selection only and must never be cited as results.
+   - Do not quote numbers from chat transcripts; quote the file.
+6. **Tests first:** write the test, show it failing, then implement and show it passing.
+7. **Git:**
+   - Never commit data or checkpoints. Record checkpoint SHA-256 in `CHECKPOINTS.md`.
+   - Commit only when the user asks. Never push without explicit authorisation.
+8. **GPU:** one GPU job at a time. Before launching, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`. Another agent may own the GPU.
+9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`.
+10. **Claims:**
+    - Thesis wording is chosen from the pre-written outcome tables (`docs/01_…` §7, `docs/02_…` §5) that match the numbers. Never write a stronger claim.
+    - "Not significant" ≠ "equal".
+    - Phase H (RASNet-only tuning) is not a fair comparison with nnU-Net.
+11. **Status polling:** do not post repeated status-only messages. Report when a milestone changes (epoch with validation, job finished, error).
+
+---
+
+## 4. Verified v1 results (200 epochs, Test N = 150)
+
+Source: `results/thesis_outputs/Table2_test_150_arms_A_B_C_summary.md` (Dice / precision / HD95 / clDice as mean ± SD) and `Table4_computational_efficiency_rtx4080super.csv` (params).
+
+| Model | Params | Arm A Dice | Arm A Precision | Arm A HD95 (mm) | Arm C Dice | Arm C Precision | Arm C HD95 (mm) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| RASNet | 4.71 M | **0.7736 ± 0.0616** | **0.8032** | 14.83 | 0.7899 ± 0.0677 | **0.8252** | 9.94 |
+| nnU-Net V2 | 30.79 M | 0.7687 ± 0.0668 | 0.7391 | 21.10 | **0.8055 ± 0.0633** | 0.8207 | **8.26** |
+| SegResNet | 4.70 M | 0.7481 ± 0.0654 | 0.7253 | 30.41 | 0.7884 ± 0.0700 | 0.8095 | 9.84 |
+| V-Net | 45.60 M | 0.7492 ± 0.0693 | 0.7524 | 22.10 | 0.7710 ± 0.0736 | 0.8054 | 12.38 |
+| 3D U-Net | 4.81 M | 0.5517 ± 0.0480 | 0.7269 | 10.88 | 0.6064 ± 0.0532 | 0.5877 | 11.85 |
+
+Arm definitions:
+
+| Arm | Passes | Threshold | Post-processing |
+| :--- | :--- | :--- | :--- |
+| A | single pass | τ = 0.50 | none |
+| B | native TTA (RASNet 4-pass, nnU-Net 8-pass, others none) | τ = 0.50 | none |
+| C | single pass | Val-94 τ\* from `results/thresholds.json` | 26-connected Top-2 CC |
+
+Arm B Dice: RASNet 0.7807, nnU-Net 0.7760.
+
+Historical asymmetric recipe (RASNet, 4-pass TTA, τ = 0.60, Top-2 CC), from `diagnostic_rasnet_historical_recipe_tau060_tta_top2.csv`:
+
+- Dice 0.7755 ± 0.0726
+- Precision 0.8968
+- Recall 0.6892
+- HD95 11.14 mm
+- ASD 1.831 mm
+- clDice 0.8562
+
+**Known v1 asymmetries.** These are disclosed; Option A addresses the inference ones.
+
+- MONAI models were evaluated with 25 % overlap and constant blending; nnU-Net used 50 % overlap with Gaussian blending.
+- TTA differed in Arm B.
+- The τ grid floor of 0.30 clamped RASNet, V-Net and 3D U-Net.
+- Training differences are baked into the weights: spacing 0.5³ vs 0.35 × 0.35 × 0.5 mm, patch 96³ vs 96 × 160 × 160, normalisation, augmentation, capacity.
+
+### Paired tests, RASNet vs nnU-Net (primary family, Holm K = 3)
+
+Source: `results/audits/2026-11-10_verification_audit/paired_stats_primary_arm_{A,B,C}_with_ci.csv`.
+
+| Arm | Precision Δ [95 % CI], W/T/L | HD95 Δ mm [95 % CI], W/T/L | ASD Δ mm [95 % CI], W/T/L |
+| :--- | :--- | :--- | :--- |
+| A | +0.0642 [+0.0565, +0.0728], 139/0/11, Holm p < 1e-20 | −6.27 [−8.43, −4.38], 107/0/43 | −0.737 [−0.995, −0.503], 107/0/43 |
+| B | +0.0602 [+0.0527, +0.0680], 141/0/9 | −5.56 [−7.67, −3.63], 103/0/47 | −0.644 [−0.885, −0.422], 98/0/52 |
+| C | +0.0046 [−0.0046, +0.0124], 84/0/66, Holm p = 0.160 (n.s.) | +1.68 [+0.50, +3.08], 55/1/94, Holm p = 4.2e-4 (favours nnU-Net) | +0.277 [−0.058, +0.713], 51/0/99, Holm p = 1.5e-4 (favours nnU-Net) |
+
+### Arm C, RASNet vs SegResNet (secondary K = 32 family)
+
+Source: `results/audits/2026-11-10_verification_audit/paired_stats_full32_arm_C_with_ci.csv`.
+
+| Metric | Δ [95 % CI] | p | Holm p | W/T/L | Verdict |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Precision | +0.0158 [+0.0105, +0.0221] | 4.68e-11 | 8.42e-10 | 108/0/42 | Significant |
+| Dice | +0.0016 [−0.0026, +0.0065] | 0.520 | 1.0 | 81/0/69 | n.s. |
+
+### Phase H — RASNet-only inference exploration (not a fair nnU-Net comparison)
+
+Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md`.
+
+- **Setup:** frozen `rasnet_best.pth`; 152 recipes searched on Val-94 for RASNet only.
+- **Result:** with 0.50 overlap, Gaussian blending and τ = 0.40 plus Top-2 CC, test Dice was 0.8008 single-pass and 0.8043 with 4-pass TTA.
+- **Why it is not fair:** the baselines got no equivalent search, and the nnU-Net reference was single-pass. Val-94: RASNet's best was 0.8023, while nnU-Net's single-pass Arm C was 0.8075.
+- **Replacement:** Option A is the fair version.
+
+---
+
+## 5. Rasnet-v2 — the controlled study (`Rasnet-v2/`)
+
+- **Protocol:** `PREREGISTRATION_V2.md` and `configs/fair_v2.yaml`.
+- **Shared settings for all MONAI models:**
+  - spacing 0.3496 × 0.3496 × 0.5 mm, patch 160 × 160 × 96, CT normalisation
+  - identical augmentation and loss
+  - AdamW, cosine schedule, 250 steps × 200 epochs, effective batch 2
+  - 0.50 Gaussian inference, τ grid 0.20–0.70
+- **nnU-Net V2** is retrained 3× with its native recipe. Present it as **framework vs framework**.
+- **Width tiers:** F = 16 (4.71 M, matched to SegResNet 4.70 M) and F = 32 (18.8 M).
+- **Pipeline** (`src/run_queue.py --stage …`):
+  - `stage2a`: LR pilots
+  - `stage2a_eval`: Val-94 LR lock
+  - `stage2b` / `stage2b_eval`: design lock with gates
+  - `stage3`: 200-epoch runs with seeds {42, 123, 456}
+  - `stage4a` / `stage4b` / `stage4c`: val curves, Val-94 threshold lock, one-shot Test-150
+  - `stage5`: families, non-inferiority, efficiency, Pareto
+- **Hypothesis families:**
+  - Family 1: RASNet-v2 vs matched SegResNet-v2 on Dice, clDice, precision, HD95.
+  - Family 2: RASNet-v2 vs nnU-Net on precision, HD95, clDice.
+  - Dice non-inferiority vs nnU-Net, margin −0.005.
+
+**Defects found 2026-11-12, fixed by proposed Amendment A1** (`docs/02_…`; needs user sign-off, then commit before Stage 2A resumes):
+
+- the Stage 3 clDice weight can differ between RASNet and its baselines
+- the Stage 2B gates are not binding, and empty predictions can help a candidate pass them
+- TTA is 4-pass for MONAI models vs 8-pass for nnU-Net
+- the F32 LR grid lacks 1e-4
+- the deep-supervision ablation has a single seed
+
+---
+
+## 6. Current state and next steps
+
+- **2026-11-10:** all v1 LAB-CHECKs were verified on the lab PC (`results/audits/2026-11-10_verification_audit/`). Superseded material is archived in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/`.
+- **2026-11-12 (lab-reported):** Stage 2A is paused at 14/16. Job 15 (`pilot2a_rasnet_v2_f32_lr3e-4_seed42`) has resume state saved at epoch 30, step 200 (`STATE_HANDOFF.md`).
+- **Next, in order** (`docs/03_NEXT_STEPS_RUNBOOK.md`):
+  - **P0:** fix the `CHECKPOINTS.md` loss description (SegResNet and V-Net used `DiceFocalLoss(1.0, 2.0)`, not DiceCELoss), and pre-register Option A and Amendment A1.
+  - **P1:** write the Option A code (`docs/01_…`).
+  - **P2:** apply the Amendment A1 patches.
+  - **P3:** run Option A on the GPU.
+  - **P4:** resume Rasnet-v2 through Stage 5.
+  - **P5:** thesis integration.
+
+## 7. Key files
+
+| What | Where |
+| :--- | :--- |
+| Evidence index | `CURRENT_EVIDENCE_INDEX.md` |
+| Checkpoints | `CHECKPOINTS.md` |
+| Inference spec | `INFERENCE_SPEC.md` |
+| v1 benchmark | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `adapters/`); tests in `tests/` |
+| RASNet model + loss | `Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py` |
+| Splits | `Phase3_Local_Integration/splits_final.json` (690 / 94 / 150) |
+| v1 trainers | `Q1_Publication_Package/matched_200ep_benchmark/train_*_200ep.py`, `prepare_and_run_nnunet_200ep.py` |
+| v1 results | `results/benchmark_runs/`, `results/thresholds.json`, `results/thesis_outputs/` |
+| Phase H | `results/rasnet_fixed_weight_optimization/`, `scripts/run_phaseH_rasnet_optimization.py` |
+| Rasnet-v2 | `Rasnet-v2/` |
+| Plans | `docs/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs/03_NEXT_STEPS_RUNBOOK.md` |
+
+## 8. Technical pitfalls
+
+- **SimpleITK `.img.nii.gz` quirk:** SimpleITK writes `*.img.nii.gz` as Analyze. Write to a temp `.nii.gz` name and rename (see `export_mask_like`).
+- **nnU-Net training-log numbers are not comparable:** `Pseudo dice` is patch-level on foreground-oversampled batches, not comparable to full-volume Dice.
+- **Empty predictions:** precision and HD95 are NaN for an empty prediction. Count empties; never let NaN-dropping help a candidate.
+- **v1 3D U-Net:** excluded from sliding-window comparisons (128³ resize).
