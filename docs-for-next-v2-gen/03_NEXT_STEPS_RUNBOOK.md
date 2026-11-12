@@ -34,6 +34,13 @@ $PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"; Set-Location C:\Thesis_RA
 
 ## Overview (order and why)
 
+> **Status 2026-11-13: P0, P1 and P2 are done on the home PC and committed.**
+> - `34ee6ff`: pre-registrations (Option A + Amendment A1, all 5 items signed off).
+> - `aecf60e`: Option A code, tests first, 51/51.
+> - `79e0458`: Amendment A1 code, tests first, 11/11.
+>
+> On the lab PC, `00_LAB_PC_OPERATOR_MANUAL.md` §4–§5 only *verifies* these (no code is written there), then continues with P3. The P0–P2 text below stays as the record of what was done.
+
 | Phase | Runs on | Purpose |
 | :--- | :--- | :--- |
 | P0 Housekeeping | CPU | Correct a doc error; freeze both protocol amendments **before** any new result exists |

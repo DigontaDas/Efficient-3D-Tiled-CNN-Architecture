@@ -10,6 +10,8 @@
 
 **Patch validation (2026-11-12, scratch copy on the H: machine, CPU only):**
 
+- **Applied to the repo on 2026-11-13 in commit `79e0458`.** The amendment text was committed first, in `34ee6ff`, with all 5 items signed off by the user.
+
 - Every patch in §3 was applied mechanically, exactly as written, to a copy of `Rasnet-v2/`.
 - `tests/test_amendment_a1.py`: **fails before** the patches (10 fail; the 1 that passes is a negative check that is trivially true before patching), **11 / 11 pass after**. The patched Stage 2A queue keeps jobs 1–16 in their existing positions (Job 15 is still `pilot2a_rasnet_v2_f32_lr3e-4_seed42`); the two new pilots are jobs 17–18. This includes the Stage 5 3-seed DS contrast and the D9 diagnostic helper (`src/diag_vnet_bn.py`).
 - Full v2 suite after patching (including the new file): 40 passed, 3 failed. All 3 failures are environment-only on that machine:

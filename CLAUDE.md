@@ -71,9 +71,10 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 - **2026-11-12 (lab-reported, LAB-CHECK):** Rasnet-v2 Stage 2A is paused at 14/16 pilots. Job 15's resume state is saved at epoch 30, step 200; see `Rasnet-v2/STATE_HANDOFF.md` on the lab PC.
 - **Open work** (not yet run, LAB-CHECK), in this order. On the lab PC follow `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`; the full plan is in `docs-for-next-v2-gen/03_…`:
   1. **Option A (next):** symmetric re-evaluation of the frozen v1 RASNet / SegResNet / V-Net / nnU-Net. Stage 2A stays paused until Option A is done.
-     - Create the Option A code only with the manual's extractor (§5), never by retyping.
+     - The Option A code is committed (`aecf60e`); the lab PC verifies it with manual §5 and never rewrites it.
      - Manifests record `git.dirty_code`, which must be `false`, and `git.dirty_any`, which is informational: training logs are git-tracked.
-  2. **Rasnet-v2 Amendment A1:** matched clDice weight, binding Stage 2B gates, 8-pass TTA, F32 LR grid incl. 1e-4, 3-seed DS ablation. It needs the user's sign-off and must be committed before Stage 2A resumes.
+  2. **Rasnet-v2 Amendment A1:** matched clDice weight, binding Stage 2B gates, 8-pass TTA, F32 LR grid incl. 1e-4, 3-seed DS ablation. **Signed off and committed on 2026-11-13** (`34ee6ff` text, `79e0458` code). Lab PC re-runs the tests (manual §5 D3), then Stage 2A resumes after Option A.
+- **Code ownership:** all core code (Option A: `aecf60e`; A1: `79e0458`) was written tests-first on the home PC. Lab-PC agents only run it and fix trivial environment issues after showing the user the diff.
 
 ## 6. Known technical pitfalls
 

@@ -166,12 +166,12 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 - **2026-11-10:** all v1 LAB-CHECKs were verified on the lab PC (`results/audits/2026-11-10_verification_audit/`). Superseded material is archived in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/`.
 - **2026-11-12 (lab-reported):** Stage 2A is paused at 14/16. Job 15 (`pilot2a_rasnet_v2_f32_lr3e-4_seed42`) has resume state saved at epoch 30, step 200 (`STATE_HANDOFF.md`).
 - **On the lab PC, start with `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`.** It tells the IDE agent exactly what to do: Option A first, while Stage 2A stays paused.
-  - Create the Option A code only with the manual's extractor (§5).
+  - All core code is already committed (Option A `aecf60e`, Amendment A1 `79e0458`, pre-registrations `34ee6ff`). **Do not write or rewrite core code**: verify it with manual §5, run it, and fix only trivial environment issues after showing the user the diff.
   - Manifests record `git.dirty_code`, which must be `false`, and `git.dirty_any`, which is informational.
 - **Next, in order** (`docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md`):
-  - **P0:** pre-register Option A and Amendment A1. The `CHECKPOINTS.md` loss description was already corrected on 2026-11-13: SegResNet and V-Net used `DiceFocalLoss(1.0, 2.0)`.
-  - **P1:** write the Option A code (`docs-for-next-v2-gen/01_…`).
-  - **P2:** apply the Amendment A1 patches, including the Stage 5 3-seed DS contrast and `src/diag_vnet_bn.py`.
+  - **P0 — done (`34ee6ff`):** pre-registrations committed. The `CHECKPOINTS.md` loss description was corrected 2026-11-13.
+  - **P1 — done (`aecf60e`):** Option A code, tests first.
+  - **P2 — done (`79e0458`):** Amendment A1 patches, including the Stage 5 3-seed DS contrast and `src/diag_vnet_bn.py`. The lab PC re-runs the tests (manual §5).
   - **P3:** run Option A on the GPU: parity, `sw_batch_size` tuning, val, lock, test, timing, stats, figures.
   - **P4:** resume Rasnet-v2 through Stage 5.
   - **P5:** thesis integration.

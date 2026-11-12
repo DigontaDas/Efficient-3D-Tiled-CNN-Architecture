@@ -5,6 +5,8 @@
 
 **Code validation (2026-11-12, done on a scratch copy of the repo on the H: machine, CPU only, MONAI 1.5.1, no data):**
 
+- **Applied to the repo on 2026-11-13 in commit `aecf60e`**, byte-identical to the blocks below (the manual §5 D1 checks this).
+
 - The three code blocks below were extracted verbatim and compiled.
 - `tests/test_optionA_symmetric_eval.py`: **18 / 18 pass**. This includes 8-flip TTA correctness on a synthetic NIfTI, nnU-Net mirroring via the synthetic predictor, lock immutability, the protected-folder guard, the timing helper, figure writing, and the code-scoped `git_info` dirty flag. Whole `tests/` suite: **51 / 51** (33 existing + 18 new).
 - The `stats` stage, the generated `OPTION_A_RESULTS.md` and the three figures were exercised on fabricated per-case rows. The figures were rendered and inspected for label collisions and fixed. Those rows were deleted and are not results.

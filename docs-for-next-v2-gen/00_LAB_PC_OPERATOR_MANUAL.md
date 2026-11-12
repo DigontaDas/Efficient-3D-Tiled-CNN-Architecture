@@ -20,7 +20,11 @@
    - Never write into `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`.
    - One GPU job at a time.
    - Every number you report must come from a file produced by a run with a manifest. Do not quote numbers from chat or transcripts.
-2. **Do not rewrite the Option A code.** Create the three files with the extractor in §5. It copies the code blocks from doc 01 byte for byte. The code was tested as written (51/51 tests on the home PC). Retyping or "improving" it breaks that guarantee.
+2. **Do not write or rewrite core code.** All core code is already committed:
+   - **Option A:** `benchmark/symmetric_eval.py`, `scripts/run_optionA_symmetric_v1_eval.py`, `tests/test_optionA_symmetric_eval.py` (commit `aecf60e`).
+   - **Rasnet-v2 Amendment A1:** commit `79e0458`.
+
+   You may fix only trivial environment problems, such as a missing package or a path in a config file, and only after showing the user the exact diff and getting approval. Never change logic, protocol constants, thresholds, grids, seeds, losses or architectures. If code seems wrong, **STOP** and report it.
 3. **Work in order.** Do the steps in §2–§8 in order. At every **STOP** condition, stop and report to the user; never work around it.
 4. **Git.** Run `git commit` only at the steps that say so, and only after the user says go. Never `git push`.
 5. **Reporting.** Do not post repeated status-only messages. Report when a step finishes, fails, or hits a STOP.
@@ -34,8 +38,9 @@
 | :--- | :--- |
 | v1 benchmark (5 models, Arms A/B/C), Phase H | Locked and verified (2026-11-10). Do not modify. |
 | Rasnet-v2 Stage 2A | **Paused** at 14/16 (lab-reported 2026-11-12). Job 15 can resume from epoch 30, step 200. Resume flags are in `Rasnet-v2/STATE_HANDOFF.md`. |
-| Option A code | Exists only inside doc 01. Created on the lab PC in step §5. |
-| Rasnet-v2 Amendment A1 | Written in doc 02 §2. Needs the user's sign-off. Must be applied and committed **before** Stage 2A resumes. |
+| Pre-registrations | Option A amendment (`BENCHMARK_PREREGISTRATION.md` §6) and Rasnet-v2 Amendment A1 (`Rasnet-v2/PREREGISTRATION_V2.md`, all 5 items signed off) committed 2026-11-13 (`34ee6ff`) |
+| Option A code | Committed (`aecf60e`); tests first; 51/51 passing on the home PC. Verified on the lab PC in step §5. |
+| Rasnet-v2 Amendment A1 code | Committed (`79e0458`); 11/11 contract tests on the home PC. The full Rasnet-v2 suite must be re-run on the lab PC (§8). |
 | `CHECKPOINTS.md` loss description | Fixed 2026-11-13 (SegResNet and V-Net used `DiceFocalLoss`) |
 
 ---
@@ -68,7 +73,7 @@ git pull
 git log -1 --oneline; Get-ChildItem docs-for-next-v2-gen
 ```
 
-All four docs (`00_`–`03_`) must be listed. If `git pull` reports a conflict: **STOP**, do not resolve it automatically, and show it to the user.
+All four docs (`00_`–`03_`) must be listed. `git log --oneline -5` must include `79e0458`, `aecf60e` and `34ee6ff`. If `git pull` reports a conflict: **STOP**, do not resolve it automatically, and show it to the user.
 
 ---
 
@@ -91,84 +96,72 @@ Checkpoint SHA-256s are verified automatically by the Option A script against `C
 
 ---
 
-## 4. Step C — pre-register Option A (before any code or result)
+## 4. Step C — pre-registration (already done; just confirm)
 
-1. Open `docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md` §1 ("Pre-registered protocol").
-2. Copy that whole section to the end of `BENCHMARK_PREREGISTRATION.md`, under the heading `## Amendment: Option A (retrospective inference-parity supplement) — <today's date>`.
-3. **Commit, after the user says go:**
+Both amendments were committed on 2026-11-13 in `34ee6ff`, before any code or result:
+
+- Option A: `BENCHMARK_PREREGISTRATION.md` §6;
+- Rasnet-v2 Amendment A1, all 5 items signed off: end of `Rasnet-v2/PREREGISTRATION_V2.md`.
+
+Confirm with:
 
 ```powershell
-git add BENCHMARK_PREREGISTRATION.md; git commit -m "Pre-register Option A (symmetric v1 inference supplement)"
+git log --oneline -1 34ee6ff; Select-String -Path BENCHMARK_PREREGISTRATION.md -Pattern "Amendment: Option A"; Select-String -Path Rasnet-v2/PREREGISTRATION_V2.md -Pattern "Amendment A1"
 ```
 
-Write the commit hash in the lab notebook.
+All three must print something. Nothing to commit here.
 
 ---
 
-## 5. Step D — create the Option A code, tests first
+## 5. Step D — verify the committed code (no writing)
 
-The extractor below copies code blocks from doc 01 into files. It:
+The code was written tests-first on the home PC. The failing-before and passing-after outputs are committed:
 
-- checks that each block starts with the expected header;
-- refuses to overwrite an existing file;
-- prints a short hash of what it wrote.
+- `results/audits/optionA_tests_FAILING_before_impl.txt`, `results/audits/optionA_tests_PASSING_after_impl.txt`
+- `Rasnet-v2/logs/amendment_a1_tests_FAILING.txt`, `Rasnet-v2/logs/amendment_a1_tests_PASSING.txt`
 
-**D1. Create only the test file, and watch it fail:**
+On the lab PC you only re-run and confirm.
+
+**D1. Check that the code in the repo is exactly the code in the guide.** This catches accidental edits. It must print `OK` three times:
 
 ```powershell
 @'
-import hashlib, pathlib, re, sys
+import pathlib, re
 doc = pathlib.Path("docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md").read_text(encoding="utf-8")
 blocks = re.findall(r"```python\n(.*?)```", doc, re.S)
-if len(blocks) != 3:
-    raise SystemExit(f"Expected 3 python blocks in doc 01, found {len(blocks)}; doc changed - stop.")
-targets = {
-    "tests": (0, "tests/test_optionA_symmetric_eval.py", '"""Option A symmetric-evaluation contract tests'),
-    "lib":   (1, "benchmark/symmetric_eval.py", '"""Option A: symmetric post-hoc inference'),
-    "cli":   (2, "scripts/run_optionA_symmetric_v1_eval.py", "#!/usr/bin/env python"),
-}
-for key in sys.argv[1:]:
-    i, path, head = targets[key]
-    code = blocks[i]
-    if not code.startswith(head):
-        raise SystemExit(f"Block {i} does not start with {head!r}; doc changed - stop.")
-    p = pathlib.Path(path)
-    if p.exists():
-        raise SystemExit(f"{p} already exists - not overwriting.")
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(code, encoding="utf-8", newline="\n")
-    print("wrote", p, "sha256:", hashlib.sha256(code.encode("utf-8")).hexdigest()[:16])
-'@ | Set-Content -Encoding utf8 $env:TEMP\extract_optionA.py
-& $PY $env:TEMP\extract_optionA.py tests
+for i, path in enumerate(["tests/test_optionA_symmetric_eval.py", "benchmark/symmetric_eval.py",
+                          "scripts/run_optionA_symmetric_v1_eval.py"]):
+    code = pathlib.Path(path).read_text(encoding="utf-8").replace("\r\n", "\n")
+    print("OK      " if code == blocks[i] else "DIFFERS ", path)
+'@ | Set-Content -Encoding utf8 $env:TEMP\verify_optionA.py
+& $PY $env:TEMP\verify_optionA.py
 ```
 
-Leave the `'@` line at column 0: PowerShell requires it.
+Leave the `'@` line at column 0. If anything prints `DIFFERS`: **STOP**. Show `git diff` and `git log -3 -- <file>` to the user.
+
+**D2. Run the v1 + Option A test suite on the lab PC:**
 
 ```powershell
-New-Item -ItemType Directory -Force results/audits | Out-Null; & $PY -m pytest tests/test_optionA_symmetric_eval.py -q -p no:cacheprovider 2>&1 | Tee-Object results/audits/optionA_tests_FAILING_before_impl.txt
+& $PY -m pytest tests -q -p no:cacheprovider 2>&1 | Tee-Object results/audits/optionA_tests_lab_pc.txt
 ```
 
-**Expected:** a collection error with `ModuleNotFoundError: No module named 'benchmark.symmetric_eval'`. That is the required "failing test first" evidence; keep the file.
+**Expected: `51 passed`** (33 existing + 18 Option A). Anything less: **STOP** and report the failing test names with their `E ` lines. Do not edit code to make a test pass.
 
-**D2. Create the library and the CLI, then run the whole suite:**
+**D3. Run the Rasnet-v2 suite on the lab PC.** It needs the lab paths and `nnunetv2`, so this is its real check. It runs on the CPU and does not touch Job 15's saved state.
 
 ```powershell
-& $PY $env:TEMP\extract_optionA.py lib cli
+& $PY -m pytest Rasnet-v2/tests -q -p no:cacheprovider 2>&1 | Tee-Object Rasnet-v2/logs/amendment_a1_tests_lab_pc.txt
 ```
+
+**Expected: all pass, 43 tests.** On the home PC 3 tests failed only because of missing lab paths, `nnunetv2` and MONAI 1.6.1; they must pass here. Any failure: **STOP** and report.
+
+**D4. Commit the two lab test logs,** after the user says go:
 
 ```powershell
-& $PY -m pytest tests -q -p no:cacheprovider 2>&1 | Tee-Object results/audits/optionA_tests_PASSING_after_impl.txt
+git add -f results/audits/optionA_tests_lab_pc.txt Rasnet-v2/logs/amendment_a1_tests_lab_pc.txt; git commit -m "Lab PC: Option A and Amendment A1 test runs"
 ```
 
-**Expected: `51 passed`** (33 existing + 18 Option A). Anything less: **STOP** and report the failing test names and their `E ` lines.
-
-**D3. Commit the code before any GPU run,** so every Option A manifest records `git.dirty_code: false`. After the user says go:
-
-```powershell
-git add benchmark/symmetric_eval.py scripts/run_optionA_symmetric_v1_eval.py tests/test_optionA_symmetric_eval.py results/audits/optionA_tests_FAILING_before_impl.txt results/audits/optionA_tests_PASSING_after_impl.txt; git commit -m "Option A: symmetric 8-pass TTA evaluation (tests first)"
-```
-
-If `results/` is git-ignored, add `-f` to the `git add` command.
+After this commit, the Option A manifests will record `git.dirty_code: false`.
 
 ---
 
@@ -245,18 +238,20 @@ On the lab PC `dirty_any` may be `true`, because training logs are git-tracked. 
 
 ## 8. After Option A — getting back to Rasnet-v2 (do not start until §7 is done)
 
-1. **User decision.** The user signs off on Amendment A1 (doc 02 §2), item by item.
-   - Append the signed block to `Rasnet-v2/PREREGISTRATION_V2.md` and commit it.
-   - Unsigned items become stated limitations.
-2. **Patches, tests first.** Apply doc 02 §3 on the lab PC:
-   - add `Rasnet-v2/tests/test_amendment_a1.py` and run it; it must fail;
-   - apply patches 3.2–3.6;
-   - create `Rasnet-v2/src/diag_vnet_bn.py` (§4);
-   - update the 16→18 and 20→22 assertions;
-   - run `& $PY -m pytest Rasnet-v2/tests -q`; all must pass;
-   - run `& $PY Rasnet-v2/src/run_stage1_gates.py`; it must pass.
+1. **Amendment A1 is already signed and committed** (`34ee6ff` text, `79e0458` code). D3 already re-ran the Rasnet-v2 tests on the lab PC.
+2. **Gate check before resuming:**
 
-   Then commit. Patch D5 only **appends** two pilots at the end of the queue. Jobs 1–16 keep their positions, and Job 15's resume check (`config_sha256`) is unaffected.
+   ```powershell
+   & $PY Rasnet-v2/src/run_stage1_gates.py
+   ```
+
+   It must pass; any failure is a **STOP**. Then confirm Job 15's saved state is present:
+
+   ```powershell
+   Get-Item Rasnet-v2/checkpoints/pilot2a_rasnet_v2_f32_lr3e-4_seed42/mid_epoch_state.pt, Rasnet-v2/checkpoints/pilot2a_rasnet_v2_f32_lr3e-4_seed42/latest_state.pt
+   ```
+
+   Patch D5 only **appends** two pilots at the end of the queue. Jobs 1–16 keep their positions, and Job 15's resume check (`config_sha256`) hashes only Job 15's own settings, which are unchanged.
 3. **Resume Stage 2A.** Check `Rasnet-v2/STATE_HANDOFF.md` for extra flags first (for example `--auto-cache`), then run:
 
    ```powershell
@@ -289,10 +284,11 @@ On the lab PC `dirty_any` may be `true`, because training logs are git-tracked. 
 
 - [ ] A. `git status` reviewed; pulled; `00_`–`03_` docs present
 - [ ] B. Versions match; GPU idle; no training process
-- [ ] C. Option A pre-registration committed (hash: ________)
-- [ ] D1. Test file extracted; failing output saved
-- [ ] D2. Library + CLI extracted; `51 passed`; passing output saved
-- [ ] D3. Code committed (hash: ________)
+- [ ] C. Pre-registrations present (`34ee6ff`)
+- [ ] D1. Code identical to guide 01 (3 × `OK`)
+- [ ] D2. `tests/`: `51 passed` on the lab PC
+- [ ] D3. `Rasnet-v2/tests`: all 43 passed on the lab PC
+- [ ] D4. Lab test logs committed (hash: ________)
 - [ ] E1. Parity OK
 - [ ] E2. `<B>` chosen = ____; tuning folders deleted
 - [ ] E3/E4. Smoke OK; time estimate given to user; smoke folder deleted
@@ -303,4 +299,36 @@ On the lab PC `dirty_any` may be `true`, because training logs are git-tracked. 
 - [ ] E10. Stats + `OPTION_A_RESULTS.md`
 - [ ] E11. Figures checked
 - [ ] F. Evidence index updated; wording picked from doc 01 §7; results committed
-- [ ] Then: Amendment A1 signed → doc 02 patches (tests first) → Stage 2A resumed
+- [ ] Then (§8): `run_stage1_gates.py` passes → Job 15 state present → user approves → Stage 2A resumed
+
+---
+
+## 11. Prompts to paste into Antigravity (one at a time)
+
+Paste them in order. Do not paste the next one until the previous phase has finished and you have answered its questions. Each phase ends at a decision only you can make: commits, the immutable threshold lock, test inference, resuming training.
+
+**Prompt 1 — pull, verify, test (no GPU stages)**
+
+```text
+Read GEMINI.md, then docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md, then docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md. Follow the manual exactly. All core code is already committed; do NOT write, rewrite or "improve" any code. You may only fix trivial environment problems, and only after showing me the exact diff and getting my OK.
+Do manual §2 (Step A, safe git pull), §3 (Step B, environment + GPU check), §4 (confirm pre-registrations) and §5 D1–D3 (verify code identical to guide 01, run tests/ and Rasnet-v2/tests). Do NOT run any GPU stage and do NOT commit yet.
+Report: git log --oneline -5, git status --short, the versions line, GPU state, the D1 output, and the pass counts of D2 (expect 51 passed) and D3 (expect 43 passed) with any failing test names and their E lines. Stop at every STOP condition in the manual and ask me.
+```
+
+**Prompt 2 — Option A up to the threshold lock**
+
+```text
+Continue with the manual: §5 D4 (commit the two lab test logs) after I confirm, then §6 E0–E6. Run parity (E1) first; if it fails, STOP and show parity_check.csv. Do the --sw-batch-size tuning (E2, E2b), the smoke run (E3), then give me the time estimate (E4) and WAIT for my OK. After my OK, delete the smoke folder (E4b), run Val-94 (E5) and the lock (E6). Show me the printed locked thresholds and the git.dirty_code value from the newest manifest, then WAIT for my OK before committing the lock (E7). Never edit, delete or re-create the lock. No status-only messages; report when a step finishes or fails.
+```
+
+**Prompt 3 — test once, timing, stats, figures, record**
+
+```text
+The lock is committed. Continue with manual §6 E8–E11 using the same --sw-batch-size as E5: Test-150 (E8, once), timing with nothing else on the GPU (E9), stats (E10), figures (E11; open each PNG and tell me if any labels overlap). Then do §7 Step F: add the "Supplement: Option A" section to CURRENT_EVIDENCE_INDEX.md with SHA-256s, and report to me the R4 table, families FA_primary_rasnet_vs_nnunet and FB_rasnet_vs_segresnet, the non-inferiority row and the timing table — copied from the files, never from memory — and which row of doc 01 §7 matches. Do not commit until I say so.
+```
+
+**Prompt 4 — later: resume Rasnet-v2 Stage 2A**
+
+```text
+Option A is finished and committed. Follow manual §8. Run Rasnet-v2/src/run_stage1_gates.py (must pass), confirm Job 15's mid_epoch_state.pt and latest_state.pt exist, read Rasnet-v2/STATE_HANDOFF.md for any extra resume flags, and show me the exact resume command. WAIT for my OK. After my OK, run it and report only at milestones (a job finished, a validation epoch with its val20_dice, or an error). The expected order is Job 15 (resume), Job 16, then the two new F32 lr=1e-4 pilots. When Stage 2A is done, STOP and tell me; do not start stage2a_eval without my OK.
+```
