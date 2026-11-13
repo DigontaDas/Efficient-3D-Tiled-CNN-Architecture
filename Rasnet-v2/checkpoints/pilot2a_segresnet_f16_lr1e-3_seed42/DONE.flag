@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "run_name": "pilot2a_segresnet_f16_lr1e-3_seed42",
+  "arch": "segresnet",
+  "init_filters": 16,
+  "gate_mode": "conv_bias",
+  "enable_ds": true,
+  "loss_name": "rasnet_v2",
+  "seed": 42,
+  "epochs": 50,
+  "global_opt_step": 12500,
+  "best_val20_dice": 0.44383448054406704,
+  "elapsed_hours": 0.8395,
+  "peak_vram_mb": 8204.8
+}
