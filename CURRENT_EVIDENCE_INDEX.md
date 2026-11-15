@@ -1,6 +1,6 @@
 # Canonical Evidence Index (`CURRENT_EVIDENCE_INDEX.md`)
 
-**Last Updated**: `2026-11-10`  
+**Last Updated**: `2026-11-15`  
 **Workstation**: `NVIDIA GeForce RTX 4080 SUPER (16,376 MiB VRAM)`, Windows 11  
 **Python Environment**: `C:\Thesis_RASNET_env\bench\Scripts\python.exe` (`Python 3.12.10`, `torch 2.14.1+cu126`, `monai 1.6.1`, `nnunetv2 2.8.1`, `SimpleITK 2.5.7`)
 
@@ -100,4 +100,35 @@ This file is the **single authoritative index** of every active, verified eviden
   - [`test_150_locked_winners_summary.csv`](results/rasnet_fixed_weight_optimization/test_150_locked_winners_summary.csv)
   - [`paired_stats_test_150_winner_vs_arms_ABC.csv`](results/rasnet_fixed_weight_optimization/paired_stats_test_150_winner_vs_arms_ABC.csv)
 - **Pareto Figure**: [`fig_phaseH_recall_precision_pareto.png`](results/rasnet_fixed_weight_optimization/fig_phaseH_recall_precision_pareto.png) / [`.svg`](results/rasnet_fixed_weight_optimization/fig_phaseH_recall_precision_pareto.svg)
+
+---
+
+## 8. Supplement: Option A (2026-11-15) (`results/optionA_v1_symmetric_sw050/`)
+
+- **Output Folder**: [`results/optionA_v1_symmetric_sw050/`](results/optionA_v1_symmetric_sw050/) (symmetric 50% overlap Gaussian sliding window, `--sw-batch-size 8`, 1-pass and 8-pass mirroring TTA, $\tau \in [0.20, 0.70]$, 26-connected top-2 CC, evaluated across the 4 sliding-window v1 checkpoints).
+- **Pre-Test Lock (committed at `558e7eb` before Test-150)**:
+  - [`locked_recipes.json`](results/optionA_v1_symmetric_sw050/locked_recipes.json) — SHA-256: `31cb484573b4d941c91f415d7ea4cb3757dc67d205479e96adeeea159ede557c` (`1pass / tta8`: `rasnet=0.40/0.40`, `segresnet=0.40/0.45`, `vnet=0.40/0.45`, `nnunet=0.35/0.20`)
+  - [`locked_recipes.sha256`](results/optionA_v1_symmetric_sw050/locked_recipes.sha256) — SHA-256: `8aff03e1789dceaeb89caa9b58a9dd6d72f8872da77d56ac55c248d300f5181c`
+- **Stage Manifests (all with `git.dirty_code: false`)**:
+  - [`manifest_parity_20261114T195345.json`](results/optionA_v1_symmetric_sw050/manifest_parity_20261114T195345.json) — SHA-256: `1e5780aed77d5ca4c59751bd8c96c8f6c9eac1579134df56c9a5634a73a5e84d`
+  - [`manifest_val_20261114T234219.json`](results/optionA_v1_symmetric_sw050/manifest_val_20261114T234219.json) — SHA-256: `da62ee399fceebeaac440a3d4b53126bd10ad54ff1c843ea9756f400d1b1356f`
+  - [`manifest_lock_20261114T234245.json`](results/optionA_v1_symmetric_sw050/manifest_lock_20261114T234245.json) — SHA-256: `a8a58709ff8d46a7bfe61f3f2839b70741a6c9d91866b3d6cc572997091bd97c`
+  - [`manifest_test_20261115T064137.json`](results/optionA_v1_symmetric_sw050/manifest_test_20261115T064137.json) — SHA-256: `277f8f3a3d6e318d3ff94d4ff3eb581aeaea5751ede66bd2bd4e720d1bbedcb2`
+  - [`manifest_timing_20261115T071538.json`](results/optionA_v1_symmetric_sw050/manifest_timing_20261115T071538.json) — SHA-256: `fcf074a18518027bb56c4d9122d094528d0bd17281abfcb336f91d0ee52d289e`
+  - [`manifest_stats_20261115T071556.json`](results/optionA_v1_symmetric_sw050/manifest_stats_20261115T071556.json) — SHA-256: `fd51824e92eb2a998ec12d88904296f71c9f343bf79d37ccc9149a38c9657797`
+  - [`manifest_figures_20261115T071603.json`](results/optionA_v1_symmetric_sw050/manifest_figures_20261115T071603.json) — SHA-256: `bece4281d8d9b9b9168d8436bfbef9f64b37ace0b08ade7d5be4d742eb920a5c`
+- **Report & Tabular Artifacts**:
+  - [`OPTION_A_RESULTS.md`](results/optionA_v1_symmetric_sw050/OPTION_A_RESULTS.md) — SHA-256: `38abd4e354a0e1422d6764221775757fafaca9660bd3c1ff866924f8acd98430`
+  - [`parity_check.csv`](results/optionA_v1_symmetric_sw050/parity_check.csv) — SHA-256: `dae50f081c4e82cd74355ebe37a7357bec574fd48a36bcda96b62e56ef46f274` (`max |dDice| = 9.08e-06 <= 1e-04`)
+  - [`val_grid_scores.csv`](results/optionA_v1_symmetric_sw050/val_grid_scores.csv) — SHA-256: `4f8f6a582eed9c0082bda782784aeb91f0ab9c981516e184f41e306afd2c3084` (`8,272` rows = `94 cases × 4 models × 22 grid entries`)
+  - [`test_per_case.csv`](results/optionA_v1_symmetric_sw050/test_per_case.csv) — SHA-256: `2b203f0999b891dd8bfb6691c132d5595c0b220b321ac80e74b83ea9797be958` (`2,400` rows = `150 cases × 4 models × 4 recipes`; `0` non-`ok` rows)
+  - [`summary_test.csv`](results/optionA_v1_symmetric_sw050/summary_test.csv) — SHA-256: `e4de75ca2daa1b343df6410b7296c4b21c6c38de1a25b86d9c6ec7fa60c147c2`
+  - [`paired_stats_families.csv`](results/optionA_v1_symmetric_sw050/paired_stats_families.csv) — SHA-256: `262ecdd1c146bb18a82175c77f5e48552fb8c3be5a507b02d4206ec3fed1fc9e` (`68` rows; `n_excluded_nan = 0` for all rows)
+  - [`noninferiority_rasnet_vs_nnunet_dice.csv`](results/optionA_v1_symmetric_sw050/noninferiority_rasnet_vs_nnunet_dice.csv) — SHA-256: `326fe2261f537777b60fb32d27f306d25515f44282feae40e64143bb4cffc28d`
+  - [`timing_val.csv`](results/optionA_v1_symmetric_sw050/timing_val.csv) — SHA-256: `2deb181dc65f874c76a243a0f68d8cab15f59930df82ad4e915f39a89f40dec0` (`80` rows = `10 val cases × 4 models × 2 modes` after `1` warm-up on idle RTX 4080 SUPER)
+  - [`timing_summary.csv`](results/optionA_v1_symmetric_sw050/timing_summary.csv) — SHA-256: `db28c133e187537403cf0ebd812f0d39186d18b9b018ab9954e83d4a4cababed`
+- **Figures**:
+  - [`fig_optionA_dice_vs_params.png`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_vs_params.png) (`6a3f6c91de07605c3af8b192acb47b181c688627626b25328d4b3ae5e9ee7347`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_vs_params.pdf) (`c7e4f6c2dc7012d216e1e975cd9a2561edb887be76955b271bdf974aff995655`)
+  - [`fig_optionA_dice_distributions.png`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_distributions.png) (`a8578d5c67509055bc8808c9e2609d2592b8abbf62dd570a4f3c4571ed7f7c64`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_distributions.pdf) (`8905f8af0e0c7fadc9ca9bec9d47b754ed7e44240da281889ad0634562ec650c`)
+  - [`fig_optionA_paired_diff_rasnet_vs_nnunet.png`](results/optionA_v1_symmetric_sw050/fig_optionA_paired_diff_rasnet_vs_nnunet.png) (`fe501e45af5710932691d2ac6f00d7ee5d80a82b0d51fc5af831554587af6fd7`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_paired_diff_rasnet_vs_nnunet.pdf) (`b99174e9da7417d4b21ea9d7592e937870cc28c5995ad5fc169bacd75bf26cba`)
 
