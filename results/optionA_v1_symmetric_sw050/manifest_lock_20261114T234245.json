@@ -1,0 +1,105 @@
+{
+  "protocol_version": "optionA-1.0",
+  "stage": "lock",
+  "utc": "2026-11-14T23:42:39Z",
+  "args": {
+    "stage": "lock",
+    "timing_cases": 10,
+    "models": [
+      "rasnet",
+      "segresnet",
+      "vnet",
+      "nnunet"
+    ],
+    "out": "C:\\Thesis_RASNET\\results\\optionA_v1_symmetric_sw050",
+    "resume": false,
+    "smoke": 0,
+    "parity_cases": 5,
+    "device": "cuda",
+    "sw_batch_size": 8
+  },
+  "git": {
+    "commit": "358dceeeea682fe5fbcd7246dd0f58836743834a",
+    "dirty_code": false,
+    "dirty_any": true,
+    "code_paths": [
+      "benchmark",
+      "scripts",
+      "tests",
+      "Phase3_Local_Integration",
+      "config.lab.yaml"
+    ]
+  },
+  "env": {
+    "python": "3.12.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "torch": "2.14.1+cu126",
+    "monai": "1.6.1",
+    "nnunetv2": "missing",
+    "SimpleITK": "2.5.7",
+    "numpy": "2.5.4",
+    "cc3d": "missing",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "cuda": "12.6"
+  },
+  "config_sha256": "73077fb08ed940a2ef84bfe8c07e0de6c693764eed02fac9c57e226b0352a138",
+  "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+  "checkpoints": {
+    "rasnet": {
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\rasnet_best.pth",
+      "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8"
+    },
+    "segresnet": {
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\segresnet_best.pt",
+      "sha256": "b8ea61d95106a0bbe15e1ce9f9e5af1a38d9508e59d0639d32bc883d93c6e109"
+    },
+    "vnet": {
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\vnet_best.pt",
+      "sha256": "a89d71bd41c3e773c68e3f4b5e27c5a067f959154aa049eead76f1642c5c1063"
+    },
+    "nnunet": {
+      "path": "Q1_Publication_Package\\matched_200ep_benchmark\\nnUNet_results\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\fold_0\\checkpoint_best.pth",
+      "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711"
+    }
+  },
+  "source_sha256": {
+    "benchmark\\__init__.py": "4617942f012b794c7a0dbf6a3c942a67b2d0cf085744ecd50a937b36fd096259",
+    "benchmark\\comparison.py": "53c14c08518b137d1552e4ac21b889d6c8cc671de6d0ec14985dc3973bd1d0a3",
+    "benchmark\\dataset.py": "30bf4190beea4063b96188b463a5f50d01c238bdd2f19abe5ea84f7d97dbefe1",
+    "benchmark\\metrics.py": "f0608117c7a10fa3dd8bb336aa368848e55a9dae3d89ecb0944b641acb579cbd",
+    "benchmark\\postprocess.py": "e9ad3709946846d623acf382f8c626fa526fb8ed96c96f12153fad2c902b1092",
+    "benchmark\\preflight.py": "3be280f3a21e809382ee638d0b668d1528b0e4cc68bac9f8de7b0fcfe981e77f",
+    "benchmark\\run_benchmark.py": "8eb439fdc240b1f714bf3aa3d8235dbc5c16b4527c2897d3d2bb5da50fd46e94",
+    "benchmark\\stats.py": "47264273639ec11028d6ac4e9f3a2103ff145b93627097e92b6904802dcfc3ce",
+    "benchmark\\symmetric_eval.py": "2a6ebf211e1ddc830af49859abe10e83509b860efd0f335a61770fb49cf44fcc",
+    "benchmark\\thresholds.py": "03272591a6f4a7488d6d82d3e640d6f21bad8cc98b296966c64ee05ce2f53a74",
+    "benchmark\\adapters\\__init__.py": "11d7510c4601ded956c540aa673864b14710cd8b87747d9468c90d6b310c479c",
+    "benchmark\\adapters\\monai_models.py": "e59b0a1061c5628d6cbaf219c11020cf10e644bc429fa14e2b431128abe327f2",
+    "benchmark\\adapters\\nnunet_adapter.py": "2456aa9c4e312b4d694ad09871644527627e6b69850f5b4bff41071551e9558e",
+    "scripts\\run_optionA_symmetric_v1_eval.py": "af71594a440e0f0899b535563b02184544d98de4ab1b0296ac0e09b71219d39a"
+  },
+  "protocol": {
+    "sw_overlap": 0.5,
+    "sw_mode": "gaussian",
+    "sigma_scale": 0.125,
+    "modes": [
+      "sw050_gauss_1pass",
+      "sw050_gauss_tta8"
+    ],
+    "tau_grid": [
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7
+    ],
+    "keep_top_k": 2
+  },
+  "locked_recipes_sha256": "31cb484573b4d941c91f415d7ea4cb3757dc67d205479e96adeeea159ede557c"
+}
