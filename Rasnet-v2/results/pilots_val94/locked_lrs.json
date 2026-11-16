@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-11-16T10:11:48Z",
+  "split": "val",
+  "n_cases": 94,
+  "ckpt_kind": "epoch_50",
+  "locked_lrs": {
+    "segresnet_f16": 0.0001,
+    "segresnet_f32": 0.001,
+    "rasnet_v2_f16": 0.0001,
+    "rasnet_v2_f32": 0.0003,
+    "vnet": 0.0003,
+    "unet3d": 0.0001
+  },
+  "details": {
+    "segresnet_f16": {
+      "lr": 0.0001,
+      "winning_run_name": "pilot2a_segresnet_f16_lr1e-4_seed42",
+      "val94_dice": 0.6659254390019514,
+      "val94_precision": 0.5799919359483412,
+      "val94_hd95": 43.48926665863245,
+      "val94_components_total": 28.0531914893617,
+      "ckpt_sha256": "79bcde19bb71da17af46a0d8473660518de7cddc5e9f623adce03f246dc908ca"
+    },
+    "segresnet_f32": {
+      "lr": 0.001,
+      "winning_run_name": "pilot2a_segresnet_f32_lr1e-3_seed42",
+      "val94_dice": 0.6716943394115943,
+      "val94_precision": 0.613807510593502,
+      "val94_hd95": 41.93006836690375,
+      "val94_components_total": 23.77659574468085,
+      "ckpt_sha256": "d650d739e9a77a21778ddfa6361b2d4a84717ce4d55bd94cb769e0fb586863d4"
+    },
+    "rasnet_v2_f16": {
+      "lr": 0.0001,
+      "winning_run_name": "pilot2a_rasnet_v2_f16_lr1e-4_seed42",
+      "val94_dice": 0.7094714847096057,
+      "val94_precision": 0.6432024724097873,
+      "val94_hd95": 29.139950063359173,
+      "val94_components_total": 21.648936170212767,
+      "ckpt_sha256": "d52dfc224b480cbc3b936a9425004259f26e42134e4c024cd523719e55d1b732"
+    },
+    "rasnet_v2_f32": {
+      "lr": 0.0003,
+      "winning_run_name": "pilot2a_rasnet_v2_f32_lr3e-4_seed42",
+      "val94_dice": 0.7026823284682939,
+      "val94_precision": 0.6389977481943424,
+      "val94_hd95": 31.81898196812323,
+      "val94_components_total": 23.73404255319149,
+      "ckpt_sha256": "477829668c4af2101833fe3cdafc4390df804276c07f30b2e0d393b7265a0d55"
+    },
+    "vnet": {
+      "lr": 0.0003,
+      "winning_run_name": "pilot2a_vnet_f16_lr3e-4_seed42",
+      "val94_dice": 0.7133866326878882,
+      "val94_precision": 0.680360009012058,
+      "val94_hd95": 25.81843117089205,
+      "val94_components_total": 25.319148936170212,
+      "ckpt_sha256": "cf5eec48d7c1739e0baac960f0e442b88b35c208f849a81e9862b2506eb6c93a"
+    },
+    "unet3d": {
+      "lr": 0.0001,
+      "winning_run_name": "pilot2a_unet3d_f16_lr1e-4_seed42",
+      "val94_dice": 0.6992439955930548,
+      "val94_precision": 0.6314614097534069,
+      "val94_hd95": 32.536172450370884,
+      "val94_components_total": 34.41489361702128,
+      "ckpt_sha256": "8673ce6fbd19acfc850df1a471aeeb87a68ba9439521c0461d7ef9e3687421cd"
+    }
+  }
+}

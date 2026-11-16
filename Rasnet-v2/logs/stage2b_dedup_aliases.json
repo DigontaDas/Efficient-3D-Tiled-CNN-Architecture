@@ -1,0 +1,19 @@
+{
+  "jobs_to_run": [
+    "pilot2b_rasnet_v2_f16_gnorig_cl020",
+    "pilot2b_rasnet_v2_f16_convbias_cl000",
+    "pilot2b_rasnet_v2_f32_gnorig_cl020"
+  ],
+  "skipped_or_aliased": [
+    {
+      "run_name": "pilot2b_rasnet_v2_f16_convbias_cl020",
+      "reason": "deduplicated_against_stage2a",
+      "resolved_run": "pilot2a_rasnet_v2_f16_lr1e-4_seed42"
+    },
+    {
+      "run_name": "pilot2b_rasnet_v2_f32_convbias_cl020",
+      "reason": "deduplicated_against_stage2a",
+      "resolved_run": "pilot2a_rasnet_v2_f32_lr3e-4_seed42"
+    }
+  ]
+}

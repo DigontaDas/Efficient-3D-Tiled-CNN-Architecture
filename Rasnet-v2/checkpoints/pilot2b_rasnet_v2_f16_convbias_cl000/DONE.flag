@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "run_name": "pilot2b_rasnet_v2_f16_convbias_cl000",
+  "arch": "rasnet_v2",
+  "init_filters": 16,
+  "gate_mode": "conv_bias",
+  "enable_ds": true,
+  "loss_name": "rasnet_v2",
+  "seed": 42,
+  "epochs": 50,
+  "global_opt_step": 12500,
+  "best_val20_dice": 0.7287239435883792,
+  "elapsed_hours": 0.8736,
+  "peak_vram_mb": 7181.7
+}

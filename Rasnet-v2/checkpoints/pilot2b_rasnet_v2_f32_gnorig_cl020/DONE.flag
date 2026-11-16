@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "run_name": "pilot2b_rasnet_v2_f32_gnorig_cl020",
+  "arch": "rasnet_v2",
+  "init_filters": 32,
+  "gate_mode": "groupnorm_orig",
+  "enable_ds": true,
+  "loss_name": "rasnet_v2",
+  "seed": 42,
+  "epochs": 50,
+  "global_opt_step": 12500,
+  "best_val20_dice": 0.7111793613947552,
+  "elapsed_hours": 1.9041,
+  "peak_vram_mb": 8144.6
+}
