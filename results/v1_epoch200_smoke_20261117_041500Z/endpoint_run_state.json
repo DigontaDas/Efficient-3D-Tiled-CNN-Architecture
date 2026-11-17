@@ -1,0 +1,14 @@
+{
+  "case_ids": [
+    14,
+    45
+  ],
+  "checkpoint_role": "final_epoch200",
+  "dataset_sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+  "nnunet_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+  "plans_sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8",
+  "protocol_version": "v1-epoch200-endpoint-1.0",
+  "rasnet_sha256": "71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95",
+  "run_id": "20261117_041500Z",
+  "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c"
+}

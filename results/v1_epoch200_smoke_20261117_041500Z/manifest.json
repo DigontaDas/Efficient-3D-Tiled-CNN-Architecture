@@ -1,0 +1,238 @@
+{
+  "run_id": "20261117_041500Z",
+  "generated_at_utc": "2026-11-17T05:02:32Z",
+  "smoke": true,
+  "checkpoint_role": "final_epoch200",
+  "evidence_separation_note": "Epoch-200 endpoint comparison (final_epoch200 checkpoints, 1-pass SW overlap 0.50, Gaussian, tau=0.50, no post-processing). Strictly distinct from best-checkpoint runs (RASNet best ~ep160, nnU-Net best current_epoch=199) and Option A.",
+  "source": {
+    "source_tree_sha256": "1764544b9b8caf8a8c36c977b56cd94637a47db32feeb8c5000483a7ce516f4a",
+    "endpoint_eval_sha256": "61baa5cf9bfa9125b6809c7783c3859b487613b8c3e0087f519f1963945327a8",
+    "cli_script_sha256": "eb6d2801d1b203bca8ce31372f56d08a2b4df94bd72218b4db9ff76aa606d8a5",
+    "provenance_verification_json": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\provenance_verification.json",
+    "provenance_verification_sha256": "ab792459c200338986c15f656457575c837a0a67372424d3c65f4cffbdfe8224"
+  },
+  "config": {
+    "path": "C:\\Thesis_RASNET\\config.lab.yaml",
+    "sha256": "73077fb08ed940a2ef84bfe8c07e0de6c693764eed02fac9c57e226b0352a138",
+    "dataset_root": "C:\\Thesis_RASNET\\secondary-imagcas-dataset",
+    "split_file": "C:\\Thesis_RASNET\\Phase3_Local_Integration\\splits_final.json",
+    "sw_batch_size": 8
+  },
+  "env": {
+    "python": "3.12.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "torch": "2.14.1+cu126",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "SimpleITK": "2.5.7",
+    "numpy": "2.5.4",
+    "cc3d": "installed",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "cuda": "12.6",
+    "cuda_available": true,
+    "gpu_name": "NVIDIA GeForce RTX 4080 SUPER",
+    "nibabel": "5.4.2",
+    "scikit_image": "0.26.0",
+    "scipy": "1.18.1",
+    "pandas": "3.0.6"
+  },
+  "git": {
+    "commit": "b3ca1f1a5553654d1b31c73ec50f36c2d6dc8ea3",
+    "dirty_code": true,
+    "dirty_any": true,
+    "code_paths": [
+      "benchmark",
+      "scripts",
+      "tests",
+      "Phase3_Local_Integration",
+      "config.lab.yaml"
+    ]
+  },
+  "split": {
+    "split_name": "val",
+    "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+    "total_val_cases": 94,
+    "evaluated_case_count": 2,
+    "case_ids": [
+      14,
+      45
+    ]
+  },
+  "checkpoints": {
+    "checkpoint_role": "final_epoch200",
+    "target_epoch": 200,
+    "rasnet": {
+      "path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\rasnet_last.pth",
+      "sha256": "71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95",
+      "role": "final_epoch200",
+      "embedded_epoch_metadata_present": false,
+      "epoch_identity_supported_by": "script_log_archive_provenance",
+      "state_dict_key_count": 114,
+      "constructor_args": {
+        "spatial_dims": 3,
+        "in_channels": 1,
+        "out_channels": 2,
+        "init_filters": 16,
+        "dropout_prob": 0.1
+      }
+    },
+    "nnunet": {
+      "last_pt_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_last.pt",
+      "last_pt_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "model_folder": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres",
+      "checkpoint_final_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\fold_0\\checkpoint_final.pth",
+      "checkpoint_final_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "plans_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\plans.json",
+      "plans_sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8",
+      "dataset_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\dataset.json",
+      "dataset_sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+      "role": "final_epoch200",
+      "embedded_epoch_metadata_present": true,
+      "current_epoch": 200,
+      "trainer_name": "nnUNetTrainer_200epochs",
+      "configuration": "3d_fullres",
+      "fold": 0,
+      "patch_size": [
+        96,
+        160,
+        160
+      ],
+      "spacing": [
+        0.5,
+        0.349609375,
+        0.349609375
+      ],
+      "normalization_schemes": [
+        "CTNormalization"
+      ],
+      "architecture_class": "dynamic_network_architectures.architectures.unet.PlainConvUNet"
+    }
+  },
+  "protocol": {
+    "protocol_version": "v1-epoch200-endpoint-1.0",
+    "checkpoint_role": "final_epoch200",
+    "split": "val",
+    "tta": false,
+    "passes": 1,
+    "threshold": 0.5,
+    "postprocess": "none",
+    "keep_top_k": null,
+    "connectivity": 26,
+    "sw_overlap": 0.5,
+    "sw_mode": "gaussian",
+    "sigma_scale": 0.125,
+    "rasnet_roi_size": [
+      96,
+      96,
+      96
+    ],
+    "metric_version": "surface-v1",
+    "bootstrap_seed": 42,
+    "bootstrap_n_boot": 2000,
+    "tie_tolerance": 1e-12,
+    "overlap": 0.5,
+    "patch_size": {
+      "rasnet": [
+        96,
+        96,
+        96
+      ],
+      "nnunet": [
+        96,
+        160,
+        160
+      ]
+    },
+    "normalization": {
+      "rasnet": "ScaleIntensityRanged(a_min=-100, a_max=800, b_min=0, b_max=1, clip=True)",
+      "nnunet": [
+        "CTNormalization"
+      ]
+    },
+    "spacing": {
+      "rasnet": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "nnunet": [
+        0.5,
+        0.349609375,
+        0.349609375
+      ]
+    },
+    "inversion": {
+      "rasnet": "Invertd(nearest_interp=False, to_tensor=True) + np.transpose((2, 1, 0))",
+      "nnunet": "nnunetv2.inference.export_prediction.convert_predicted_logits_to_segmentation_with_correct_shape"
+    },
+    "precision_mode": {
+      "rasnet": "amp_fp16_autocast",
+      "nnunet": "amp_autocast"
+    },
+    "sw_batch_size": {
+      "rasnet": 8,
+      "nnunet": 1
+    },
+    "rasnet": {
+      "patch_size": [
+        96,
+        96,
+        96
+      ],
+      "normalization": "ScaleIntensityRanged(a_min=-100, a_max=800, b_min=0, b_max=1, clip=True)",
+      "spacing": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "inversion": "Invertd(nearest_interp=False, to_tensor=True) + np.transpose((2, 1, 0))",
+      "precision_mode": "amp_fp16_autocast",
+      "sw_batch_size": 8,
+      "transform_recipe": [
+        "LoadImaged",
+        "EnsureChannelFirstd",
+        "CropForegroundd",
+        "Spacingd",
+        "ScaleIntensityRanged",
+        "EnsureTyped"
+      ],
+      "overlap": 0.5,
+      "sw_mode": "gaussian",
+      "sigma_scale": 0.125
+    },
+    "nnunet": {
+      "patch_size": [
+        96,
+        160,
+        160
+      ],
+      "normalization": [
+        "CTNormalization"
+      ],
+      "spacing": [
+        0.5,
+        0.349609375,
+        0.349609375
+      ],
+      "inversion": "nnunetv2.inference.export_prediction.convert_predicted_logits_to_segmentation_with_correct_shape",
+      "precision_mode": "amp_autocast",
+      "sw_batch_size": 1,
+      "tile_step_size": 0.5,
+      "use_gaussian": true,
+      "use_mirroring": false
+    }
+  },
+  "timing_seconds": {
+    "rasnet": 42.092,
+    "nnunet": 58.821
+  },
+  "outputs": {
+    "per_case_rasnet_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\per_case_metrics_rasnet_epoch200.csv",
+    "per_case_nnunet_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\per_case_metrics_nnunet_epoch200.csv",
+    "per_case_combined_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\per_case_metrics_combined.csv",
+    "geometry_verification_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\geometry_verification.csv",
+    "summary_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\summary_epoch200.csv",
+    "paired_stats_csv": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\paired_stats_epoch200.csv",
+    "paired_stats_json": "C:\\Thesis_RASNET\\results\\v1_epoch200_smoke_20261117_041500Z\\paired_stats_epoch200.json"
+  }
+}

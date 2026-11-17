@@ -1,0 +1,597 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "20261117_041500Z",
+  "generated_at_utc": "2026-11-17T04:29:45Z",
+  "overall_status": "PASS",
+  "environment": {
+    "python_version": "3.12.3",
+    "python_executable": "C:\\Thesis_RASNET_env\\bench\\Scripts\\python.exe",
+    "torch_version": "2.14.1+cu126",
+    "monai_version": "1.6.1",
+    "nnunetv2_version": "2.8.1",
+    "git_head": "b3ca1f1a5553654d1b31c73ec50f36c2d6dc8ea3",
+    "git_dirty_tracked": false
+  },
+  "split_archive": {
+    "directory": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints_best_and_last",
+    "part_count": 10,
+    "part_files": [
+      "checkpoints_200ep.zip.001",
+      "checkpoints_200ep.zip.002",
+      "checkpoints_200ep.zip.003",
+      "checkpoints_200ep.zip.004",
+      "checkpoints_200ep.zip.005",
+      "checkpoints_200ep.zip.006",
+      "checkpoints_200ep.zip.007",
+      "checkpoints_200ep.zip.008",
+      "checkpoints_200ep.zip.009",
+      "checkpoints_200ep.zip.010"
+    ],
+    "combined_bytes": 901178285,
+    "recovery_method": "seekable_split_zip_stream_no_combined_zip_no_extractall",
+    "members_inventory": [
+      {
+        "filename": "segresnet_best.pt",
+        "file_size": 18836926,
+        "compress_size": 17403518,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x73cefc17",
+        "zip_date_time": "2026-09-08 04:06:46"
+      },
+      {
+        "filename": "segresnet_last.pt",
+        "file_size": 18836926,
+        "compress_size": 17403350,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x7902ed1c",
+        "zip_date_time": "2026-09-08 04:29:44"
+      },
+      {
+        "filename": "3dunet_best.pth",
+        "file_size": 19253157,
+        "compress_size": 17815643,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x3456de33",
+        "zip_date_time": "2026-09-08 13:03:48"
+      },
+      {
+        "filename": "3dunet_last.pth",
+        "file_size": 19253157,
+        "compress_size": 17815429,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0xca46f218",
+        "zip_date_time": "2026-09-08 13:19:46"
+      },
+      {
+        "filename": "vnet_best.pt",
+        "file_size": 182479290,
+        "compress_size": 169023591,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x40c61aef",
+        "zip_date_time": "2026-09-08 19:25:48"
+      },
+      {
+        "filename": "vnet_last.pt",
+        "file_size": 182479290,
+        "compress_size": 169024819,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x10dae7fe",
+        "zip_date_time": "2026-09-08 20:02:36"
+      },
+      {
+        "filename": "nnunet_best.pt",
+        "file_size": 246472150,
+        "compress_size": 228877318,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x0d66be47",
+        "zip_date_time": "2026-09-08 09:19:08"
+      },
+      {
+        "filename": "nnunet_last.pt",
+        "file_size": 246472688,
+        "compress_size": 228843105,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0xae7f79e9",
+        "zip_date_time": "2026-09-08 09:20:06"
+      },
+      {
+        "filename": "rasnet_best.pth",
+        "file_size": 18871718,
+        "compress_size": 17485165,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0xdd7b65e3",
+        "zip_date_time": "2026-09-09 02:06:02"
+      },
+      {
+        "filename": "rasnet_last.pth",
+        "file_size": 18871718,
+        "compress_size": 17485273,
+        "compress_type": 8,
+        "flag_bits": 0,
+        "crc32_hex": "0x382cc853",
+        "zip_date_time": "2026-09-09 03:31:22"
+      }
+    ],
+    "archive_best_cross_check": {
+      "rasnet_best.pth": {
+        "file_size": 18871718,
+        "crc32_hex": "0xdd7b65e3",
+        "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8",
+        "matches_disk_best": true,
+        "zip_date_time": "2026-09-09 02:06:02"
+      },
+      "nnunet_best.pt": {
+        "file_size": 246472150,
+        "crc32_hex": "0x0d66be47",
+        "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711",
+        "matches_disk_best": true,
+        "zip_date_time": "2026-09-08 09:19:08"
+      }
+    }
+  },
+  "recovered_checkpoints": {
+    "rasnet_last": {
+      "filename": "rasnet_last.pth",
+      "path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\rasnet_last.pth",
+      "action": "verified_existing",
+      "size_bytes": 18871718,
+      "expected_crc32_hex": "0x382cc853",
+      "computed_crc32_hex": "0x382cc853",
+      "crc_match": true,
+      "expected_sha256": "71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95",
+      "actual_sha256": "71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95",
+      "sha256_match": true,
+      "zip_timestamp": "2026-09-09 03:31:22",
+      "local_header": {
+        "header_offset": 883692339,
+        "flag_bits": 0,
+        "compress_type": 8,
+        "local_crc32_hex": "0x382cc853",
+        "local_compress_size": 17485273,
+        "local_file_size": 18871718,
+        "extra_len": 0
+      }
+    },
+    "nnunet_last": {
+      "filename": "nnunet_last.pt",
+      "path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_last.pt",
+      "action": "verified_existing",
+      "size_bytes": 246472688,
+      "expected_crc32_hex": "0xae7f79e9",
+      "computed_crc32_hex": "0xae7f79e9",
+      "crc_match": true,
+      "expected_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "actual_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "sha256_match": true,
+      "zip_timestamp": "2026-09-08 09:20:06",
+      "local_header": {
+        "header_offset": 637363980,
+        "flag_bits": 0,
+        "compress_type": 8,
+        "local_crc32_hex": "0xae7f79e9",
+        "local_compress_size": 228843105,
+        "local_file_size": 246472688,
+        "extra_len": 0
+      }
+    }
+  },
+  "rasnet_provenance": {
+    "checkpoint_role": "final_epoch200",
+    "epoch_identity_supported_by": "script_log_archive_provenance",
+    "embedded_epoch_metadata_present": false,
+    "embedded_metadata_note": "Raw OrderedDict state_dict saved via torch.save(model.state_dict(), last_ckpt_path) in train_rasnet_200ep.py:268; epoch-200 identity is established by script saving logic, uninterrupted 200-epoch rasnet_200ep_log.csv, and ZIP archive timestamp alignment rather than embedded checkpoint metadata.",
+    "state_dict_format": "OrderedDict",
+    "tensor_dtypes": [
+      "torch.float32"
+    ],
+    "state_dict_key_count": 114,
+    "all_tensors_finite": true,
+    "architecture": {
+      "module": "Phase3_Local_Integration.rasnet_model.RASNet",
+      "source_sha256": "4f2372ec25081f483d21150129730bdc98f4edfa2714d4493735187a744a305c",
+      "constructor_args": {
+        "spatial_dims": 3,
+        "in_channels": 1,
+        "out_channels": 2,
+        "init_filters": 16,
+        "dropout_prob": 0.1
+      },
+      "parameter_count": 4706772,
+      "buffer_count": 0,
+      "strict_load_passed": true,
+      "eval_return_type": "torch.Tensor",
+      "train_return_type": "tuple[torch.Tensor, list[torch.Tensor]]"
+    },
+    "diff_vs_rasnet_best": {
+      "best_checkpoint_path": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\rasnet_best.pth",
+      "best_checkpoint_sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8",
+      "best_zip_matches_disk": true,
+      "total_keys": 114,
+      "changed_keys": 114,
+      "max_abs_diff": 0.005901217460632324,
+      "total_l2_diff": 1.376970489616204
+    },
+    "training_script": {
+      "path": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\train_rasnet_200ep.py",
+      "sha256": "6d73bdb1c055fa343a8145adb7742cb46cbb08c736ef8bf3021893e252b86a0d",
+      "target_epochs": 200,
+      "val_interval": 20,
+      "best_save_lines": [
+        265
+      ],
+      "last_save_lines": [
+        268
+      ]
+    },
+    "training_log": {
+      "path": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\logs\\rasnet_200ep_log.csv",
+      "sha256": "d3ad4d06eec1c8df10c0f0d58bcd6b82392401bfcf05acfcd5305dc8f313fb82",
+      "row_count": 200,
+      "epoch_min": 1,
+      "epoch_max": 200,
+      "contiguous_epochs": true,
+      "validation_epochs": [
+        20,
+        40,
+        50,
+        60,
+        80,
+        100,
+        120,
+        140,
+        150,
+        160,
+        180,
+        200
+      ],
+      "best_epoch": 160,
+      "best_val_dice": 0.7769595980644226,
+      "final_epoch": 200,
+      "final_val_dice": 0.7761295437812805,
+      "final_val_loss": 0.04736641731033934,
+      "final_train_loss": 0.11177645572003601,
+      "cosine_lr_max_abs_error": 5.421010862427522e-20,
+      "zip_timestamp_delta_seconds": 5120.0,
+      "log_elapsed_ep160_to_ep200_seconds": 5119.970666885376,
+      "timestamp_delta_discrepancy_seconds": 0.029333114624023438
+    }
+  },
+  "nnunet_provenance": {
+    "checkpoint_role": "final_epoch200",
+    "epoch_identity_supported_by": "embedded_checkpoint_metadata_and_trainer_convention",
+    "embedded_current_epoch": 200,
+    "trainer_epoch_convention": "0-based internal current_epoch (0..199); on_train_end() decrements by 1 and save_checkpoint() writes current_epoch + 1 == 200",
+    "trainer_name": "nnUNetTrainer_200epochs",
+    "configuration": "3d_fullres",
+    "fold": 0,
+    "inference_allowed_mirroring_axes": [
+      0,
+      1,
+      2
+    ],
+    "architecture_class": "PlainConvUNet",
+    "parameter_count": 30785994,
+    "network_weights_key_count": 292,
+    "logging_key_lengths": {
+      "mean_fg_dice": 200,
+      "ema_fg_dice": 200,
+      "dice_per_class_or_region": 200,
+      "train_losses": 200,
+      "val_losses": 200,
+      "lrs": 200,
+      "epoch_start_timestamps": 200,
+      "epoch_end_timestamps": 200
+    },
+    "inter_epoch_gaps_gt_1s": 0,
+    "total_training_hours_from_timestamps": 3.1430668442116843,
+    "csv_log_verification": {
+      "path": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\logs\\nnunet_200ep_log.csv",
+      "valid_rows": 200,
+      "empty_resume_marker_rows": [
+        51,
+        101,
+        151,
+        201
+      ],
+      "max_abs_diff_train_loss_raw": 4.916849136349377e-05,
+      "max_abs_diff_val_loss_raw": 4.927911758423331e-05,
+      "max_abs_diff_val_dice_raw": 4.946527481075602e-05,
+      "max_abs_diff_lr_raw": 4.993610101651502e-06,
+      "max_abs_diff_train_loss_rounded4": 0.0,
+      "max_abs_diff_val_loss_rounded4": 0.0,
+      "max_abs_diff_val_dice_rounded4": 0.0,
+      "max_abs_diff_lr_rounded5": 0.0
+    },
+    "final_epoch_metrics_from_checkpoint": {
+      "mean_fg_dice": 0.8145043253898621,
+      "ema_fg_dice": 0.8160656690597534,
+      "train_loss": -0.7712647318840027,
+      "val_loss": -0.7910333871841431,
+      "lr": 8.493232323171241e-05
+    },
+    "best_ema_fg_dice": 0.8162392377853394,
+    "diff_vs_nnunet_best": {
+      "best_checkpoint_path": "C:\\Thesis_RASNET\\Q1_Publication_Package\\matched_200ep_benchmark\\checkpoints\\nnunet_best.pt",
+      "best_checkpoint_sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711",
+      "best_current_epoch": 199,
+      "total_keys": 292,
+      "changed_keys": 290,
+      "max_abs_diff": 0.0019564032554626465,
+      "total_l2_diff": 0.09429094980019037
+    },
+    "native_model_folder": {
+      "path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres",
+      "plans_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\plans.json",
+      "plans_action": "verified_existing",
+      "plans_sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8",
+      "dataset_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\dataset.json",
+      "dataset_action": "verified_existing",
+      "dataset_sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+      "checkpoint_final_path": "C:\\Thesis_RASNET\\recovered_checkpoints\\v1_epoch200_20261117_041500Z\\nnunet_native_model\\Dataset501_CoronarySeg\\nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres\\fold_0\\checkpoint_final.pth",
+      "checkpoint_final_action": "verified_existing",
+      "checkpoint_final_sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "plans_matches_checkpoint_init_args": true,
+      "dataset_matches_checkpoint_init_args": true,
+      "predictor_initialized": true,
+      "predictor_trainer_name": "nnUNetTrainer_200epochs",
+      "predictor_patch_size": [
+        96,
+        160,
+        160
+      ],
+      "predictor_spacing": [
+        0.5,
+        0.349609375,
+        0.349609375
+      ],
+      "predictor_normalization_schemes": [
+        "CTNormalization"
+      ],
+      "predictor_num_segmentation_heads": 2
+    }
+  },
+  "non_interference_checks": {
+    "protected_paths_verified_unmodified": true,
+    "protected_hashes_before": {
+      "files": {
+        "LAB_RUN_PLAN.md": {
+          "size_bytes": 9883,
+          "sha256": "8aab7f02dd3b59a66b870bcba328fffa945e2d0a4f03edc38c529129e96c3f3a"
+        },
+        "CHECKPOINTS.md": {
+          "size_bytes": 8705,
+          "sha256": "22624d08f5e6736251333e1ebb957bf0214f0e5cf424d892e012e1a535e1af4a"
+        },
+        "Phase3_Local_Integration/splits_final.json": {
+          "size_bytes": 9538,
+          "sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c"
+        },
+        "Phase3_Local_Integration/rasnet_model.py": {
+          "size_bytes": 4730,
+          "sha256": "4f2372ec25081f483d21150129730bdc98f4edfa2714d4493735187a744a305c"
+        },
+        "results/thresholds.json": {
+          "size_bytes": 3837,
+          "sha256": "4f66ac1d415c5ca9bc09ca0e900e9f8f5d106b3620a20d5916f472d1ba0d3acb"
+        },
+        "Rasnet-v2/logs/queue_status.json": {
+          "size_bytes": 316,
+          "sha256": "181e105b21e95ceb76bd3ed4a76c719380f6153976da301a1282b19c42e2a7d0"
+        },
+        "Rasnet-v2/results/pilots_val94/pilot_lock_decision.md": {
+          "size_bytes": 4201,
+          "sha256": "e47913d7ae4d6f8e769de972175675e39826a28188aca0bd0c0ac08c6b989fce"
+        },
+        "benchmark/adapters/nnunet_adapter.py": {
+          "size_bytes": 4713,
+          "sha256": "2456aa9c4e312b4d694ad09871644527627e6b69850f5b4bff41071551e9558e"
+        },
+        "benchmark/run_benchmark.py": {
+          "size_bytes": 40746,
+          "sha256": "8eb439fdc240b1f714bf3aa3d8235dbc5c16b4527c2897d3d2bb5da50fd46e94"
+        },
+        "benchmark/symmetric_eval.py": {
+          "size_bytes": 29939,
+          "sha256": "2a6ebf211e1ddc830af49859abe10e83509b860efd0f335a61770fb49cf44fcc"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/train_rasnet_200ep.py": {
+          "size_bytes": 13820,
+          "sha256": "6d73bdb1c055fa343a8145adb7742cb46cbb08c736ef8bf3021893e252b86a0d"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/prepare_and_run_nnunet_200ep.py": {
+          "size_bytes": 11132,
+          "sha256": "98dcf6611b06c71396eaa088943eb0dce74fc49a4f33feded2fcb144c0a4e411"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/rasnet_200ep_log.csv": {
+          "size_bytes": 17548,
+          "sha256": "d3ad4d06eec1c8df10c0f0d58bcd6b82392401bfcf05acfcd5305dc8f313fb82"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/nnunet_200ep_log.csv": {
+          "size_bytes": 12154,
+          "sha256": "68c8e7d1fc4ff4c9f25b525ef55a7bb7c7119f47bd8ba25fa901b8338036c1d4"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth": {
+          "size_bytes": 18871718,
+          "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt": {
+          "size_bytes": 246472150,
+          "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/plans.json": {
+          "size_bytes": 16826,
+          "sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/dataset.json": {
+          "size_bytes": 182,
+          "sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/fold_0/checkpoint_best.pth": {
+          "size_bytes": 246472150,
+          "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711"
+        }
+      },
+      "dirs": {
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints": {
+          "file_count": 7,
+          "total_bytes": 523659219
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints_best_and_last": {
+          "file_count": 12,
+          "total_bytes": 901183185
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results": {
+          "file_count": 3,
+          "total_bytes": 246489158
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs": {
+          "file_count": 14,
+          "total_bytes": 145872
+        },
+        "results": {
+          "file_count": 221,
+          "total_bytes": 22192512
+        },
+        "benchmark": {
+          "file_count": 26,
+          "total_bytes": 261911
+        },
+        "scripts": {
+          "file_count": 5,
+          "total_bytes": 190761
+        },
+        "tests": {
+          "file_count": 20,
+          "total_bytes": 195313
+        }
+      }
+    },
+    "protected_hashes_after": {
+      "files": {
+        "LAB_RUN_PLAN.md": {
+          "size_bytes": 9883,
+          "sha256": "8aab7f02dd3b59a66b870bcba328fffa945e2d0a4f03edc38c529129e96c3f3a"
+        },
+        "CHECKPOINTS.md": {
+          "size_bytes": 8705,
+          "sha256": "22624d08f5e6736251333e1ebb957bf0214f0e5cf424d892e012e1a535e1af4a"
+        },
+        "Phase3_Local_Integration/splits_final.json": {
+          "size_bytes": 9538,
+          "sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c"
+        },
+        "Phase3_Local_Integration/rasnet_model.py": {
+          "size_bytes": 4730,
+          "sha256": "4f2372ec25081f483d21150129730bdc98f4edfa2714d4493735187a744a305c"
+        },
+        "results/thresholds.json": {
+          "size_bytes": 3837,
+          "sha256": "4f66ac1d415c5ca9bc09ca0e900e9f8f5d106b3620a20d5916f472d1ba0d3acb"
+        },
+        "Rasnet-v2/logs/queue_status.json": {
+          "size_bytes": 316,
+          "sha256": "181e105b21e95ceb76bd3ed4a76c719380f6153976da301a1282b19c42e2a7d0"
+        },
+        "Rasnet-v2/results/pilots_val94/pilot_lock_decision.md": {
+          "size_bytes": 4201,
+          "sha256": "e47913d7ae4d6f8e769de972175675e39826a28188aca0bd0c0ac08c6b989fce"
+        },
+        "benchmark/adapters/nnunet_adapter.py": {
+          "size_bytes": 4713,
+          "sha256": "2456aa9c4e312b4d694ad09871644527627e6b69850f5b4bff41071551e9558e"
+        },
+        "benchmark/run_benchmark.py": {
+          "size_bytes": 40746,
+          "sha256": "8eb439fdc240b1f714bf3aa3d8235dbc5c16b4527c2897d3d2bb5da50fd46e94"
+        },
+        "benchmark/symmetric_eval.py": {
+          "size_bytes": 29939,
+          "sha256": "2a6ebf211e1ddc830af49859abe10e83509b860efd0f335a61770fb49cf44fcc"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/train_rasnet_200ep.py": {
+          "size_bytes": 13820,
+          "sha256": "6d73bdb1c055fa343a8145adb7742cb46cbb08c736ef8bf3021893e252b86a0d"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/prepare_and_run_nnunet_200ep.py": {
+          "size_bytes": 11132,
+          "sha256": "98dcf6611b06c71396eaa088943eb0dce74fc49a4f33feded2fcb144c0a4e411"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/rasnet_200ep_log.csv": {
+          "size_bytes": 17548,
+          "sha256": "d3ad4d06eec1c8df10c0f0d58bcd6b82392401bfcf05acfcd5305dc8f313fb82"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/nnunet_200ep_log.csv": {
+          "size_bytes": 12154,
+          "sha256": "68c8e7d1fc4ff4c9f25b525ef55a7bb7c7119f47bd8ba25fa901b8338036c1d4"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth": {
+          "size_bytes": 18871718,
+          "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt": {
+          "size_bytes": 246472150,
+          "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/plans.json": {
+          "size_bytes": 16826,
+          "sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/dataset.json": {
+          "size_bytes": 182,
+          "sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389"
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/fold_0/checkpoint_best.pth": {
+          "size_bytes": 246472150,
+          "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711"
+        }
+      },
+      "dirs": {
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints": {
+          "file_count": 7,
+          "total_bytes": 523659219
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints_best_and_last": {
+          "file_count": 12,
+          "total_bytes": 901183185
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results": {
+          "file_count": 3,
+          "total_bytes": 246489158
+        },
+        "Q1_Publication_Package/matched_200ep_benchmark/logs": {
+          "file_count": 14,
+          "total_bytes": 145872
+        },
+        "results": {
+          "file_count": 221,
+          "total_bytes": 22192512
+        },
+        "benchmark": {
+          "file_count": 26,
+          "total_bytes": 261911
+        },
+        "scripts": {
+          "file_count": 5,
+          "total_bytes": 190761
+        },
+        "tests": {
+          "file_count": 20,
+          "total_bytes": 195313
+        }
+      }
+    }
+  },
+  "documentation_discrepancies_noted": [
+    "CHECKPOINTS.md:9 lists 400 keys for rasnet_best.pth; verified key count in both rasnet_best.pth and rasnet_last.pth is 114.",
+    "CHECKPOINTS.md:13,31 lists 402 keys, patch_size=[128,192,192], spacing=[0.5,0.359375,0.359375] for nnU-Net V2; verified plans.json and checkpoints have 292 keys, patch_size=[96,160,160], spacing=[0.5,0.349609375,0.349609375], and nnunet_best.pt has current_epoch=199."
+  ]
+}

@@ -1,0 +1,5 @@
+case_id,model,mask_path,image_size,mask_size,image_spacing,mask_spacing,image_origin,mask_origin,geometry_ok
+14,nnunet,C:\Thesis_RASNET\results\v1_epoch200_smoke_20261117_041500Z\predictions\nnunet\14.nii.gz,"[512, 512, 275]","[512, 512, 275]","[0.318359, 0.318359, 0.5]","[0.318359, 0.318359, 0.5]","[-58.34082, -81.15918, 9.95]","[-58.34082, -81.15918, 9.95]",True
+45,nnunet,C:\Thesis_RASNET\results\v1_epoch200_smoke_20261117_041500Z\predictions\nnunet\45.nii.gz,"[512, 512, 275]","[512, 512, 275]","[0.400391, 0.400391, 0.5]","[0.400391, 0.400391, 0.5]","[-64.299805, -62.200195, 81.949997]","[-64.299805, -62.200195, 81.949997]",True
+14,rasnet,C:\Thesis_RASNET\results\v1_epoch200_smoke_20261117_041500Z\predictions\rasnet\14.nii.gz,"[512, 512, 275]","[512, 512, 275]","[0.318359, 0.318359, 0.5]","[0.318359, 0.318359, 0.5]","[-58.34082, -81.15918, 9.95]","[-58.34082, -81.15918, 9.95]",True
+45,rasnet,C:\Thesis_RASNET\results\v1_epoch200_smoke_20261117_041500Z\predictions\rasnet\45.nii.gz,"[512, 512, 275]","[512, 512, 275]","[0.400391, 0.400391, 0.5]","[0.400391, 0.400391, 0.5]","[-64.299805, -62.200195, 81.949997]","[-64.299805, -62.200195, 81.949997]",True

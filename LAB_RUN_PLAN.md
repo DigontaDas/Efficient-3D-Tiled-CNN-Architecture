@@ -149,3 +149,52 @@ C:\Thesis_RASNET_env\bench\Scripts\python.exe -m benchmark.run_benchmark `
   - `manifest.json` records `source_tree_sha256: 179d8188047ad596e18b7c32fb66ff4c4997c1fc6407eb59e616e4aa58520af1`.
   - `RASNet`, `SegResNet`, and `V-Net` match `val_full_94` with `0.00e+00` maximum absolute difference across all 8 metrics; `nnU-Net V2` batch iterator matches single-case `infer_nnunet_probability` (`smoke_val_all5`) within `7.75e-06` on Dice (`< 1e-4` tolerance).
   - Multi-planar 2D slice overlays saved in `results/audits/2026-11-10_verification_audit/smoke_overlays/smoke_case_{14,45,47}_armA_5models_overlay.png`.
+
+---
+
+## 7. Stage 5 — V1 Epoch-200 Final Checkpoint Recovery & Val94 Endpoint Comparison (`2026-11-17`)
+
+> **Preserved Original**: Exact pre-update `LAB_RUN_PLAN.md` (`SHA-256: 8aab7f02dd3b59a66b870bcba328fffa945e2d0a4f03edc38c529129e96c3f3a`) is preserved at `docs/LAB_RUN_PLAN_v1_2026-11-10_original.md`.
+
+### 7.1 Checkpoint Recovery & Provenance Verification (`recovered_checkpoints/v1_epoch200_20261117_041500Z/`)
+
+```powershell
+C:\Thesis_RASNET_env\bench\Scripts\python.exe C:\Thesis_RASNET\recovered_checkpoints\v1_epoch200_20261117_041500Z\recover_and_verify.py
+```
+
+- **Recovered Artifacts (seekable split-zip extraction; no combined 900 MB zip, no `extractall()`):**
+  - `rasnet_last.pth` (`SHA-256: 71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95`, `18,871,718 B`, CRC-32 `0x382cc853`): raw `OrderedDict` (`114` tensors, `4,706,772` params). **No embedded epoch metadata**; epoch-200 identity is supported by `train_rasnet_200ep.py` line `268`, contiguous 200-epoch `logs/rasnet_200ep_log.csv`, and archive timestamp alignment (`5120.0 s` delta vs `5119.97 s` logged elapsed time from ep 160 to ep 200).
+  - `nnunet_last.pt` (`SHA-256: 2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2`, `246,472,688 B`, CRC-32 `0xae7f79e9`): embedded `current_epoch = 200` (`nnUNetTrainer_200epochs`, `3d_fullres`, `fold_0`, `PlainConvUNet`), staged into isolated native model folder `nnunet_native_model/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/` (`plans.json` `c67af4aa...`, `dataset.json` `d81f4025...`, `fold_0/checkpoint_final.pth` `2105bd72...`).
+
+### 7.2 Tests, Preflight Smoke & Full Val94 Endpoint Evaluation
+
+```powershell
+# 1. Run all synthetic unit tests (endpoint eval + report/figure + full benchmark suite)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -B -m pytest -v -p no:cacheprovider tests
+
+# 2. 2-case Val94 smoke run (cases 14, 45)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -B C:\Thesis_RASNET\scripts\run_v1_epoch200_endpoint_eval.py `
+  --run-id 20261117_041500Z `
+  --out C:\Thesis_RASNET\results\v1_epoch200_smoke_20261117_041500Z `
+  --smoke --device cuda --sw-batch-size 8
+
+# 3. Full Val94 endpoint evaluation (all 94 validation cases; --resume continues from saved per-model CSV/masks)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -B C:\Thesis_RASNET\scripts\run_v1_epoch200_endpoint_eval.py `
+  --run-id 20261117_041500Z `
+  --out C:\Thesis_RASNET\results\v1_epoch200_comparison_20261117_041500Z `
+  --device cuda --sw-batch-size 8
+
+# 4. Generate paired case-level CSV, separated comparison table, endpoint figure, and thesis curve text
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -B C:\Thesis_RASNET\scripts\generate_v1_epoch200_report_and_figures.py `
+  --out-dir C:\Thesis_RASNET\results\v1_epoch200_comparison_20261117_041500Z
+```
+
+- **Protocol (`v1-epoch200-endpoint-1.0`):** `Val94` (`N = 94`, `splits_final.json` `efe3f06c...`), `final_epoch200`, `1-pass` (no TTA), `0.50` Gaussian SW blending, threshold `tau = 0.50`, no CC pruning, scored on original SimpleITK physical grid (`surface-v1`), `bootstrap_seed = 42`, `n_boot = 2000`, `tie_tolerance = 1e-12`.
+- **Verified Smoke (`results/v1_epoch200_smoke_20261117_041500Z/`):** Cases `14, 45`; RASNet mean Dice `0.7679`, nnU-Net mean Dice `0.7995`; physical headers and voxel-axis orientation verified (`flipped_dices <= 0.0666` vs `>= 0.7411` unflipped).
+- **Verified Full Val94 Results (`results/v1_epoch200_comparison_20261117_041500Z/`):**
+  - `94/94` cases `'ok'` for both models (`0` dropped, `0` empty predictions, `188/188` output mask headers verified).
+  - `RASNet` (`final_epoch200`): Dice `0.7792 ± 0.0569`, Precision `0.7586`, Recall `0.8065`, HD95 `17.32 mm`, ASD `2.619 mm`, clDice `0.8413`, Centerline Recall `0.9068`.
+  - `nnU-Net V2` (`final_epoch200`): Dice `0.7767 ± 0.0562`, Precision `0.7428`, Recall `0.8203`, HD95 `18.67 mm`, ASD `2.748 mm`, clDice `0.8347`, Centerline Recall `0.9142`.
+  - Paired (`RASNet − nnU-Net`, `N = 94`): Dice `+0.0025` (`95% CI [-0.0027, +0.0075]`, `p = 0.2401`, `54W / 0T / 40L`; non-significant ≠ equivalence); Precision `+0.0158` (`[+0.0072, +0.0245]`, `p = 1.07e-4`, `66W / 0T / 28L`, favors RASNet); Recall `-0.0138` (`[-0.0175, -0.0098]`, `p = 4.85e-10`, `16W / 0T / 78L`, favors nnU-Net); Centerline Recall `-0.0074` (`[-0.0124, -0.0025]`, `p = 0.0092`, `37W / 2T / 55L`, favors nnU-Net).
+  - Distinct best-checkpoint references (`val_full_94` Arm A and `optionA_v1_symmetric_sw050` Val94) are tabulated separately in `table_epoch200_vs_existing_best_references.md` and `fig_v1_epoch200_val94_endpoint_comparison.{png,svg}`; thesis curve replacement text is in `THESIS_CURVE_AND_ENDPOINT_CORRECTION.md` (integration into protected `results/thesis_outputs/THESIS_METHODS_RESULTS_AND_LIMITATIONS.md`, `Answers-thesis-def.md`, and external thesis documents remains outstanding).
+
