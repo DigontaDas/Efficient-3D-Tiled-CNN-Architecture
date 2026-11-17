@@ -26,7 +26,7 @@
 | Allowed work | Code reading, synthetic CPU tests | Training, evaluation, GPU runs |
 | Python env | Varies (MONAI may differ, no `nnunetv2`) | `C:\Thesis_RASNET_env\bench` (Python 3.12, torch cu126, MONAI 1.6.1, nnunetv2 2.8.1) |
 
-Everything that runs for real runs on the lab PC. All commands, settings and performance tuning target it: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`. The v1 synthetic suite (`tests/`) collects 33 tests, all passing on the home PC on 2026-11-13.
+Everything that runs for real runs on the lab PC. All commands, settings and performance tuning target it: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`. The synthetic & reporting test suite (`tests/`) collects `72` tests, all passing on the lab PC on `2026-11-17` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
 
 Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 
@@ -125,7 +125,26 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 - **Setup:** frozen `rasnet_best.pth`; 152 recipes searched on Val-94 for RASNet only.
 - **Result:** with 0.50 overlap, Gaussian blending and τ = 0.40 plus Top-2 CC, test Dice was 0.8008 single-pass and 0.8043 with 4-pass TTA.
 - **Why it is not fair:** the baselines got no equivalent search, and the nnU-Net reference was single-pass. Val-94: RASNet's best was 0.8023, while nnU-Net's single-pass Arm C was 0.8075.
-- **Replacement:** Option A is the fair version.
+- **Replacement:** Option A (`results/optionA_v1_symmetric_sw050/`, committed `22d4581`) is the completed fair 4-model symmetric version (`3dunet` excluded).
+
+### Option A — Symmetric v1 evaluation (4 models, Test N = 150 retrospective)
+
+Source: `results/optionA_v1_symmetric_sw050/OPTION_A_RESULTS.md`, `summary_test.csv`, `noninferiority_rasnet_vs_nnunet_dice.csv`.
+
+- **Primary recipe `R4_tuned_tta8_top2`** (`0.50` Gauss SW, 8-pass logit-averaged TTA, Val94-locked `tau*`, Top-2 CC):
+  - `nnU-Net V2` (`tau*=0.20`): Dice `0.8059 ± 0.0630`, Precision `0.8084`, Recall `0.8104`, HD95 `8.17 mm`, clDice `0.8744`.
+  - `RASNet` (`tau*=0.40`): Dice `0.8039 ± 0.0691`, Precision `0.8302`, Recall `0.7861`, HD95 `8.93 mm`, clDice `0.8750`.
+  - `SegResNet` (`tau*=0.45`): Dice `0.7989 ± 0.0692`; `V-Net` (`tau*=0.45`): Dice `0.7915 ± 0.0677`.
+  - **Non-inferiority (RASNet − nnU-Net Dice, margin `−0.005`):** mean diff `−0.0021`, `95% CI [−0.0088, +0.0030]`, `NI = False`, `Superior = False`.
+  - **R4 families (Holm within family):** RASNet wins `FA_primary` Precision (`+0.0218`, Holm `p = 7.23e-17`) and `FB`/`FC` Dice over SegResNet/V-Net; HD95/ASD/clDice vs nnU-Net are non-significant; nnU-Net retains Recall (`+0.0244`, Holm `p = 2.40e-17`).
+- **Secondary recipes `R1`–`R3`:** `R1` (`0.7788` vs `0.7687`), `R2` (`0.7863` vs `0.7760`), `R3` (`0.8008` vs `0.8055`, `NI = False`).
+
+### V1 Epoch-200 Endpoint Evaluation (`final_epoch200`, Val N = 94)
+
+Source: `results/v1_epoch200_comparison_20261117_041500Z/` & `results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_summary_and_paired_corrected.md`.
+
+- **Protocol:** `final_epoch200` checkpoints (`rasnet_last.pth` via script/log/archive provenance, `nnunet_last.pt` `current_epoch=200`), symmetric 1-pass, `0.50` Gauss SW, `tau=0.50`, no CC (`N=94`, 0 empty, 188/188 geometry OK).
+- **Result (`RASNet` vs `nnU-Net`):** Dice `0.7792 ± 0.0569` vs `0.7767 ± 0.0562` (paired diff `+0.0025`, `95% CI [−0.0027, +0.0075]`, exploratory unadjusted Wilcoxon `p = 0.2401`, `54W/0T/40L`; neither superiority nor equivalence). Across the 8 exploratory unadjusted metrics, post-hoc Holm-8 retains Precision (`+0.0158`, `Holm-8 p = 7.47e-4`) and Recall (`−0.0138`, `Holm-8 p = 3.88e-9`), while `clDice` (`unadj p = 0.0352`, `Holm-8 p = 0.1760`) and `centerline_recall` (`unadj p = 0.0092`, `Holm-8 p = 0.0551`) do not survive `< 0.05`.
 
 ---
 
@@ -151,7 +170,7 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
   - Family 2: RASNet-v2 vs nnU-Net on precision, HD95, clDice.
   - Dice non-inferiority vs nnU-Net, margin −0.005.
 
-**Defects found 2026-11-12, fixed by proposed Amendment A1** (`docs-for-next-v2-gen/02_…`; needs user sign-off, then commit before Stage 2A resumes):
+**Defects found 2026-11-12, fixed by Amendment A1** (`docs-for-next-v2-gen/02_…`; signed off and committed 2026-11-13 at `34ee6ff` / `79e0458`):
 
 - the Stage 3 clDice weight can differ between RASNet and its baselines
 - the Stage 2B gates are not binding, and empty predictions can help a candidate pass them
@@ -164,17 +183,14 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 ## 6. Current state and next steps
 
 - **2026-11-10:** all v1 LAB-CHECKs were verified on the lab PC (`results/audits/2026-11-10_verification_audit/`). Superseded material is archived in `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/`.
-- **2026-11-12 (lab-reported):** Stage 2A is paused at 14/16. Job 15 (`pilot2a_rasnet_v2_f32_lr3e-4_seed42`) has resume state saved at epoch 30, step 200 (`STATE_HANDOFF.md`).
-- **On the lab PC, start with `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`.** It tells the IDE agent exactly what to do: Option A first, while Stage 2A stays paused.
-  - All core code is already committed (Option A `aecf60e`, Amendment A1 `79e0458`, pre-registrations `34ee6ff`). **Do not write or rewrite core code**: verify it with manual §5, run it, and fix only trivial environment issues after showing the user the diff.
-  - Manifests record `git.dirty_code`, which must be `false`, and `git.dirty_any`, which is informational.
-- **Next, in order** (`docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md`):
-  - **P0 — done (`34ee6ff`):** pre-registrations committed. The `CHECKPOINTS.md` loss description was corrected 2026-11-13.
-  - **P1 — done (`aecf60e`):** Option A code, tests first.
-  - **P2 — done (`79e0458`):** Amendment A1 patches, including the Stage 5 3-seed DS contrast and `src/diag_vnet_bn.py`. The lab PC re-runs the tests (manual §5).
-  - **P3:** run Option A on the GPU: parity, `sw_batch_size` tuning, val, lock, test, timing, stats, figures.
-  - **P4:** resume Rasnet-v2 through Stage 5.
-  - **P5:** thesis integration.
+- **2026-11-13 (`34ee6ff`, `aecf60e`, `79e0458`):** pre-registrations, Option A code, and Amendment A1 patches committed (`CHECKPOINTS.md` loss description corrected).
+- **2026-11-15 (`558e7eb`, `22d4581`):** **P3 (Option A) completed** on the RTX 4080 SUPER (`results/optionA_v1_symmetric_sw050/`): symmetric 4-model evaluation (`R4`: RASNet `0.8039` vs nnU-Net `0.8059`, `NI=False`).
+- **2026-11-16 (`b3ca1f1`):** **Rasnet-v2 Stage 2A/2B pilots completed** (`Rasnet-v2/results/pilots_val94/pilot_lock_decision.md`): Stage 2B gate outcome **`FALLBACK (NO CANDIDATE PASSED BOTH GATES)`**. **V2 Stage 3+ remains paused**; do not run V2 or override failed gates.
+- **2026-11-17 (`8e9b303` & V1 reporting correction):**
+  - V1 Epoch-200 Val94 endpoint evaluation completed (`results/v1_epoch200_comparison_20261117_041500Z/`, `0.7792` vs `0.7767`, `p = 0.2401`, 8 exploratory unadjusted metrics).
+  - `CHECKPOINTS.md` updated with verified state-dict key counts (`114`/`292`/`83`/`164`/`63`), nnU-Net plans (`[96, 160, 160]`, `[0.5, 0.349609375, 0.349609375]`), `current_epoch=199` vs ep `189` raw peak, and `final_epoch200` provenance.
+  - Corrected figures/tables, `HISTORICAL_ERRATA.md`, and thesis/defense replacement text generated in `results/v1_reporting_correction_20261117_105000Z/`.
+- **Next:** **P5 (external thesis & slide integration)** remains **`OUTSTANDING`** (no `.tex`/`.docx`/`.pptx` sources in `C:\Thesis_RASNET`). Keep `git.dirty_code = false` for any future runs (`docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`).
 
 ## 7. Key files
 
@@ -183,11 +199,13 @@ Source: `results/rasnet_fixed_weight_optimization/PHASE_H_OPTIMIZATION_REPORT.md
 | Evidence index | `CURRENT_EVIDENCE_INDEX.md` |
 | Checkpoints | `CHECKPOINTS.md` |
 | Inference spec | `INFERENCE_SPEC.md` |
-| v1 benchmark | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `adapters/`); tests in `tests/` |
+| v1 benchmark | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `endpoint_eval.py`, `symmetric_eval.py`, `adapters/`); tests in `tests/` (`72` passing) |
 | RASNet model + loss | `Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py` |
 | Splits | `Phase3_Local_Integration/splits_final.json` (690 / 94 / 150) |
 | v1 trainers | `Q1_Publication_Package/matched_200ep_benchmark/train_*_200ep.py`, `prepare_and_run_nnunet_200ep.py` |
-| v1 results | `results/benchmark_runs/`, `results/thresholds.json`, `results/thesis_outputs/` |
+| v1 results | `results/benchmark_runs/`, `results/thresholds.json`, `results/thesis_outputs/`, `results/optionA_v1_symmetric_sw050/` |
+| V1 Epoch-200 endpoint & recovery | `recovered_checkpoints/v1_epoch200_20261117_041500Z/`, `results/v1_epoch200_smoke_20261117_041500Z/`, `results/v1_epoch200_comparison_20261117_041500Z/` |
+| V1 reporting correction & defense package | `results/v1_reporting_correction_20261117_105000Z/` |
 | Phase H | `results/rasnet_fixed_weight_optimization/`, `scripts/run_phaseH_rasnet_optimization.py` |
 | Rasnet-v2 | `Rasnet-v2/` |
 | Lab PC manual (start here) | `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md` |

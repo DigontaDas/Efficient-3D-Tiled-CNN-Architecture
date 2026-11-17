@@ -1,0 +1,13 @@
+# Verified V1 Checkpoint Provenance (State-Dict Keys, Hashes, Plans, & Epochs)
+
+> Independent torch.load verification of all V1 best and final_epoch200 checkpoints.
+
+| model_key | checkpoint_role | relative_path | bytes | sha256 | state_dict_keys | unique_params_exact | embedded_epoch_metadata | has_optimizer_state | provenance_notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| rasnet | best | Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth | 18871718 | 8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8 | 114 | 4706772 | None (embedded_epoch_metadata_present=False) | False | Best at epoch 160 per rasnet_200ep_log.csv (0.77696) |
+| rasnet | final_epoch200 | recovered_checkpoints/v1_epoch200_20261117_041500Z/rasnet_last.pth | 18871718 | 71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95 | 114 | 4706772 | None (embedded_epoch_metadata_present=False) | False | Supported by train_rasnet_200ep.py:268 + rasnet_200ep_log.csv (200 ep) + split-ZIP timestamp delta |
+| segresnet | best | Q1_Publication_Package/matched_200ep_benchmark/checkpoints/segresnet_best.pt | 18836926 | b8ea61d95106a0bbe15e1ce9f9e5af1a38d9508e59d0639d32bc883d93c6e109 | 83 | 4700914 | None (embedded_epoch_metadata_present=False) | False | Best at epoch 190 per segresnet_200ep_log.csv (0.75212) |
+| vnet | best | Q1_Publication_Package/matched_200ep_benchmark/checkpoints/vnet_best.pt | 182479290 | a89d71bd41c3e773c68e3f4b5e27c5a067f959154aa049eead76f1642c5c1063 | 164 | 45599452 | None (embedded_epoch_metadata_present=False) | False | Best at epoch 180 per vnet_200ep_log.csv (0.74905) |
+| 3dunet | best | Q1_Publication_Package/matched_200ep_benchmark/checkpoints/3dunet_best.pth | 19253157 | d8a8f5ec95b5f34e2afe0b807ac49bb36d136f9d864238c27a763a29a800a60f | 63 | 4805534 | epoch=180 (best_val_dice=0.663835) | False | top_keys=['epoch', 'model_state_dict', 'best_val_dice']; optimizer_state_dict absent |
+| nnunet | best | Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt | 246472150 | 9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711 | 292 | 30785994 | current_epoch=199 | True | plans patch=[96, 160, 160], spacing=[0.5, 0.349609375, 0.349609375], _best_ema=0.816239, raw_peak_ep=189 (0.8376), ema_peak_ep=199 |
+| nnunet | final_epoch200 | recovered_checkpoints/v1_epoch200_20261117_041500Z/nnunet_last.pt | 246472688 | 2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2 | 292 | 30785994 | current_epoch=200 | True | plans patch=[96, 160, 160], spacing=[0.5, 0.349609375, 0.349609375], _best_ema=0.816239, raw_peak_ep=189 (0.8376), ema_peak_ep=199 |

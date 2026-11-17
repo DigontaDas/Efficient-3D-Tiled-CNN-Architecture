@@ -1,0 +1,858 @@
+{
+  "manifest_id": "v1_reporting_correction_20261117_105000Z",
+  "generated_at_utc": "2026-11-17T11:05:17Z",
+  "repo_root": "C:\\Thesis_RASNET",
+  "output_dir": "results/v1_reporting_correction_20261117_105000Z",
+  "python_executable": "C:\\Thesis_RASNET_env\\bench\\Scripts\\python.exe",
+  "external_manuscript_and_slide_integration_status": "OUTSTANDING (no .tex, .docx, .pptx, or .key sources inside C:\\Thesis_RASNET)",
+  "protected_baseline_verification": {
+    "manifest_path": "results/v1_reporting_correction_20261117_105000Z/protected_baseline_hashes.json",
+    "total_files": 548,
+    "verified_identical": 548,
+    "missing_count": 0,
+    "mismatch_count": 0,
+    "status": "548/548 byte-identical, 0 mismatches"
+  },
+  "pre_edit_backup_verification": {
+    "manifest_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_hashes.json",
+    "total_files": 9,
+    "verified_identical": 9,
+    "mismatch_count": 0,
+    "status": "9/9 byte-identical, 0 mismatches"
+  },
+  "counts": {
+    "pre_edit_backups": 9,
+    "active_files_modified_and_added": 11,
+    "generated_deliverables_and_manifests": 22,
+    "primary_input_sources": 37
+  },
+  "pre_edit_backups": [
+    {
+      "source_path": "AUDIT_FINDINGS.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/AUDIT_FINDINGS.md",
+      "role": "Exact pre-edit snapshot of AUDIT_FINDINGS.md",
+      "bytes": 25127,
+      "sha256": "19fc95db2a287df3a7be1ac569753e5cfaad8125e311b5726fc3a2c883f55371",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "Answers-thesis-def.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/Answers-thesis-def.md",
+      "role": "Exact pre-edit snapshot of Answers-thesis-def.md",
+      "bytes": 9160,
+      "sha256": "dca9d0638febde3f62225fcb416d25df3fa3c246ac6c67a1e8a7af9eba71faf6",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "CHECKPOINTS.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CHECKPOINTS.md",
+      "role": "Exact pre-edit snapshot of CHECKPOINTS.md",
+      "bytes": 8705,
+      "sha256": "22624d08f5e6736251333e1ebb957bf0214f0e5cf424d892e012e1a535e1af4a",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "CLAUDE.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CLAUDE.md",
+      "role": "Exact pre-edit snapshot of CLAUDE.md",
+      "bytes": 8631,
+      "sha256": "ceece082159e29a87689e9a36988cbd2e59f9e69d6993f250d2f7a6c652db211",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "CURRENT_EVIDENCE_INDEX.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CURRENT_EVIDENCE_INDEX.md",
+      "role": "Exact pre-edit snapshot of CURRENT_EVIDENCE_INDEX.md",
+      "bytes": 16717,
+      "sha256": "5b8a2ff2ff7e029e79a3d6d797d82f2a3052656eed1163823e69cd44736ef103",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "GEMINI.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/GEMINI.md",
+      "role": "Exact pre-edit snapshot of GEMINI.md",
+      "bytes": 13963,
+      "sha256": "23687f644d884e26d1fcdb30d360bd0d0f2678b6a9b6e354827e8438db1b872c",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "LAB_RUN_PLAN.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/LAB_RUN_PLAN.md",
+      "role": "Exact pre-edit snapshot of LAB_RUN_PLAN.md",
+      "bytes": 14826,
+      "sha256": "5cd82d53959efedf26099c347d443e815b1d61888c24df4b837550cc68333d7d",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "README.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/README.md",
+      "role": "Exact pre-edit snapshot of README.md",
+      "bytes": 21058,
+      "sha256": "c1c8a63d6dcb24d8facf058b556fe0c89c99f9f10cda7dcbad73251fc684ce9d",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    },
+    {
+      "source_path": "scripts/generate_v1_epoch200_report_and_figures.py",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/scripts/generate_v1_epoch200_report_and_figures.py",
+      "role": "Exact pre-edit snapshot of scripts/generate_v1_epoch200_report_and_figures.py",
+      "bytes": 32613,
+      "sha256": "9cfb517c038e118389c5acf7299238ee3a180617120fc7aecf0d37b386b8711f",
+      "matches_pre_edit_hashes_json": true,
+      "active_file_modified_after_backup": true
+    }
+  ],
+  "active_files_modified_and_added": [
+    {
+      "path": "CHECKPOINTS.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CHECKPOINTS.md",
+      "category": "modified_active_doc",
+      "role": "Updated checkpoint state-dict key counts (114/83/164/63/292), nnU-Net plans [96,160,160] & [0.5,0.349609375,0.349609375], current_epoch=199 vs ep 189 raw peak, final_epoch200 provenance, training protocols, and errata notes.",
+      "bytes": 11945,
+      "sha256": "69e29faef0bbfd9eeaeb4c05f05e48270815ae1ccc9d2d1d4584077a6b801f9c",
+      "pre_edit_bytes": 8705,
+      "pre_edit_sha256": "22624d08f5e6736251333e1ebb957bf0214f0e5cf424d892e012e1a535e1af4a",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "CURRENT_EVIDENCE_INDEX.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CURRENT_EVIDENCE_INDEX.md",
+      "category": "modified_active_doc",
+      "role": "Updated canonical evidence index with verified V1 Epoch-200 endpoint, Option A, reporting correction deliverables, and provenance clarifications.",
+      "bytes": 23586,
+      "sha256": "22daf620cd7f0d1a02bbfedb2c47bcf9372af3ee084afb66bbc6649c0d1f6d0a",
+      "pre_edit_bytes": 16717,
+      "pre_edit_sha256": "5b8a2ff2ff7e029e79a3d6d797d82f2a3052656eed1163823e69cd44736ef103",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "LAB_RUN_PLAN.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/LAB_RUN_PLAN.md",
+      "category": "modified_active_doc",
+      "role": "Recorded exact verification/test/generation commands run during Stage 6 reporting corrections and external integration status (OUTSTANDING).",
+      "bytes": 17967,
+      "sha256": "8c0a250015654d53c78fa970147a7a8b046682d5ce37fcef57c9c88e28166d17",
+      "pre_edit_bytes": 14826,
+      "pre_edit_sha256": "5cd82d53959efedf26099c347d443e815b1d61888c24df4b837550cc68333d7d",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/CLAUDE.md",
+      "category": "modified_active_doc",
+      "role": "Synchronized project summary, test count (72), Option A / Epoch-200 / V2 Stage 2B status, and reporting correction references.",
+      "bytes": 10257,
+      "sha256": "56be1f4bf00d90a1afdfa7df1e2b52719cf6c93bcac62694004355323edfa6ca",
+      "pre_edit_bytes": 8631,
+      "pre_edit_sha256": "ceece082159e29a87689e9a36988cbd2e59f9e69d6993f250d2f7a6c652db211",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "GEMINI.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/GEMINI.md",
+      "category": "modified_active_doc",
+      "role": "Synchronized project summary, test count (72), Option A / Epoch-200 / V2 Stage 2B status, and reporting correction references.",
+      "bytes": 17017,
+      "sha256": "775ea3b947cc7e9b2e57bccf9ea0a256b59597d646173963f7e96e8a1fd872f9",
+      "pre_edit_bytes": 13963,
+      "pre_edit_sha256": "23687f644d884e26d1fcdb30d360bd0d0f2678b6a9b6e354827e8438db1b872c",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "Answers-thesis-def.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/Answers-thesis-def.md",
+      "category": "modified_active_doc",
+      "role": "Replaced overstated/erroneous defense claims with evidence-linked V1 results, Option A R4 NI=False disclosure, exact parameter/timing scopes, and exclusions.",
+      "bytes": 15217,
+      "sha256": "d5cc009a028ac6af1ccf8617a0b6448ff6d4c46df26951d65a8f8fcac93c8001",
+      "pre_edit_bytes": 9160,
+      "pre_edit_sha256": "dca9d0638febde3f62225fcb416d25df3fa3c246ac6c67a1e8a7af9eba71faf6",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "README.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/README.md",
+      "category": "modified_active_doc",
+      "role": "Corrected nnU-Net GFLOPs (1,119.34 native / 402.96 equal 96^3 vs erroneous 2,149.13), test count (72), and separated V1 regime results.",
+      "bytes": 22338,
+      "sha256": "727af2e6418595936321eae86141de6b873c25ff408498484e9633d5215d0dd0",
+      "pre_edit_bytes": 21058,
+      "pre_edit_sha256": "c1c8a63d6dcb24d8facf058b556fe0c89c99f9f10cda7dcbad73251fc684ce9d",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "AUDIT_FINDINGS.md",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/AUDIT_FINDINGS.md",
+      "category": "modified_active_doc",
+      "role": "Documented V1 reporting corrections and explicitly kept unrelated source/pipeline audit findings (S1-S6, E5, D2, D4, I2, T1-T4) OPEN / ARCHIVED / NOT CLOSED.",
+      "bytes": 28891,
+      "sha256": "d104fa698ec09fd65c0073a164fc8ee781c046ac2598bceddb1bed48db4369bc",
+      "pre_edit_bytes": 25127,
+      "pre_edit_sha256": "19fc95db2a287df3a7be1ac569753e5cfaad8125e311b5726fc3a2c883f55371",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "scripts/generate_v1_epoch200_report_and_figures.py",
+      "backup_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/scripts/generate_v1_epoch200_report_and_figures.py",
+      "category": "modified_active_script",
+      "role": "Replaced causal patch-sampling wording with required non-causal protocol sentence, added all 5 validation protocols/cadences, exploratory/unadjusted p-value tags, Wilcoxon vs CI note, and 0.0s resume-skip clarification.",
+      "bytes": 35557,
+      "sha256": "c0c58f79d38c2f60e14501587b482e4831206b823a4c12d1c4d9eacf395c2367",
+      "pre_edit_bytes": 32613,
+      "pre_edit_sha256": "9cfb517c038e118389c5acf7299238ee3a180617120fc7aecf0d37b386b8711f",
+      "changed_from_pre_edit": true
+    },
+    {
+      "path": "scripts/generate_v1_reporting_corrections.py",
+      "backup_path": null,
+      "category": "new_active_script",
+      "role": "Generates corrected Fig 3, corrected Val94 Epoch-200 endpoint figure, and 5 verified CSV/MD summary/provenance/Holm-8/regime/efficiency tables read-only from source data.",
+      "bytes": 46608,
+      "sha256": "18ca88e34654863a63c74cedabeb26978cc4fb0022e15e3c1f9f90a576ffbe65",
+      "pre_edit_bytes": null,
+      "pre_edit_sha256": null,
+      "changed_from_pre_edit": null
+    },
+    {
+      "path": "tests/test_v1_reporting_corrections.py",
+      "backup_path": null,
+      "category": "new_active_test",
+      "role": "Tests-first verification suite covering R4/R5/R6 narrative fixes, Val94 stats recomputation, post-hoc Holm-8, 5-model log parsing, protected-path guard, 4 regimes, and efficiency/timing.",
+      "bytes": 9844,
+      "sha256": "4f3f712fd6dcc319d7c7dd21a50f3441685c02520c7a1d57afd6a90683e18c2b",
+      "pre_edit_bytes": null,
+      "pre_edit_sha256": null,
+      "changed_from_pre_edit": null
+    }
+  ],
+  "generated_deliverables_and_manifests": [
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/V1_REPORTING_CORRECTION_REPORT.md",
+      "filename": "V1_REPORTING_CORRECTION_REPORT.md",
+      "category": "deliverable_report",
+      "source_paths": [
+        "results/v1_epoch200_comparison_20261117_041500Z/*",
+        "results/optionA_v1_symmetric_sw050/*",
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/*",
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/*",
+        "recovered_checkpoints/v1_epoch200_20261117_041500Z/*"
+      ],
+      "role": "Master V1 reporting correction report: defensible central claim, 17-item issue matrix, open audit findings, checkpoint provenance, Fig 3 audit, Val94 stats, 4-regime separation, exclusions, and efficiency.",
+      "bytes": 31096,
+      "sha256": "091d9c35f25859cddb30424cfdb185dc16869c4878da308efa4b4ac995bb6577"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/CLAIM_TO_EVIDENCE_MATRIX.csv",
+      "filename": "CLAIM_TO_EVIDENCE_MATRIX.csv",
+      "category": "deliverable_matrix",
+      "source_paths": [
+        "results/v1_epoch200_comparison_20261117_041500Z/*",
+        "results/optionA_v1_symmetric_sw050/*",
+        "results/thesis_outputs/Table4_computational_efficiency_rtx4080super.csv",
+        "Phase3_Local_Integration/splits_final.json"
+      ],
+      "role": "Row-by-row claim-to-evidence verification matrix tracing active, corrected, qualified, and removed V1 claims to exact files, protocols, and SHA-256 digests.",
+      "bytes": 18023,
+      "sha256": "12f6189691df4d015190d87666e356777da90f7a5eb8cd9386f2eaa6fbbf5241"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/HISTORICAL_ERRATA.md",
+      "filename": "HISTORICAL_ERRATA.md",
+      "category": "deliverable_errata",
+      "source_paths": [
+        "results/audits/2026-11-10_verification_audit/checkpoint_verification.csv",
+        "results/thesis_outputs/Table1_validation_94_and_thresholds.md",
+        "results/thesis_outputs/THESIS_METHODS_RESULTS_AND_LIMITATIONS.md",
+        "results/v1_epoch200_comparison_20261117_041500Z/THESIS_CURVE_AND_ENDPOINT_CORRECTION.md"
+      ],
+      "role": "Read-only errata log documenting historical errors in preserved protected files without altering those files.",
+      "bytes": 7853,
+      "sha256": "365022eee5f86189143c839d336d43260c675adc79c3f9590de20beef1adab63"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/THESIS_REPLACEMENT_TEXT.md",
+      "filename": "THESIS_REPLACEMENT_TEXT.md",
+      "category": "deliverable_manuscript",
+      "source_paths": [
+        "results/v1_reporting_correction_20261117_105000Z/V1_REPORTING_CORRECTION_REPORT.md",
+        "results/v1_reporting_correction_20261117_105000Z/table_*.csv"
+      ],
+      "role": "Ready-to-paste corrected thesis Methods, Results, Discussion, and Limitations text (external thesis integration marked OUTSTANDING).",
+      "bytes": 20518,
+      "sha256": "7bbdaf93f00f88a322cbe4ed73184c00d385ec8e6df416d62ec6c46a98b24b33"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/DEFENSE_QA_V1.md",
+      "filename": "DEFENSE_QA_V1.md",
+      "category": "deliverable_defense",
+      "source_paths": [
+        "results/v1_reporting_correction_20261117_105000Z/V1_REPORTING_CORRECTION_REPORT.md"
+      ],
+      "role": "Concise evidence-based defense answers to the 8 required questions (R7) plus regime/timing/claim clarifications.",
+      "bytes": 15196,
+      "sha256": "19763b0dffc28c73e429a62facac0e4d6bc6de1ae320cb41bba0290eefe6538b"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/DEFENSE_SLIDE_OUTLINE.md",
+      "filename": "DEFENSE_SLIDE_OUTLINE.md",
+      "category": "deliverable_defense",
+      "source_paths": [
+        "results/v1_reporting_correction_20261117_105000Z/V1_REPORTING_CORRECTION_REPORT.md",
+        "results/v1_reporting_correction_20261117_105000Z/fig*.png"
+      ],
+      "role": "Evidence-disciplined defense slide outline aligned to corrected figures and tables (external slide integration marked OUTSTANDING).",
+      "bytes": 10590,
+      "sha256": "d70081819fbf4b24af47a02ac65e48f6ccf281534c331a642b542c469d9dba46"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/fig3_corrected_training_and_val_convergence_200ep.png",
+      "filename": "fig3_corrected_training_and_val_convergence_200ep.png",
+      "category": "corrected_figure_png",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/*_200ep_log.csv",
+        "recovered_checkpoints/v1_epoch200_20261117_041500Z/nnunet_last.pt"
+      ],
+      "role": "Corrected Fig 3 (PNG): DiceFocalLoss(1.0, 2.0) labels for SegResNet/V-Net, unshifted dual loss axes, distinct raw Pseudo dice (ep 189 peak) vs ema_fg_dice (ep 199 best), full 0-0.96 y-axis, and required non-causal footer.",
+      "bytes": 965456,
+      "sha256": "afe449d0df0a1e7210c0fc7aef04e9aacf03123e6c58c513f1e06cfe87591e8e"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/fig3_corrected_training_and_val_convergence_200ep.svg",
+      "filename": "fig3_corrected_training_and_val_convergence_200ep.svg",
+      "category": "corrected_figure_svg",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "Q1_Publication_Package/matched_200ep_benchmark/logs/*_200ep_log.csv",
+        "recovered_checkpoints/v1_epoch200_20261117_041500Z/nnunet_last.pt"
+      ],
+      "role": "Corrected Fig 3 (vector SVG).",
+      "bytes": 274013,
+      "sha256": "de29ef36ac234e4a17184a46a39433cfa2634e91ea746ce1d0a00f376bb5f408"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/fig_v1_epoch200_val94_endpoint_corrected.png",
+      "filename": "fig_v1_epoch200_val94_endpoint_corrected.png",
+      "category": "corrected_figure_png",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv"
+      ],
+      "role": "Corrected Val94 Epoch-200 endpoint figure (PNG) with matched N=94 paired Dice distributions, exploratory/unadjusted p-value labels, and separated regime panels.",
+      "bytes": 593382,
+      "sha256": "a490374ef15c571ed1c586a721644d4cf8375536ceba7804be17c55ab8fda6d8"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/fig_v1_epoch200_val94_endpoint_corrected.svg",
+      "filename": "fig_v1_epoch200_val94_endpoint_corrected.svg",
+      "category": "corrected_figure_svg",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv"
+      ],
+      "role": "Corrected Val94 Epoch-200 endpoint figure (vector SVG).",
+      "bytes": 255547,
+      "sha256": "a8b851ea0c1cd72e4338fd9bf743ff21a65fe4647fdc9e872007900cfd9c156f"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_checkpoint_provenance_verified.csv",
+      "filename": "table_checkpoint_provenance_verified.csv",
+      "category": "verified_table_csv",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/*",
+        "recovered_checkpoints/v1_epoch200_20261117_041500Z/*"
+      ],
+      "role": "Verified checkpoint provenance table (CSV): state-dict key counts, parameter counts, SHA-256 digests, plans, and epoch metadata.",
+      "bytes": 2278,
+      "sha256": "a582ac0a0c1ef9b0644b3349a6cf843c4e68532f35787ae6b0db12da3e4fa72e"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_checkpoint_provenance_verified.md",
+      "filename": "table_checkpoint_provenance_verified.md",
+      "category": "verified_table_md",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py"
+      ],
+      "role": "Verified checkpoint provenance table (Markdown).",
+      "bytes": 2681,
+      "sha256": "3f7d55400b4ec5236241824bf9ac59f8b6ff4ffdac3d31f67784fec1c00a4fd4"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_summary_and_paired_corrected.csv",
+      "filename": "table_epoch200_val94_summary_and_paired_corrected.csv",
+      "category": "verified_table_csv",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv",
+        "Phase3_Local_Integration/splits_final.json"
+      ],
+      "role": "Recomputed Val94 Epoch-200 paired statistics (CSV) explicitly tagged exploratory_unadjusted with Wilcoxon vs bootstrap CI note.",
+      "bytes": 4172,
+      "sha256": "0936bc6d044b33918ad59ec14a4b64c53b20474e8b108056efbfde35f11f32cc"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_summary_and_paired_corrected.md",
+      "filename": "table_epoch200_val94_summary_and_paired_corrected.md",
+      "category": "verified_table_md",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py"
+      ],
+      "role": "Recomputed Val94 Epoch-200 summary and paired statistics (Markdown).",
+      "bytes": 7329,
+      "sha256": "22656d56d9de6de09d007ff9118b1c96e12a790bfbbba1c7958eab46dfefce55"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_posthoc_holm8_exploratory.csv",
+      "filename": "table_epoch200_val94_posthoc_holm8_exploratory.csv",
+      "category": "verified_table_csv",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv",
+        "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv"
+      ],
+      "role": "Separate post-hoc exploratory (NOT preregistered) Holm-Bonferroni (K=8) adjustment for Val94 Epoch-200 endpoint (CSV).",
+      "bytes": 1777,
+      "sha256": "4a85af9c6b257ea0f84f1862768431b5a8af5d4ff3751371d0acca386ca3407b"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_posthoc_holm8_exploratory.md",
+      "filename": "table_epoch200_val94_posthoc_holm8_exploratory.md",
+      "category": "verified_table_md",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py"
+      ],
+      "role": "Separate post-hoc exploratory Holm-8 adjustment table (Markdown).",
+      "bytes": 2065,
+      "sha256": "dd1b6f3bb27ffefa40eb01472e03d8c1c2c7e9e8d34fee0bc4fc236b87da9aa9"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_v1_four_regimes_comparison.csv",
+      "filename": "table_v1_four_regimes_comparison.csv",
+      "category": "verified_table_csv",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/v1_epoch200_comparison_20261117_041500Z/summary_epoch200.csv",
+        "results/benchmark_runs/val_full_94/summary_arm_A.csv",
+        "results/benchmark_runs/test_retrospective_150/summary_arm_{A,B,C}.csv",
+        "results/optionA_v1_symmetric_sw050/{val_grid_scores.csv,summary_test.csv,noninferiority_rasnet_vs_nnunet_dice.csv}"
+      ],
+      "role": "Strictly separated 4-regime comparison table (A, B1/B2, C, D Option A R1-R4) (CSV).",
+      "bytes": 3870,
+      "sha256": "c9e54bb22551fb3524309f9ab3621fa50933be71eeb94c26046419b8a5dbe3b2"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_v1_four_regimes_comparison.md",
+      "filename": "table_v1_four_regimes_comparison.md",
+      "category": "verified_table_md",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py"
+      ],
+      "role": "Strictly separated 4-regime comparison table (Markdown).",
+      "bytes": 4210,
+      "sha256": "0c15acb154f1502467773b0deb4070ecaabbdf075bb69bacfdbc55edc0d0147d"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_v1_efficiency_and_timing_verified.csv",
+      "filename": "table_v1_efficiency_and_timing_verified.csv",
+      "category": "verified_table_csv",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py",
+        "results/thesis_outputs/Table4_computational_efficiency_rtx4080super.csv",
+        "results/optionA_v1_symmetric_sw050/timing_summary.csv"
+      ],
+      "role": "Verified parameter counts, single-patch Table 4 compute/VRAM, and Option A n=10 full-volume runtime table excluding invalid 0.0s/~1.85s timings (CSV).",
+      "bytes": 2513,
+      "sha256": "3a06cb65fca49f48c309b19a99e27b825d8faefe2830c0a474263dbff383af8d"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/table_v1_efficiency_and_timing_verified.md",
+      "filename": "table_v1_efficiency_and_timing_verified.md",
+      "category": "verified_table_md",
+      "source_paths": [
+        "scripts/generate_v1_reporting_corrections.py"
+      ],
+      "role": "Verified efficiency and timing table (Markdown).",
+      "bytes": 3060,
+      "sha256": "ce7c8e2277965fd91fc572ba14ba3c728ab5a3b17d99bfd3d4630d82b9ecd1e8"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/pre_edit_hashes.json",
+      "filename": "pre_edit_hashes.json",
+      "category": "hash_manifest",
+      "source_paths": [
+        "pre_edit_backups/*"
+      ],
+      "role": "Pre-edit SHA-256 and byte-size manifest for the 9 modified active files.",
+      "bytes": 2238,
+      "sha256": "7bcf6ae0190df07e596ab6bd4c891ce385ceeebc7f22ec37cc959682d7b0d6a1"
+    },
+    {
+      "output_path": "results/v1_reporting_correction_20261117_105000Z/protected_baseline_hashes.json",
+      "filename": "protected_baseline_hashes.json",
+      "category": "hash_manifest",
+      "source_paths": [
+        "results/benchmark_runs/*",
+        "results/rasnet_fixed_weight_optimization/*",
+        "results/thesis_outputs/*",
+        "results/audits/*",
+        "results/optionA_v1_symmetric_sw050/*",
+        "results/v1_epoch200_*/*",
+        "recovered_checkpoints/*",
+        "benchmark/*",
+        "Phase3_Local_Integration/*",
+        "Q1_Publication_Package/*",
+        "checkpoints/*"
+      ],
+      "role": "Pre-edit SHA-256 and byte-size baseline manifest covering 548 protected and historical files.",
+      "bytes": 106704,
+      "sha256": "f9bdcd3c4eb40f28a3cbe955343cabda0be6297ce97f93c931b611c2f81a3e2d"
+    }
+  ],
+  "primary_input_sources": [
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/rasnet_200ep_log.csv",
+      "category": "training_log",
+      "role": "RASNet 200-epoch training & Val94 full-volume validation log (12 val evals; best ep 160).",
+      "bytes": 17548,
+      "sha256": "d3ad4d06eec1c8df10c0f0d58bcd6b82392401bfcf05acfcd5305dc8f313fb82",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/segresnet_200ep_log.csv",
+      "category": "training_log",
+      "role": "SegResNet 200-epoch training & Val94 full-volume validation log (20 val evals; best ep 190).",
+      "bytes": 17575,
+      "sha256": "18e4443a28ee1685cb9b179b782c984aac424ba213180a430e490458bba42b8f",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/vnet_200ep_log.csv",
+      "category": "training_log",
+      "role": "V-Net 200-epoch training & Val94 full-volume validation log (13 val evals; best ep 180).",
+      "bytes": 17377,
+      "sha256": "cbcb31b25bc63a2a923447d9f5cbf410ce244c9b2cfdb0b6dbc8498428e5bc63",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/3dunet_200ep_log.csv",
+      "category": "training_log",
+      "role": "3D U-Net 200-epoch training & 128^3 resized Val94 validation log (21 val evals; best ep 180).",
+      "bytes": 17767,
+      "sha256": "ecf849ccfa62697e0736bb88f0ba17111e76e666e0c101742af029931a555180",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/nnunet_200ep_log.csv",
+      "category": "training_log",
+      "role": "nnU-Net V2 200-epoch training & 50-batch patch Pseudo dice log (200 evals; raw peak ep 189 = 0.8376).",
+      "bytes": 12154,
+      "sha256": "68c8e7d1fc4ff4c9f25b525ef55a7bb7c7119f47bd8ba25fa901b8338036c1d4",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/ablation_attngate_200ep_log.csv",
+      "category": "training_log_ablation",
+      "role": "Ablation (without attention gates) 200-epoch training log in matched logs directory.",
+      "bytes": 7535,
+      "sha256": "08ecaa5ccc9813b4bd993061a954de7b6e1de382dee6000bb70336e5a5eb38a3",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/logs/ablation_deepsup_200ep_log.csv",
+      "category": "training_log_ablation",
+      "role": "Ablation (without deep supervision) 200-epoch training log in matched logs directory.",
+      "bytes": 7546,
+      "sha256": "3f36c7850caf9d79e7d1ed5bad676cde28af0326a0f2e1ceba4e9acf1c5cefdf",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth",
+      "category": "checkpoint_best",
+      "role": "RASNet best checkpoint (raw OrderedDict, 114 keys, 4,706,772 params; ep 160 per log).",
+      "bytes": 18871718,
+      "sha256": "8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "recovered_checkpoints/v1_epoch200_20261117_041500Z/rasnet_last.pth",
+      "category": "checkpoint_final_epoch200",
+      "role": "RASNet final_epoch200 checkpoint (raw OrderedDict, 114 keys, 4,706,772 params; script/log/archive provenance).",
+      "bytes": 18871718,
+      "sha256": "71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt",
+      "category": "checkpoint_best",
+      "role": "nnU-Net V2 best checkpoint (292 network_weights keys, 30,785,994 unique params; current_epoch=199, _best_ema=0.816239).",
+      "bytes": 246472150,
+      "sha256": "9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "recovered_checkpoints/v1_epoch200_20261117_041500Z/nnunet_last.pt",
+      "category": "checkpoint_final_epoch200",
+      "role": "nnU-Net V2 final_epoch200 checkpoint (292 network_weights keys, 30,785,994 unique params; current_epoch=200, logging len=200).",
+      "bytes": 246472688,
+      "sha256": "2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/segresnet_best.pt",
+      "category": "checkpoint_best",
+      "role": "SegResNet best checkpoint (raw OrderedDict, 83 keys, 4,700,914 params; ep 190 per log).",
+      "bytes": 18836926,
+      "sha256": "b8ea61d95106a0bbe15e1ce9f9e5af1a38d9508e59d0639d32bc883d93c6e109",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/vnet_best.pt",
+      "category": "checkpoint_best",
+      "role": "V-Net best checkpoint (raw OrderedDict, 164 keys, 45,599,452 params; ep 180 per log).",
+      "bytes": 182479290,
+      "sha256": "a89d71bd41c3e773c68e3f4b5e27c5a067f959154aa049eead76f1642c5c1063",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/checkpoints/3dunet_best.pth",
+      "category": "checkpoint_best",
+      "role": "3D U-Net best checkpoint (dict with epoch=180, model_state_dict 63 keys, 4,805,534 params, no optimizer_state_dict).",
+      "bytes": 19253157,
+      "sha256": "d8a8f5ec95b5f34e2afe0b807ac49bb36d136f9d864238c27a763a29a800a60f",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/plans.json",
+      "category": "nnunet_metadata",
+      "role": "Verified nnU-Net 3d_fullres plans (patch_size [96,160,160], spacing [0.5,0.349609375,0.349609375], CTNormalization).",
+      "bytes": 16826,
+      "sha256": "c67af4aaeb24f5a72b58c83e351a9c62cf026f8baf1bbb727e3022491d5733d8",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Q1_Publication_Package/matched_200ep_benchmark/nnUNet_results/Dataset501_CoronarySeg/nnUNetTrainer_200epochs__nnUNetPlans__3d_fullres/dataset.json",
+      "category": "nnunet_metadata",
+      "role": "Verified nnU-Net dataset metadata (numTraining=784 = 690 train + 94 val).",
+      "bytes": 182,
+      "sha256": "d81f40253d7c2d88b9d1cdbd4bd7319a7a0206fce5b2350287317bd34f9c7389",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "Phase3_Local_Integration/splits_final.json",
+      "category": "split_manifest",
+      "role": "Canonical ImageCAS split manifest (690 train, 94 val, 150 test IDs 851-1000; 0 overlap).",
+      "bytes": 9538,
+      "sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/summary_epoch200.csv",
+      "category": "epoch200_summary",
+      "role": "Val94 final_epoch200 per-model summary CSV.",
+      "bytes": 3204,
+      "sha256": "c63543f4666952ce7f76f64296d763821f8f09bc0f1ba4014315922220457aeb",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/paired_stats_epoch200.csv",
+      "category": "epoch200_paired_stats",
+      "role": "Val94 final_epoch200 paired Wilcoxon & bootstrap CI stats CSV (8 exploratory unadjusted metrics).",
+      "bytes": 2474,
+      "sha256": "69136023f1fb90a60c0c7a582f1a7e632502e60a7a9335a273d5176c9285eaa0",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv",
+      "category": "epoch200_per_case",
+      "role": "Val94 final_epoch200 RASNet case-level metrics (N=94).",
+      "bytes": 29487,
+      "sha256": "5a16938d70629b5860683cddcaa0e5d476caf2a83409ae3fa9adac836dd6d12c",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv",
+      "category": "epoch200_per_case",
+      "role": "Val94 final_epoch200 nnU-Net case-level metrics (N=94).",
+      "bytes": 29511,
+      "sha256": "3aaf8c405f3162049697e5ba985c63a059d50f4e5e12f47c3625d96adfdc754c",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/geometry_verification.csv",
+      "category": "epoch200_geometry",
+      "role": "Val94 final_epoch200 physical header & shape geometry checks (188/188 OK).",
+      "bytes": 52622,
+      "sha256": "4d8a0d0a52668bb3e634aaba170ee177cb0d4ebebe7f5bb84d3d616c5f54aeb1",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_comparison_20261117_041500Z/manifest.json",
+      "category": "epoch200_manifest",
+      "role": "Val94 final_epoch200 run manifest (records rasnet timing_seconds=0.0 from --resume skip).",
+      "bytes": 9701,
+      "sha256": "07925df80c2d430736a6b47402240c63c83ed85be27f2b50ad80609212265fdb",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/v1_epoch200_smoke_20261117_041500Z/manifest.json",
+      "category": "epoch200_smoke_manifest",
+      "role": "Val94 2-case smoke manifest (records rasnet clean timing=42.092s).",
+      "bytes": 8566,
+      "sha256": "5b62ca09bfefef1441e0ba84bf95a16cae9b442bc291739487a7e82d4b4321ee",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/summary_test.csv",
+      "category": "optionA_summary",
+      "role": "Option A symmetric 4-model Test150 summary across R1-R4.",
+      "bytes": 14081,
+      "sha256": "e4de75ca2daa1b343df6410b7296c4b21c6c38de1a25b86d9c6ec7fa60c147c2",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/noninferiority_rasnet_vs_nnunet_dice.csv",
+      "category": "optionA_noninferiority",
+      "role": "Option A RASNet vs nnU-Net Dice non-inferiority test (margin -0.005; R4 NI=False).",
+      "bytes": 508,
+      "sha256": "326fe2261f537777b60fb32d27f306d25515f44282feae40e64143bb4cffc28d",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/paired_stats_families.csv",
+      "category": "optionA_paired_families",
+      "role": "Option A Holm-adjusted hypothesis family paired statistics (FA-FD).",
+      "bytes": 22347,
+      "sha256": "262ecdd1c146bb18a82175c77f5e48552fb8c3be5a507b02d4206ec3fed1fc9e",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/timing_summary.csv",
+      "category": "optionA_timing",
+      "role": "Option A n=10 Val full-volume runtime & peak VRAM summary on RTX 4080 SUPER.",
+      "bytes": 864,
+      "sha256": "db28c133e187537403cf0ebd812f0d39186d18b9b018ab9954e83d4a4cababed",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/locked_recipes.json",
+      "category": "optionA_locked_recipes",
+      "role": "Option A Val94-locked thresholds and recipes (R1-R4).",
+      "bytes": 5365,
+      "sha256": "31cb484573b4d941c91f415d7ea4cb3757dc67d205479e96adeeea159ede557c",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/optionA_v1_symmetric_sw050/val_grid_scores.csv",
+      "category": "optionA_val_grid",
+      "role": "Option A Val94 sliding-window threshold grid (used for Regime B2 tau=0.50 Top-2 CC).",
+      "bytes": 438466,
+      "sha256": "4f8f6a582eed9c0082bda782784aeb91f0ab9c981516e184f41e306afd2c3084",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/benchmark_runs/val_full_94/summary_arm_A.csv",
+      "category": "benchmark_val94_armA",
+      "role": "Best-checkpoint Val94 Arm A 5-model summary (Regime B1).",
+      "bytes": 8176,
+      "sha256": "a00988016931dec578e9596ae6c7450317e8c25d8b0f3d525848810903329e88",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/benchmark_runs/test_retrospective_150/summary_arm_A.csv",
+      "category": "benchmark_test150_armA",
+      "role": "Best-checkpoint retrospective Test150 Arm A 5-model summary (Regime C-Arm A).",
+      "bytes": 8175,
+      "sha256": "fa1aed7608fce74756fa811e9588a394221eb5a2899e80c63e333c2f0d0043bf",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/benchmark_runs/test_retrospective_150/summary_arm_B.csv",
+      "category": "benchmark_test150_armB",
+      "role": "Best-checkpoint retrospective Test150 Arm B 5-model summary (Regime C-Arm B).",
+      "bytes": 8179,
+      "sha256": "b713491c18d15ddd84c5681332b9ca40dc132fa221f7cdb7a6e339c661226046",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/benchmark_runs/test_retrospective_150/summary_arm_C.csv",
+      "category": "benchmark_test150_armC",
+      "role": "Best-checkpoint retrospective Test150 Arm C 5-model summary (Regime C-Arm C).",
+      "bytes": 8165,
+      "sha256": "4f4bd9725e56d970bf85a3dd309e1932730aa8055b4c022016abbc14ffca45fb",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/thesis_outputs/Table4_computational_efficiency_rtx4080super.csv",
+      "category": "thesis_table4",
+      "role": "Verified single-patch efficiency, parameter counts, GFLOPs, latency, and VRAM on RTX 4080 SUPER.",
+      "bytes": 945,
+      "sha256": "24a8ad19a26ca71f38f6e1be6e694cfc00499d940fda45972653d34556f1ba92",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.png",
+      "category": "thesis_fig3_original_png",
+      "role": "Preserved historical Fig 3 PNG audited for raw Pseudo dice & DiceCE label errata.",
+      "bytes": 642533,
+      "sha256": "1c482a5537404d6e2d68cb1d0e2b1bd264c9d463dcf761a3a109911e96edfcd8",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    },
+    {
+      "source_path": "results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.svg",
+      "category": "thesis_fig3_original_svg",
+      "role": "Preserved historical Fig 3 SVG used to prove raw mean_fg_dice path correlation (r=0.99999978).",
+      "bytes": 180463,
+      "sha256": "25c3fd48d048d05f99a66f973ba5a9a47545d05284e29d936022c7bc7c0d5e41",
+      "in_protected_baseline": true,
+      "protected_baseline_match": true
+    }
+  ],
+  "self_reference_note": "ARTIFACT_MANIFEST.json cannot embed its own SHA-256; see ARTIFACT_MANIFEST.md for the verified SHA-256 and byte size of ARTIFACT_MANIFEST.json."
+}

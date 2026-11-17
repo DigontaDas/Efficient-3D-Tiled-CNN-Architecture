@@ -4,7 +4,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.14.1%2Bcu126-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![MONAI](https://img.shields.io/badge/MONAI-1.6.1-5C2D91.svg)](https://monai.io/)
 [![nnU-Net](https://img.shields.io/badge/nnUNetv2-2.8.1-008080.svg)](https://github.com/MIC-DKFZ/nnUNet)
-[![Tests](https://img.shields.io/badge/Pytest-33%2F33_Passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-72%2F72_Passing-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **RASNet (Residual Attention Segmentation Network)** is a lightweight (`4.71M` parameters) 3D residual encoder–decoder architecture for coronary artery segmentation in contrast-enhanced Computed Tomography Angiography (CCTA). Built on MONAI's `SegResNet` backbone, RASNet integrates 3D additive skip-connection attention gates (`AttentionGate3D`), multi-scale deep supervision (`aux2`, `aux3`), and a calibrated two-component compound loss (`StenosisAwareLoss`: $\alpha = 0.4$ Dice + $0.6$ Focal with $\gamma = 2.5$).
@@ -137,9 +137,10 @@ All metrics are computed on the native physical NIfTI grid using `surface-v1` (6
 | **V-Net ($\tau^*=0.30$)** | `0.7710 ± 0.0736` | `0.6328 ± 0.0914` | `0.8054 ± 0.0765` | `0.7488 ± 0.1048` | `12.38 ± 13.20` | `2.032 ± 2.490` | `0.8508 ± 0.0795` | `0.8009 ± 0.1050` |
 | **3D U-Net ($\tau^*=0.30$)** | `0.6064 ± 0.0532` | `0.4371 ± 0.0532` | `0.5877 ± 0.0615` | `0.6336 ± 0.0752` | `11.85 ± 8.74` | `2.158 ± 1.442` | `0.7664 ± 0.0705` | `0.7206 ± 0.0947` |
 
-> **Key Scientific Insight Across Arms A–C**:
-> - **Before heuristic post-processing (`Arm A` and `Arm B`)**, `RASNet` (`4.71M` parameters, `123.39 GFLOPs` per patch) achieves the **highest Dice, highest IoU, highest Precision, and highest clDice** of all five models — outperforming `nnU-Net V2` (`30.79M` parameters, `2,149.13 GFLOPs` per patch) and `SegResNet` (`4.70M` parameters) because `StenosisAwareLoss` ($\gamma = 2.5$) and `AttentionGate3D` suppress non-vascular false positives directly in the network's raw probability outputs.
-> - **After symmetric top-2 connected-component pruning (`Arm C`)**, removing isolated false-positive islands boosts high-recall `nnU-Net V2` by `+0.0367` Dice (`0.7687 -> 0.8055`) and `SegResNet` by `+0.0402` Dice (`0.7481 -> 0.7884`), whereas `RASNet` gains `+0.0163` (`0.7736 -> 0.7899`) because its raw predictions already contained far fewer disconnected false-positive islands. Even in Arm C, `RASNet` maintains the **highest Precision (`0.8252`)** of all 5 models while using **$6.54\times$ fewer parameters** and **$17.4\times$ fewer GFLOPs per patch** than `nnU-Net V2`.
+> **Key Scientific Insight Across Arms A–C (and Symmetric Option A / Epoch-200 Supplements)**:
+> - **Before heuristic post-processing (`Arm A` and `Arm B`, note asymmetric `0.25` constant vs `0.50` Gaussian SW overlap)**, `RASNet` (`4.707M` parameters, `123.39 GFLOPs` per `96³` patch) recorded higher raw Dice, IoU, Precision, and clDice than `nnU-Net V2` (`30.786M` parameters, `1,119.34 GFLOPs` per `96×160×160` patch, or `402.96 GFLOPs` on an equal `96³` grid) and `SegResNet` (`4.701M` parameters, slightly smaller than `RASNet`), while `nnU-Net V2` retained higher Recall and Centerline Recall.
+> - **After symmetric top-2 connected-component pruning (`Arm C`)**, removing isolated false-positive islands boosts high-recall `nnU-Net V2` by `+0.0368` Dice (`0.7687 -> 0.8055`) and `SegResNet` by `+0.0403` Dice (`0.7481 -> 0.7884`), whereas `RASNet` gains `+0.0163` (`0.7736 -> 0.7899`). In Arm C, `RASNet` retains higher observed Precision (`0.8252` vs `0.8207`, Holm `p = 0.160`, n.s.) while using **`6.54×` fewer parameters** (`84.7%` fewer) and **`9.07×` fewer GFLOPs per native patch** (`3.27×` fewer on `96³`) than `nnU-Net V2`, whereas `nnU-Net V2` achieves higher Arm C Dice (`0.8055`) and lower HD95 (`8.26 mm` vs `9.94 mm`).
+> - **Symmetric Option A (`results/optionA_v1_symmetric_sw050/`, 4 SW models) & Val94 Epoch-200 Endpoint (`results/v1_epoch200_comparison_20261117_041500Z/`)**: Under symmetric `0.50` Gaussian SW in Option A primary `R4_tuned_tta8_top2`, `RASNet` (`0.8039 ± 0.0691`) vs `nnU-Net V2` (`0.8059 ± 0.0630`) did not establish Dice non-inferiority (`NI = False` at `−0.005` margin), while `RASNet` won R4 `FA_primary` Precision (`0.8302` vs `0.8084`, Holm `p = 7.23e-17`) and `nnU-Net V2` retained Recall (`0.8104` vs `0.7861`, Holm `p = 2.40e-17`). On `Val94` `final_epoch200`, Dice was comparable (`0.7792` vs `0.7767`, exploratory unadjusted `p = 0.2401`; neither superiority nor equivalence); see `results/v1_reporting_correction_20261117_105000Z/` for verified tables, corrected figures, and provenance errata.
 
 ---
 
@@ -165,7 +166,7 @@ Full 32-test exploratory tables comparing `RASNet` against all four baselines ac
 
 ## 🚀 Reproducing the Benchmark & Running Tests
 
-### 1. Run the Complete Synthetic Unit & Integration Test Suite (`33/33` passing on 2026-11-13; re-run on the lab PC after adding new tests)
+### 1. Run the Complete Synthetic Unit & Integration Test Suite (`72/72` passing on `2026-11-17`)
 ```powershell
 C:\Thesis_RASNET_env\bench\Scripts\python.exe -B -m pytest -v -p no:cacheprovider tests
 ```
@@ -207,7 +208,7 @@ C:\Thesis_RASNET\
 │   ├── stats.py                       # Paired Wilcoxon, Holm-Bonferroni & paired diff bootstrap 95% CIs
 │   ├── thresholds.py                  # Validation-only threshold grid sweep & tie-breaking
 │   └── adapters/                      # Native MONAI (infer_monai_both_passes) & nnU-Net V2 adapters
-├── tests/                             # 31 unit & synthetic end-to-end dry-run tests
+├── tests/                             # 72 unit, synthetic end-to-end, Option A, Epoch-200 & reporting tests
 ├── Phase3_Local_Integration/
 │   ├── rasnet_model.py                # RASNet & AttentionGate3D implementation
 │   ├── rasnet_loss.py                 # StenosisAwareLoss (0.4 Dice + 0.6 Focal, γ=2.5)
@@ -218,7 +219,10 @@ C:\Thesis_RASNET\
 │   ├── thresholds.json                # Frozen validation thresholds (sha256: 4f66ac1d...)
 │   ├── benchmark_runs/                # Verified outputs: val_full_94, test_retrospective_150, smoke_*
 │   ├── audits/2026-11-10_verification_audit/ # Full provenance audit, CI tables & smoke slice overlays
-│   └── thesis_outputs/                # Publication-ready tables, figures & thesis narrative
+│   ├── optionA_v1_symmetric_sw050/    # Symmetric 4-model 0.50 Gauss SW + TTA-8 evaluation (R1-R4)
+│   ├── v1_epoch200_comparison_20261117_041500Z/ # Val94 final_epoch200 endpoint evaluation
+│   ├── v1_reporting_correction_20261117_105000Z/ # Verified tables, corrected fig3/endpoint figures, errata & defense package
+│   └── thesis_outputs/                # Protected original publication tables, figures & thesis narrative
 └── _Archive_Historical_Experiments_and_Logs/
     └── thesis_cleanup_2026-11-10/     # 306 archived historical/outside-scope files + ARCHIVE_INDEX.csv
 ```

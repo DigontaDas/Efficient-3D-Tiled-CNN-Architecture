@@ -20,7 +20,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 - Paths such as `C:\Thesis_RASNET\...` in transcripts and configs map to the same repo-relative path here.
 - `Rasnet-v2/configs/fair_v2.yaml` and the `Rasnet-v2/tests/*` files hard-code `C:/Thesis_RASNET`. On the home PC those tests fail for environment reasons only; say so, do not "fix" the paths.
 - **Everything that runs for real runs on the lab PC.** Write all commands, settings and performance tuning for the lab PC: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`, RTX 4080 SUPER 16 GB. Never tune for the home PC's hardware.
-- v1 synthetic suite status: `tests/` collects 33 tests, all passing on the home PC on 2026-11-13.
+- v1 synthetic suite status: `tests/` collects `72` tests, all passing on the lab PC on `2026-11-17` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
 
 ## 3. Hard rules
 
@@ -54,11 +54,13 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 | What | Where |
 | :--- | :--- |
 | Canonical evidence index (paths + SHA-256) | `CURRENT_EVIDENCE_INDEX.md` |
-| Checkpoints + hashes | `CHECKPOINTS.md` (§2 loss description corrected 2026-11-13: SegResNet and V-Net used `DiceFocalLoss(lambda_dice=1.0, lambda_focal=2.0)`; the archived ablation variants used `DiceCELoss`) |
-| v1 benchmark code | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `adapters/`) |
+| Checkpoints + hashes | `CHECKPOINTS.md` (§2 loss description corrected 2026-11-13: SegResNet and V-Net used `DiceFocalLoss(lambda_dice=1.0, lambda_focal=2.0)`; verified key counts `114`/`292`/`83`/`164`/`63`, nnU-Net plans `[96, 160, 160]` & `[0.5, 0.349609375, 0.349609375]`, `current_epoch=199` vs ep `189` raw peak, and `final_epoch200` checkpoints updated 2026-11-17) |
+| v1 benchmark code | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `endpoint_eval.py`, `symmetric_eval.py`, `adapters/`) |
 | v1 models / training | `Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py`; `Q1_Publication_Package/matched_200ep_benchmark/train_*_200ep.py` |
 | Splits | `Phase3_Local_Integration/splits_final.json` (690 / 94 / 150) |
-| v1 locked results | `results/benchmark_runs/{val_full_94,test_retrospective_150}/`, `results/thresholds.json`, `results/thesis_outputs/Table1–4` |
+| v1 locked results | `results/benchmark_runs/{val_full_94,test_retrospective_150}/`, `results/thresholds.json`, `results/thesis_outputs/Table1–4`, `results/optionA_v1_symmetric_sw050/` |
+| V1 Epoch-200 endpoint & recovery | `recovered_checkpoints/v1_epoch200_20261117_041500Z/`, `results/v1_epoch200_smoke_20261117_041500Z/`, `results/v1_epoch200_comparison_20261117_041500Z/` |
+| V1 reporting correction & defense package | `results/v1_reporting_correction_20261117_105000Z/` (`V1_REPORTING_CORRECTION_REPORT.md`, `HISTORICAL_ERRATA.md`, `THESIS_REPLACEMENT_TEXT.md`, `DEFENSE_QA_V1.md`, corrected figures/tables) |
 | Phase H (RASNet-only inference exploration) | `results/rasnet_fixed_weight_optimization/` |
 | Rasnet-v2 (controlled multi-seed study) | `Rasnet-v2/` (`PREREGISTRATION_V2.md`, `configs/fair_v2.yaml`, `src/run_queue.py`) |
 | **Lab PC manual — start here** | `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md` (step-by-step for the lab PC, including instructions for the IDE agent) |
@@ -68,13 +70,12 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 ## 5. Current state (update this section when it changes)
 
 - **2026-11-10:** all v1 LAB-CHECK items were verified on the lab PC (`CURRENT_EVIDENCE_INDEX.md`, `results/audits/2026-11-10_verification_audit/`).
-- **2026-11-12 (lab-reported, LAB-CHECK):** Rasnet-v2 Stage 2A is paused at 14/16 pilots. Job 15's resume state is saved at epoch 30, step 200; see `Rasnet-v2/STATE_HANDOFF.md` on the lab PC.
-- **Open work** (not yet run, LAB-CHECK), in this order. On the lab PC follow `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md`; the full plan is in `docs-for-next-v2-gen/03_…`:
-  1. **Option A (next):** symmetric re-evaluation of the frozen v1 RASNet / SegResNet / V-Net / nnU-Net. Stage 2A stays paused until Option A is done.
-     - The Option A code is committed (`aecf60e`); the lab PC verifies it with manual §5 and never rewrites it.
-     - Manifests record `git.dirty_code`, which must be `false`, and `git.dirty_any`, which is informational: training logs are git-tracked.
-  2. **Rasnet-v2 Amendment A1:** matched clDice weight, binding Stage 2B gates, 8-pass TTA, F32 LR grid incl. 1e-4, 3-seed DS ablation. **Signed off and committed on 2026-11-13** (`34ee6ff` text, `79e0458` code). Lab PC re-runs the tests (manual §5 D3), then Stage 2A resumes after Option A.
-- **Code ownership:** all core code (Option A: `aecf60e`; A1: `79e0458`) was written tests-first on the home PC. Lab-PC agents only run it and fix trivial environment issues after showing the user the diff.
+- **2026-11-13:** Rasnet-v2 Amendment A1 signed off and committed (`34ee6ff` text, `79e0458` code); Option A code committed (`aecf60e`).
+- **2026-11-15 (`22d4581`, `558e7eb`):** **Option A completed** (`results/optionA_v1_symmetric_sw050/`): symmetric 4-model evaluation (`rasnet`, `segresnet`, `vnet`, `nnunet`; `3dunet` excluded). Under primary `R4_tuned_tta8_top2`, RASNet Dice is `0.8039 ± 0.0691` vs nnU-Net `0.8059 ± 0.0630` (mean diff `-0.0021`, `95% CI [-0.0088, +0.0030]`, `NI = False` at `-0.005` margin), while RASNet wins R4 `FA_primary` Precision (`+0.0218`, Holm `p = 7.23e-17`) and nnU-Net retains Recall (`+0.0244`).
+- **2026-11-16 (`b3ca1f1`):** **Rasnet-v2 Stage 2A & Stage 2B pilots completed** (`Rasnet-v2/results/pilots_val94/pilot_lock_decision.md`): gate outcome **`FALLBACK (NO CANDIDATE PASSED BOTH GATES)`** (`Val Precision >= 0.8000` & fragmentation `<= SegResNet-v2`). **V2 Stage 3+ remains paused**; do not run or override failed gates.
+- **2026-11-17 (`8e9b303`):** **V1 Epoch-200 Val94 endpoint evaluation completed** (`results/v1_epoch200_comparison_20261117_041500Z/`): `final_epoch200` RASNet (`0.7792 ± 0.0569`) vs nnU-Net (`0.7767 ± 0.0562`), paired diff `+0.0025` (`95% CI [-0.0027, +0.0075]`, exploratory unadjusted Wilcoxon `p = 0.2401`, `54W/0T/40L`); 8 exploratory unadjusted endpoint metrics reported (post-hoc Holm-8 retains Precision and Recall `< 0.05`; `clDice` `Holm-8 p = 0.1760`).
+- **2026-11-17 (Reporting & Provenance Correction):** Verified checkpoint provenance in `CHECKPOINTS.md` (`114`/`292`/`83`/`164`/`63` keys, nnU-Net plans `[96, 160, 160]` & `[0.5, 0.349609375, 0.349609375]`, `current_epoch=199` vs ep `189` raw peak) and generated corrected figures/tables and thesis/defense replacement artifacts in `results/v1_reporting_correction_20261117_105000Z/`. External thesis/slide integration remains **`OUTSTANDING`** (no `.tex`/`.docx`/`.pptx` in `C:\Thesis_RASNET`).
+- **Code ownership:** all core evaluation code (`aecf60e`, `79e0458`, `8e9b303`) is committed; follow `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md` for lab conventions and keep `git.dirty_code = false` for any future runs.
 
 ## 6. Known technical pitfalls
 

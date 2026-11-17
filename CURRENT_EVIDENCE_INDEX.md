@@ -1,6 +1,6 @@
 # Canonical Evidence Index (`CURRENT_EVIDENCE_INDEX.md`)
 
-**Last Updated**: `2026-11-15`  
+**Last Updated**: `2026-11-17`  
 **Workstation**: `NVIDIA GeForce RTX 4080 SUPER (16,376 MiB VRAM)`, Windows 11  
 **Python Environment**: `C:\Thesis_RASNET_env\bench\Scripts\python.exe` (`Python 3.12.10`, `torch 2.14.1+cu126`, `monai 1.6.1`, `nnunetv2 2.8.1`, `SimpleITK 2.5.7`)
 
@@ -22,7 +22,7 @@ This file is the **single authoritative index** of every active, verified eviden
 | Model | Checkpoint Path | SHA-256 Digest | Best Epoch | Native-Grid Val Dice (Arm A) | Native-Grid Val Dice (Arm C) |
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | **RASNet** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/rasnet_best.pth` | `8d4c25cd12d07c40423062b27b1d36836e5fd6cecb30c20c34055eeac976d1b8` | `160` | `0.7789 ± 0.0521` | `0.7897` ($\tau^*=0.30$) |
-| **nnU-Net V2** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt` | `9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711` | `189` | `0.7761 ± 0.0567` | `0.8075` ($\tau^*=0.35$) |
+| **nnU-Net V2** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/nnunet_best.pt` | `9accddf283b1c480e386f30f426b9200ca8d4aa1ecd70d5b5af0b8aad6058711` | `199` (`_best_ema=0.8162`; raw `Pseudo dice` peak ep `189` = `0.8376`) | `0.7761 ± 0.0567` | `0.8075` ($\tau^*=0.35$) |
 | **SegResNet** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/segresnet_best.pt` | `b8ea61d95106a0bbe15e1ce9f9e5af1a38d9508e59d0639d32bc883d93c6e109` | `190` | `0.7532 ± 0.0591` | `0.7901` ($\tau^*=0.35$) |
 | **V-Net** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/vnet_best.pt` | `a89d71bd41c3e773c68e3f4b5e27c5a067f959154aa049eead76f1642c5c1063` | `180` | `0.7511 ± 0.0619` | `0.7702` ($\tau^*=0.30$) |
 | **3D U-Net** | `Q1_Publication_Package/matched_200ep_benchmark/checkpoints/3dunet_best.pth` | `d8a8f5ec95b5f34e2afe0b807ac49bb36d136f9d864238c27a763a29a800a60f` | `180` | `0.5516 ± 0.0480` | `0.6047` ($\tau^*=0.30$) |
@@ -50,7 +50,7 @@ This file is the **single authoritative index** of every active, verified eviden
 
 - [`run_state.md`](results/audits/2026-11-10_verification_audit/run_state.md): Complete provenance reconciliation of all benchmark runs and Step 1–2 verification results.
 - [`environment.json`](results/audits/2026-11-10_verification_audit/environment.json): Captured workstation hardware and Python package versions.
-- [`checkpoint_verification.csv`](results/audits/2026-11-10_verification_audit/checkpoint_verification.csv): Checkpoint SHA-256, epoch, and training-log vs. native-grid validation reconciliation.
+- [`checkpoint_verification.csv`](results/audits/2026-11-10_verification_audit/checkpoint_verification.csv): Checkpoint SHA-256, epoch, and training-log vs. native-grid validation reconciliation (preserved historical CSV; see [`HISTORICAL_ERRATA.md`](results/v1_reporting_correction_20261117_105000Z/HISTORICAL_ERRATA.md) for row-6 nnU-Net epoch/EMA errata).
 - [`source_inventory.csv`](results/audits/2026-11-10_verification_audit/source_inventory.csv) & [`source_inventory_pre_step1.csv`](results/audits/2026-11-10_verification_audit/source_inventory_pre_step1.csv): Pre- and post-Step-1 SHA-256 digests of all code, config, and test files.
 - [`artifact_inventory.csv`](results/audits/2026-11-10_verification_audit/artifact_inventory.csv): SHA-256 inventory of all 105 benchmark result files.
 - [`issues.csv`](results/audits/2026-11-10_verification_audit/issues.csv): Dated issue ledger mapping every audit finding to its fix and verification test.
@@ -75,7 +75,7 @@ This file is the **single authoritative index** of every active, verified eviden
 - **Figures (`.png` and `.svg`)**:
   - [`fig1_multi_arm_metric_distributions.png`](results/thesis_outputs/fig1_multi_arm_metric_distributions.png) / [`.svg`](results/thesis_outputs/fig1_multi_arm_metric_distributions.svg)
   - [`fig2_validation_threshold_sensitivity_n94.png`](results/thesis_outputs/fig2_validation_threshold_sensitivity_n94.png) / [`.svg`](results/thesis_outputs/fig2_validation_threshold_sensitivity_n94.svg)
-  - [`fig3_training_and_val_n94_convergence_200ep.png`](results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.png) / [`.svg`](results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.svg)
+  - [`fig3_training_and_val_n94_convergence_200ep.png`](results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.png) / [`.svg`](results/thesis_outputs/fig3_training_and_val_n94_convergence_200ep.svg) (preserved historical figure; see [`HISTORICAL_ERRATA.md`](results/v1_reporting_correction_20261117_105000Z/HISTORICAL_ERRATA.md) and corrected replacement [`fig3_corrected_training_and_val_convergence_200ep.png`](results/v1_reporting_correction_20261117_105000Z/fig3_corrected_training_and_val_convergence_200ep.png) for `DiceFocalLoss` and raw `Pseudo dice` vs EMA fixes)
   - [`fig4_precision_recall_boundary_tradeoff.png`](results/thesis_outputs/fig4_precision_recall_boundary_tradeoff.png) / [`.svg`](results/thesis_outputs/fig4_precision_recall_boundary_tradeoff.svg)
 - **Thesis Manuscript Narrative**:
   - [`THESIS_METHODS_RESULTS_AND_LIMITATIONS.md`](results/thesis_outputs/THESIS_METHODS_RESULTS_AND_LIMITATIONS.md)
@@ -131,4 +131,36 @@ This file is the **single authoritative index** of every active, verified eviden
   - [`fig_optionA_dice_vs_params.png`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_vs_params.png) (`6a3f6c91de07605c3af8b192acb47b181c688627626b25328d4b3ae5e9ee7347`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_vs_params.pdf) (`c7e4f6c2dc7012d216e1e975cd9a2561edb887be76955b271bdf974aff995655`)
   - [`fig_optionA_dice_distributions.png`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_distributions.png) (`a8578d5c67509055bc8808c9e2609d2592b8abbf62dd570a4f3c4571ed7f7c64`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_dice_distributions.pdf) (`8905f8af0e0c7fadc9ca9bec9d47b754ed7e44240da281889ad0634562ec650c`)
   - [`fig_optionA_paired_diff_rasnet_vs_nnunet.png`](results/optionA_v1_symmetric_sw050/fig_optionA_paired_diff_rasnet_vs_nnunet.png) (`fe501e45af5710932691d2ac6f00d7ee5d80a82b0d51fc5af831554587af6fd7`) / [`.pdf`](results/optionA_v1_symmetric_sw050/fig_optionA_paired_diff_rasnet_vs_nnunet.pdf) (`b99174e9da7417d4b21ea9d7592e937870cc28c5995ad5fc169bacd75bf26cba`)
+
+---
+
+## 9. V1 Epoch-200 Final Checkpoint Recovery & Val94 Endpoint Comparison (`2026-11-17`)
+
+- **Recovered Final Epoch-200 Checkpoints (`recovered_checkpoints/v1_epoch200_20261117_041500Z/`)**:
+  - [`PROVENANCE_REPORT.md`](recovered_checkpoints/v1_epoch200_20261117_041500Z/PROVENANCE_REPORT.md), [`provenance_verification.json`](recovered_checkpoints/v1_epoch200_20261117_041500Z/provenance_verification.json) (`ab792459c200338986c15f656457575c837a0a67372424d3c65f4cffbdfe8224`), [`recover_and_verify.py`](recovered_checkpoints/v1_epoch200_20261117_041500Z/recover_and_verify.py)
+  - `rasnet_last.pth` (`71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95`, `114` keys, `4,706,772` params; no embedded epoch metadata — corroborated by `train_rasnet_200ep.py`, `rasnet_200ep_log.csv`, `CosineAnnealingLR`, and archive timestamps)
+  - `nnunet_last.pt` (`2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2`, `292` keys, `30,785,994` unique params, embedded `current_epoch=200`) and isolated native model folder `nnunet_native_model/`
+- **2-Case Val94 Smoke Run (`results/v1_epoch200_smoke_20261117_041500Z/`)**:
+  - [`manifest.json`](results/v1_epoch200_smoke_20261117_041500Z/manifest.json), [`summary_epoch200.csv`](results/v1_epoch200_smoke_20261117_041500Z/summary_epoch200.csv), [`geometry_verification.csv`](results/v1_epoch200_smoke_20261117_041500Z/geometry_verification.csv) (`N=2`, cases `14, 45`)
+- **Full Val94 Endpoint Comparison (`results/v1_epoch200_comparison_20261117_041500Z/`)**:
+  - [`manifest.json`](results/v1_epoch200_comparison_20261117_041500Z/manifest.json) (note: `timing_seconds.rasnet = 0.0` reflects `--resume` skipping 94 pre-completed cases, not inference latency), [`geometry_verification.csv`](results/v1_epoch200_comparison_20261117_041500Z/geometry_verification.csv) (`188/188` verified)
+  - [`per_case_metrics_rasnet_epoch200.csv`](results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_rasnet_epoch200.csv), [`per_case_metrics_nnunet_epoch200.csv`](results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_nnunet_epoch200.csv), [`per_case_metrics_combined.csv`](results/v1_epoch200_comparison_20261117_041500Z/per_case_metrics_combined.csv), [`paired_case_level_differences_epoch200.csv`](results/v1_epoch200_comparison_20261117_041500Z/paired_case_level_differences_epoch200.csv)
+  - [`summary_epoch200.csv`](results/v1_epoch200_comparison_20261117_041500Z/summary_epoch200.csv), [`paired_stats_epoch200.csv`](results/v1_epoch200_comparison_20261117_041500Z/paired_stats_epoch200.csv), [`paired_stats_epoch200.json`](results/v1_epoch200_comparison_20261117_041500Z/paired_stats_epoch200.json), [`table_epoch200_vs_existing_best_references.md`](results/v1_epoch200_comparison_20261117_041500Z/table_epoch200_vs_existing_best_references.md)
+  - [`ENDPOINT_EVALUATION_REPORT.md`](results/v1_epoch200_comparison_20261117_041500Z/ENDPOINT_EVALUATION_REPORT.md) and [`THESIS_CURVE_AND_ENDPOINT_CORRECTION.md`](results/v1_epoch200_comparison_20261117_041500Z/THESIS_CURVE_AND_ENDPOINT_CORRECTION.md) (preserved; superseded for narrative/multiplicity discipline by §10)
+
+---
+
+## 10. V1 Reporting Correction, Provenance & Defense Package (`results/v1_reporting_correction_20261117_105000Z/`)
+
+- **Preservation & Baseline Digests**: [`pre_edit_backups/`](results/v1_reporting_correction_20261117_105000Z/pre_edit_backups/), [`pre_edit_hashes.json`](results/v1_reporting_correction_20261117_105000Z/pre_edit_hashes.json), [`protected_baseline_hashes.json`](results/v1_reporting_correction_20261117_105000Z/protected_baseline_hashes.json) (`548` protected files)
+- **Errata & Audit Reports**: [`HISTORICAL_ERRATA.md`](results/v1_reporting_correction_20261117_105000Z/HISTORICAL_ERRATA.md) (documents protected `fig3` and `checkpoint_verification.csv` errata without modifying them), [`V1_REPORTING_CORRECTION_REPORT.md`](results/v1_reporting_correction_20261117_105000Z/V1_REPORTING_CORRECTION_REPORT.md), [`CLAIM_TO_EVIDENCE_MATRIX.csv`](results/v1_reporting_correction_20261117_105000Z/CLAIM_TO_EVIDENCE_MATRIX.csv)
+- **Thesis & Defense Deliverables**: [`THESIS_REPLACEMENT_TEXT.md`](results/v1_reporting_correction_20261117_105000Z/THESIS_REPLACEMENT_TEXT.md), [`DEFENSE_QA_V1.md`](results/v1_reporting_correction_20261117_105000Z/DEFENSE_QA_V1.md), [`DEFENSE_SLIDE_OUTLINE.md`](results/v1_reporting_correction_20261117_105000Z/DEFENSE_SLIDE_OUTLINE.md)
+- **Corrected Tables & Figures**:
+  - [`table_epoch200_val94_summary_and_paired_corrected.md`](results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_summary_and_paired_corrected.md) / [`.csv`](results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_summary_and_paired_corrected.csv)
+  - [`table_epoch200_val94_posthoc_holm8_exploratory.md`](results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_posthoc_holm8_exploratory.md) / [`.csv`](results/v1_reporting_correction_20261117_105000Z/table_epoch200_val94_posthoc_holm8_exploratory.csv)
+  - [`table_v1_four_regimes_comparison.md`](results/v1_reporting_correction_20261117_105000Z/table_v1_four_regimes_comparison.md) / [`.csv`](results/v1_reporting_correction_20261117_105000Z/table_v1_four_regimes_comparison.csv)
+  - [`table_v1_efficiency_and_timing_verified.md`](results/v1_reporting_correction_20261117_105000Z/table_v1_efficiency_and_timing_verified.md) / [`.csv`](results/v1_reporting_correction_20261117_105000Z/table_v1_efficiency_and_timing_verified.csv)
+  - [`table_checkpoint_provenance_verified.md`](results/v1_reporting_correction_20261117_105000Z/table_checkpoint_provenance_verified.md) / [`.csv`](results/v1_reporting_correction_20261117_105000Z/table_checkpoint_provenance_verified.csv)
+  - [`fig3_corrected_training_and_val_convergence_200ep.png`](results/v1_reporting_correction_20261117_105000Z/fig3_corrected_training_and_val_convergence_200ep.png) / [`.svg`](results/v1_reporting_correction_20261117_105000Z/fig3_corrected_training_and_val_convergence_200ep.svg)
+  - [`fig_v1_epoch200_val94_endpoint_corrected.png`](results/v1_reporting_correction_20261117_105000Z/fig_v1_epoch200_val94_endpoint_corrected.png) / [`.svg`](results/v1_reporting_correction_20261117_105000Z/fig_v1_epoch200_val94_endpoint_corrected.svg)
 

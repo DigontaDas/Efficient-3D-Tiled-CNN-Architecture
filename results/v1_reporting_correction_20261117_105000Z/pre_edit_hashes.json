@@ -1,0 +1,47 @@
+{
+  "AUDIT_FINDINGS.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\AUDIT_FINDINGS.md",
+    "bytes": 25127,
+    "sha256": "19fc95db2a287df3a7be1ac569753e5cfaad8125e311b5726fc3a2c883f55371"
+  },
+  "Answers-thesis-def.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\Answers-thesis-def.md",
+    "bytes": 9160,
+    "sha256": "dca9d0638febde3f62225fcb416d25df3fa3c246ac6c67a1e8a7af9eba71faf6"
+  },
+  "CHECKPOINTS.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\CHECKPOINTS.md",
+    "bytes": 8705,
+    "sha256": "22624d08f5e6736251333e1ebb957bf0214f0e5cf424d892e012e1a535e1af4a"
+  },
+  "CLAUDE.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\CLAUDE.md",
+    "bytes": 8631,
+    "sha256": "ceece082159e29a87689e9a36988cbd2e59f9e69d6993f250d2f7a6c652db211"
+  },
+  "CURRENT_EVIDENCE_INDEX.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\CURRENT_EVIDENCE_INDEX.md",
+    "bytes": 16717,
+    "sha256": "5b8a2ff2ff7e029e79a3d6d797d82f2a3052656eed1163823e69cd44736ef103"
+  },
+  "GEMINI.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\GEMINI.md",
+    "bytes": 13963,
+    "sha256": "23687f644d884e26d1fcdb30d360bd0d0f2678b6a9b6e354827e8438db1b872c"
+  },
+  "LAB_RUN_PLAN.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\LAB_RUN_PLAN.md",
+    "bytes": 14826,
+    "sha256": "5cd82d53959efedf26099c347d443e815b1d61888c24df4b837550cc68333d7d"
+  },
+  "README.md": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\README.md",
+    "bytes": 21058,
+    "sha256": "c1c8a63d6dcb24d8facf058b556fe0c89c99f9f10cda7dcbad73251fc684ce9d"
+  },
+  "scripts/generate_v1_epoch200_report_and_figures.py": {
+    "backup_path": "results\\v1_reporting_correction_20261117_105000Z\\pre_edit_backups\\scripts\\generate_v1_epoch200_report_and_figures.py",
+    "bytes": 32613,
+    "sha256": "9cfb517c038e118389c5acf7299238ee3a180617120fc7aecf0d37b386b8711f"
+  }
+}

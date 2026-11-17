@@ -195,6 +195,46 @@ C:\Thesis_RASNET_env\bench\Scripts\python.exe -B C:\Thesis_RASNET\scripts\genera
   - `94/94` cases `'ok'` for both models (`0` dropped, `0` empty predictions, `188/188` output mask headers verified).
   - `RASNet` (`final_epoch200`): Dice `0.7792 ± 0.0569`, Precision `0.7586`, Recall `0.8065`, HD95 `17.32 mm`, ASD `2.619 mm`, clDice `0.8413`, Centerline Recall `0.9068`.
   - `nnU-Net V2` (`final_epoch200`): Dice `0.7767 ± 0.0562`, Precision `0.7428`, Recall `0.8203`, HD95 `18.67 mm`, ASD `2.748 mm`, clDice `0.8347`, Centerline Recall `0.9142`.
-  - Paired (`RASNet − nnU-Net`, `N = 94`): Dice `+0.0025` (`95% CI [-0.0027, +0.0075]`, `p = 0.2401`, `54W / 0T / 40L`; non-significant ≠ equivalence); Precision `+0.0158` (`[+0.0072, +0.0245]`, `p = 1.07e-4`, `66W / 0T / 28L`, favors RASNet); Recall `-0.0138` (`[-0.0175, -0.0098]`, `p = 4.85e-10`, `16W / 0T / 78L`, favors nnU-Net); Centerline Recall `-0.0074` (`[-0.0124, -0.0025]`, `p = 0.0092`, `37W / 2T / 55L`, favors nnU-Net).
-  - Distinct best-checkpoint references (`val_full_94` Arm A and `optionA_v1_symmetric_sw050` Val94) are tabulated separately in `table_epoch200_vs_existing_best_references.md` and `fig_v1_epoch200_val94_endpoint_comparison.{png,svg}`; thesis curve replacement text is in `THESIS_CURVE_AND_ENDPOINT_CORRECTION.md` (integration into protected `results/thesis_outputs/THESIS_METHODS_RESULTS_AND_LIMITATIONS.md`, `Answers-thesis-def.md`, and external thesis documents remains outstanding).
+  - Paired (`RASNet − nnU-Net`, `N = 94`, **8 exploratory / unadjusted** paired Wilcoxon tests): Dice `+0.0025` (`95% CI [-0.0027, +0.0075]`, unadjusted `p = 0.2401`, `54W / 0T / 40L`; non-significant ≠ equivalence); Precision `+0.0158` (`[+0.0072, +0.0245]`, unadjusted `p = 1.07e-4`, `66W / 0T / 28L`, favors RASNet); Recall `-0.0138` (`[-0.0175, -0.0098]`, unadjusted `p = 4.85e-10`, `16W / 0T / 78L`, favors nnU-Net); Centerline Recall `-0.0074` (`[-0.0124, -0.0025]`, unadjusted `p = 0.0092`, `37W / 2T / 55L`, favors nnU-Net); clDice `+0.0067` (`[-0.0006, +0.0135]`, unadjusted `p = 0.0352`, `57W / 0T / 37L`). Under post-hoc exploratory Holm-Bonferroni (`K = 8`), Precision (`Holm-8 p = 7.47e-4`) and Recall (`Holm-8 p = 3.88e-9`) remain `< 0.05`, whereas `clDice` (`Holm-8 p = 0.1760`) and `centerline_recall` (`Holm-8 p = 0.0551`) do not.
+  - Distinct best-checkpoint references (`val_full_94` Arm A and `optionA_v1_symmetric_sw050` Val94) are tabulated separately in `table_epoch200_vs_existing_best_references.md` and `fig_v1_epoch200_val94_endpoint_comparison.{png,svg}`; the narrative in `THESIS_CURVE_AND_ENDPOINT_CORRECTION.md` is superseded by `results/v1_reporting_correction_20261117_105000Z/` (`V1_REPORTING_CORRECTION_REPORT.md`, `THESIS_REPLACEMENT_TEXT.md`, `HISTORICAL_ERRATA.md`, and corrected figures/tables).
+
+---
+
+## 8. Stage 6 — V1 Reporting, Provenance & Documentation Correction Run Record (`2026-11-17`)
+
+> **Preservation & Scope**: Pre-edit copies and SHA-256 digests of all 9 modified active files (`pre_edit_hashes.json`) plus 548 protected/historical files (`protected_baseline_hashes.json`, `0` mismatches) are stored in `results/v1_reporting_correction_20261117_105000Z/`. No retraining, new GPU inference, V2 execution, gate overrides, git commits, or git pushes were performed.
+
+### 8.1 Phase 1 Read-Only Audit & Verification Commands
+
+```powershell
+# Active process, GPU, and Git state checks
+Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python|conda|uv|nvcc' -or $_.CommandLine -match 'Thesis_RASNET|rasnet|nnunet' }
+nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
+git status
+git log -n 10 --oneline
+
+# Independent checkpoint provenance, nnU-Net trainer convention, Val94/Option A recomputation, and model parameter count checks
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -c "import torch, json; ..." # verified 114/292/83/164/63 state-dict keys, plans [96,160,160] & [0.5,0.349609375,0.349609375], current_epoch=199 vs ep 189 raw peak vs current_epoch=200
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -c "from benchmark import stats, endpoint_eval, symmetric_eval; ..." # verified Val94 endpoint (<=3.55e-15), Holm-8, Option A R1-R4 (<=3.55e-15), and exact model params
+```
+
+### 8.2 Phase 2 Tests-First, Corrected Figure/Table Generation, & Full Suite Verification
+
+```powershell
+# 1. Tests-first run BEFORE reporting script fixes and new generator (expected FAIL: 4 failed in 5.77s)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/test_v1_reporting_corrections.py
+
+# 2. Generate corrected training-curve figure, endpoint figure, and 5 verified CSV/MD tables
+C:\Thesis_RASNET_env\bench\Scripts\python.exe scripts\generate_v1_reporting_corrections.py
+
+# 3. Targeted tests AFTER fixes (PASS: 4 passed in 2.91s)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/test_v1_reporting_corrections.py
+
+# 4. Full synthetic & reporting test suite AFTER fixes and documentation updates (PASS: 72 passed)
+C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/
+```
+
+### 8.3 External Thesis & Slide Integration Status
+
+- **Status (`C:\Thesis_RASNET`)**: **`OUTSTANDING`** — recursive search confirmed zero `.tex`, `.docx`, `.pptx`, or `.key` manuscript/slide files exist inside `C:\Thesis_RASNET`. Ready-to-paste replacement text, defense Q&A, and slide outline are supplied in `results/v1_reporting_correction_20261117_105000Z/` (`THESIS_REPLACEMENT_TEXT.md`, `DEFENSE_QA_V1.md`, `DEFENSE_SLIDE_OUTLINE.md`).
 
