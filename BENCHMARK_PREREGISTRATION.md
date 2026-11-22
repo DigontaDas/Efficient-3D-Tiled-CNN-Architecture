@@ -107,4 +107,56 @@ Test recipes:
 | NI | RASNet vs nnU-Net Dice non-inferiority | Lower bound of the 95 % bootstrap CI of the paired difference > **−0.005** (same margin as `Rasnet-v2/PREREGISTRATION_V2.md:53`) |
 | Exploratory | Baseline vs baseline | Not used for claims |
 
+---
+
+## 7. Amendment: Strategy A — Fair Upgraded 200-Epoch Retrain (`retrain_v1_1`, Dated `2026-11-22`)
+
+- **Status:** **APPROVED & SIGNED OFF BY USER on `2026-11-22`** (committed with `git.dirty_code = false` prior to launching Epoch 1 on the GPU).
+- **Retrospective Epistemic Scope:** All Test-150 (`IDs 851–1000`) evaluations remain explicitly labeled **retrospective reassessments**, because cases `851–1000` were inspected during earlier v1 development and Option A. Validation (`Val-94`) is strictly used for checkpoint selection and threshold locking; Test-150 is evaluated **once** per frozen model after the validation lock is committed.
+- **Strict Isolation (Rule 9):** Zero v1 checkpoints, zero protected `results/` directories (`results/benchmark_runs/`, `results/thesis_outputs/`, `results/optionA_v1_symmetric_sw050/`, `results/rasnet_fixed_weight_optimization/`), and zero `Rasnet-v2/` files are modified or overwritten. All code, config, transform-hashed cache, checkpoints, logs, and results live exclusively inside the brand-new top-level directory `retrain_v1_1/`.
+
+### 7.1 Six Core Architecture, Loss & Pipeline Fixes (Applied Symmetrically to All 5 Trained MONAI Models)
+1. **Fixed `AttentionGate3D` (`retrain_v1_1/src/models.py`, `conv_bias` gate):**
+   - Replaces `nn.GroupNorm(1, 1)` in `self.psi` with `nn.Conv3d(F_int, 1, kernel_size=1, bias=True)` + `nn.Sigmoid()` so attention gates can genuinely close on background patches.
+   - Removes redundant dual bias in `W_g` and `W_x` (unbiased `1×1×1` projections followed by a single post-sum `GroupNorm` before `ReLU`).
+   - Guards `GroupNorm` group count via `num_groups = min(4, F_int)` (largest divisor `<= min(4, F_int)`), preventing Gate 2 (`F_int = 8`) from degenerating to 1-channel `InstanceNorm3d`.
+   - Derives gate channels `[4F, 2F, F]` and DS head channels `[4F, 2F]` dynamically from `init_filters`, with explicit boolean toggles `enable_attention` and `enable_ds` for controlled ablations.
+2. **Fixed Multi-Scale Deep Supervision (`retrain_v1_1/src/losses.py`):**
+   - Weights finer `1/2`-resolution (`ds_outputs[1]`) higher than coarser `1/4`-resolution (`ds_outputs[0]`):
+     $$\mathcal{L}_{\text{total}} = \frac{1.0\,\mathcal{L}_{\text{main}} + 0.50\,\mathcal{L}_{\text{half (1/2)}} + 0.25\,\mathcal{L}_{\text{quarter (1/4)}}}{1.75}$$
+   - Downsamples binary ground-truth masks directly to each auxiliary logit's spatial grid (`max_pool3d` for exact integer strides to preserve thin 1–2 voxel coronary branches) instead of trilinearly upsampling coarse logits.
+3. **Matched Foreground `DiceCELoss(batch=True)` (`retrain_v1_1/src/losses.py`):**
+   - Replaces `StenosisAwareLoss` with `monai.losses.DiceCELoss(to_onehot_y=True, softmax=True, include_background=False, batch=True)` identically across all 5 trained MONAI models (matching nnU-Net's `BatchDice + CE` formulation).
+4. **Upgraded Native-Resolution Preprocessing & Full 3D Augmentations (`retrain_v1_1/src/transforms.py`):**
+   - **Target spacing:** native ImageCAS median `[0.349609375, 0.349609375, 0.5] mm` in MONAI `XYZ` order (identical to nnU-Net's `[0.5, 0.349609375, 0.349609375] mm` in SimpleITK `ZYX`).
+   - **Patch size:** `160 × 160 × 96` (`XYZ`; equivalent to nnU-Net's `96 × 160 × 160` `ZYX`), `batch_size = 2`, `250` steps/epoch (`500` patches/epoch, `33.3%` forced foreground oversampling).
+   - **Normalization:** exact nnU-Net `CTNormalization` — clip `[-166.0, 727.0]` HU, z-score `(x - 147.97113) / 179.68488`.
+   - **Cropping:** raw-HU `CropForegroundd(x > 0)` completely removed.
+   - **Full 3D Augmentations (identical for all 5 models):** 3-axis random flips (`p = 0.5` each), `RandAffined` 3D rotation (`±15°`) & scaling (`[0.85, 1.15]`, `p = 0.30`), `RandGaussianNoised` (`std = 0.10`, `p = 0.15`), `RandGaussianSmoothd` (`sigma ∈ [0.5, 1.0]`, `p = 0.15`), `RandScaleIntensityd` (`±15%`, `p = 0.15`), and `RandAdjustContrastd` (`gamma ∈ [0.7, 1.5]`, `p = 0.15`).
+5. **Training Loop & Reproducibility Hygiene (`retrain_v1_1/src/train.py`, `cache.py`):**
+   - **Optimizer & schedule (identical for all 5 models):** `AdamW(lr = 3e-4, weight_decay = 1e-5)` with 5-epoch linear warmup (`1,250` steps) + per-step `CosineAnnealingLR(eta_min = 1e-6)`, gradient clipping `clip_grad_norm_(max_norm = 1.0)`, and hardware `bfloat16` AMP on RTX 4080 SUPER (avoids IEEE `float16` overflow observed in `SegResNet` at `160×160×96`).
+   - **Full resume checkpoints:** atomically saves `model_state_dict`, `optimizer_state_dict`, `scaler_state_dict`, `scheduler_state_dict`, `epoch`, `best_val_dice`, `rng_state` (Python/NumPy/Torch/CUDA), and `transform_sha256` to `retrain_v1_1/checkpoints/<model>/`.
+   - **Transform-hashed cache:** fresh `retrain_v1_1/cache/<transform_sha256[:16]>/` storing lossless `blosc2` ZSTD-1 compressed `float16` images + `uint8` binary labels + precomputed `fg/bg` indices (`~71 GB` for 784 train+val volumes, keeping `~100 GB` free on `C:\`). Any change to preprocessing changes the hash directory, making the v1 LAS/RAS cache-reuse bug impossible.
+   - **Standardized validation cadence:** full `Val-94` (`N = 94`, `0.50` Gauss SW, `sw_batch_size = 4`, `τ = 0.50`, no CC) every `20` epochs (`20, 40, ..., 200` = `10` identical evals per model) selecting `best_model.pth`, plus `final_epoch200.pth` and `train_manifest.json` per run.
+
+### 7.2 Model Roster (Seed `42`, `200` Epochs) & Output Locations
+| Model ID | Training Status | Description | Output Checkpoint Dir |
+| :--- | :--- | :--- | :--- |
+| `rasnet_v1_1` | Train (`200` ep, seed `42`) | Fixed `RASNet` (`F=16`, `conv_bias` AG, fixed DS `1.0/0.5/0.25`) | `retrain_v1_1/checkpoints/rasnet_v1_1/` |
+| `segresnet_v1_1` | Train (`200` ep, seed `42`) | Matched MONAI `SegResNet` (`F=16`, identical pipeline/loss/LR/augs) | `retrain_v1_1/checkpoints/segresnet_v1_1/` |
+| `vnet_v1_1` | Train (`200` ep, seed `42`) | Matched MONAI `VNet` (identical pipeline/loss/LR/augs/batch) | `retrain_v1_1/checkpoints/vnet_v1_1/` |
+| `ablation_no_attn_v1_1` | Train (`200` ep, seed `42`) | `RASNet-v1.1` with `enable_attention=False, enable_ds=True` | `retrain_v1_1/checkpoints/ablation_no_attn_v1_1/` |
+| `ablation_no_ds_v1_1` | Train (`200` ep, seed `42`) | `RASNet-v1.1` with `enable_attention=True, enable_ds=False` | `retrain_v1_1/checkpoints/ablation_no_ds_v1_1/` |
+| `nnunet_v2` | **Reused (Frozen)** | Existing 200-ep `nnunet_best.pt` (`SHA-256: 9accddf2...`; already trained on `[0.5, 0.3496, 0.3496] mm`, `96×160×160`, `CTNormalization`, full 3D augs, `BatchDice+CE`) | Read-only from `Q1_Publication_Package/.../fold_0/checkpoint_best.pth` |
+
+All new checkpoint SHA-256 digests will be recorded in `CHECKPOINTS.md` upon completion. All evaluation outputs write exclusively to `retrain_v1_1/results/`.
+
+### 7.3 Symmetric Evaluation Protocol, Widened Threshold Grid & Statistical Families
+- **Inference:** Raw `.nii.gz` → deterministic preprocessing → `0.50` overlap Gaussian SW (`σ = 0.125 × patch`, `160×160×96` MONAI / `96×160×160` nnU-Net) → `Invertd(nearest_interp=False)` onto native SimpleITK `(Z, Y, X)` physical grid → `surface-v1` metrics (`benchmark/metrics.py`).
+- **Symmetric TTA:** 8-pass mirroring (identity + all 7 flip-axis combinations, logits averaged before softmax) identically for all 6 models.
+- **Widened Val-94 Threshold Grid (`Val-94` only):** $\tau \in \{0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70\}$ (`13` levels, eliminating the `0.20` lower edge clamp), maximizing mean Val-94 Dice after symmetric 26-connected Top-2 CC (tie-break closest to `0.50`, then lower). Written to `retrain_v1_1/results/locked_recipes.json` + `.sha256` sidecar (LF) and **committed before Test-150 inference** (`assert_lock_committed()`).
+- **Recipes:** Primary **`R4_tuned_tta8_top2`**; secondary descriptive `R1_raw_1pass`, `R2_raw_tta8`, `R3_tuned_1pass_top2`.
+- **Statistics (`N = 150` retrospective Test-150):** Two-sided paired Wilcoxon signed-rank tests, Holm-Bonferroni within family (`FA_primary_rasnet_vs_nnunet`: Precision/HD95/ASD; `FB_rasnet_vs_segresnet`: Dice/Precision/HD95/clDice; `FC_rasnet_vs_vnet`: Dice/Precision/HD95/clDice; `FD_secondary_rasnet_vs_nnunet`: Dice/clDice/Recall; `FE_ablations_vs_rasnet`: `rasnet_v1_1` vs `ablation_no_attn_v1_1` & `ablation_no_ds_v1_1` on Dice/Precision/HD95/clDice), **`10,000`-resample** percentile bootstrap 95% CIs (seed `42`), Dice non-inferiority vs `nnU-Net V2` (`margin = -0.005`), explicit empty-prediction counts (`n_empty_pred`, `precision_strict_mean`), and RTX 4080 SUPER single-patch GFLOPs/VRAM + `n = 10` Val full-volume runtime (`sw_batch_size` disclosed).
+
+
 
