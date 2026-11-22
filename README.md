@@ -4,7 +4,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.14.1%2Bcu126-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![MONAI](https://img.shields.io/badge/MONAI-1.6.1-5C2D91.svg)](https://monai.io/)
 [![nnU-Net](https://img.shields.io/badge/nnUNetv2-2.8.1-008080.svg)](https://github.com/MIC-DKFZ/nnUNet)
-[![Tests](https://img.shields.io/badge/Pytest-72%2F72_Passing-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/Pytest-94%2F94_Passing-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **RASNet (Residual Attention Segmentation Network)** is a lightweight (`4.71M` parameters) 3D residual encoder–decoder architecture for coronary artery segmentation in contrast-enhanced Computed Tomography Angiography (CCTA). Built on MONAI's `SegResNet` backbone, RASNet integrates 3D additive skip-connection attention gates (`AttentionGate3D`), multi-scale deep supervision (`aux2`, `aux3`), and a calibrated two-component compound loss (`StenosisAwareLoss`: $\alpha = 0.4$ Dice + $0.6$ Focal with $\gamma = 2.5$).
@@ -17,7 +17,7 @@ This repository provides a **fail-closed, cryptographically fingerprinted 3-arm 
 
 ## 📌 Table of Contents
 - [🫀 RASNet Architecture & Loss Formulation](#-rasnet-architecture--loss-formulation)
-- [🔄 Three-Arm Symmetric Evaluation Protocol](#-three-arm-symmetric-evaluation-protocol)
+- [🔄 Three-Arm Evaluation Protocol (Supplemented by Symmetric Option A)](#-three-arm-evaluation-protocol-supplemented-by-symmetric-option-a)
 - [📊 Verified 200-Epoch Benchmark Results (`N = 150` Test & `N = 94` Val)](#-verified-200-epoch-benchmark-results-n--150-test--n--94-val)
 - [📈 Paired Statistical Hypothesis Testing (`Wilcoxon` + `Holm-Bonferroni` + `95% CI`)](#-paired-statistical-hypothesis-testing-wilcoxon--holm-bonferroni--95-ci)
 - [🚀 Reproducing the Benchmark & Running Tests](#-reproducing-the-benchmark--running-tests)
@@ -28,12 +28,12 @@ This repository provides a **fail-closed, cryptographically fingerprinted 3-arm 
 ## 🫀 RASNet Architecture & Loss Formulation
 
 Implemented in [`Phase3_Local_Integration/rasnet_model.py`](Phase3_Local_Integration/rasnet_model.py), `RASNet` subclasses MONAI's `SegResNet` (`init_filters=16`, encoder blocks `[1, 2, 2, 4]`, decoder blocks `[1, 1, 1]`, `dropout_prob=0.1`):
-1. **3D Additive Attention Gates (`AttentionGate3D`)**: At each of the three decoder stages (`64`, `32`, and `16` channels), the upsampled decoder feature map $g$ (`up_conv[i](x)`) and the same-resolution encoder skip feature map $x$ are projected to intermediate channels $F_{\text{int}} = \max(C/2, 1)$ via $1\times 1\times 1$ convolutions with `GroupNorm(8, F_int)`, summed and passed through `ReLU`, projected to a 1-channel attention map via $1\times 1\times 1$ convolution + `GroupNorm(1, 1)` + `Sigmoid`, and multiplied element-wise with $x$. The gated skip features are fused with the upsampled decoder stream via **element-wise addition** (`x = x + attn_gate(g=x, x=down_x[i])`) followed by the decoder residual block (`up_layers[i]`).
-2. **Multi-Scale Deep Supervision (`ds_head2`, `ds_head3`)**: During training (`self.training == True`), auxiliary $1\times 1\times 1$ classification heads (`ds_head2` at Decoder Level 2, $1/4$ spatial resolution; `ds_head3` at Decoder Level 1, $1/2$ spatial resolution) are trilinearly upsampled to full patch resolution (`96 × 96 × 96`) and weighted in [`train_rasnet_200ep.py:215`](Q1_Publication_Package/matched_200ep_benchmark/train_rasnet_200ep.py) as:
+1. **3D Additive Attention Gates (`self.attention_gates`, `AttentionGate3D`)**: At each of the three decoder stages (`64`, `32`, and `16` channels for `init_filters=16`), the upsampled decoder feature map $g$ (`self.up_samples[i](x)`) and the same-resolution encoder skip feature map `skip = down_x[i + 1]` are projected to intermediate channels $F_{\text{int}} = \max(C/2, 1)$ via $1\times 1\times 1$ convolutions with `GroupNorm`, summed and passed through `ReLU`, projected to a 1-channel attention map via $1\times 1\times 1$ convolution + `GroupNorm(1, 1)` + `Sigmoid`, and multiplied element-wise with `skip`. The gated skip features are fused with the upsampled decoder stream via **element-wise addition** (`x = g + self.attention_gates[i](g=g, x=down_x[i + 1])`) followed by the decoder residual block (`self.up_layers[i]`). *Scope note:* because `self.psi` applies `GroupNorm(1, 1)` per patch before `Sigmoid`, `AttentionGate3D` acts strictly as **soft per-patch spatial re-weighting** rather than background suppression (verified on frozen `rasnet_best.pth`: `38.5–59.3%` of pure-background voxels retain $\psi > 0.50$).
+2. **Multi-Scale Deep Supervision (`self.ds_heads`)**: During training (`self.training == True`), auxiliary $1\times 1\times 1$ classification heads (`self.ds_heads[0]` at Decoder Level 0, $1/4$ spatial resolution, 64 ch / `aux2`; `self.ds_heads[1]` at Decoder Level 1, $1/2$ spatial resolution, 32 ch / `aux3`) are trilinearly upsampled to full patch resolution (`96 × 96 × 96`) and weighted in [`train_rasnet_200ep.py:215`](Q1_Publication_Package/matched_200ep_benchmark/train_rasnet_200ep.py) as:
    $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{main}} + 0.4\,\mathcal{L}_{\text{aux2 (1/4 res)}} + 0.2\,\mathcal{L}_{\text{aux3 (1/2 res)}}$$
 3. **`StenosisAwareLoss` ([`Phase3_Local_Integration/rasnet_loss.py`](Phase3_Local_Integration/rasnet_loss.py))**:
    $$\mathcal{L}(\hat{y}, y) = 0.4\,\mathcal{L}_{\text{Dice}}(\hat{y}, y) + 0.6\,\mathcal{L}_{\text{Focal}}(\hat{y}, y; \gamma = 2.5)$$
-   Using $\gamma = 2.5$ penalizes confident background false positives in non-vascular cardiac structures while avoiding over-suppression of uncertain thin distal vessel voxels.
+   Implemented as `0.4 * DiceLoss(softmax=True, to_onehot_y=True, include_background=True)` + `0.6 * FocalLoss(gamma=2.5, to_onehot_y=True, use_softmax=False, include_background=True)`. *Non-causal scope note:* v1 performance differences vs. `SegResNet` or `nnU-Net V2` cannot be causally attributed to `AttentionGate3D`, deep supervision, or `StenosisAwareLoss` (`RASNet vs SegResNet` in v1 is confounded by LR `2e-4` vs. `1e-4`, loss function, and historical $\alpha/\gamma$ calibration; legacy v1 ablation checkpoints `ablation_{attngate,deepsup}_best.pth` are scientifically invalid due to a `PersistentDataset` LAS-train / RAS-val cache mismatch in `train_ablation_models_200ep.py` and must not be cited).
 
 ```mermaid
 graph TD
@@ -52,21 +52,21 @@ graph TD
     end
 
     subgraph "Decoder Path & Multi-Scale Deep Supervision"
-        E5 --> U0["UpConv #0 (64 ch, 1/4 Res)"]
+        E5 --> U0["up_samples[0] (64 ch, 1/4 Res)"]
         E4 --> AG0
         U0 --> AG0
         U0 --> D0["Add (g + x_gated) & ResBlock (64 ch)"]
         AG0 --> D0
-        D0 --> Aux2["ds_head2 (aux2, 1/4 Res -> Upsample 96³)<br/>Loss Weight: 0.4"]
+        D0 --> Aux2["ds_heads[0] (aux2, 1/4 Res -> Upsample 96³)<br/>Loss Weight: 0.4"]
 
-        D0 --> U1["UpConv #1 (32 ch, 1/2 Res)"]
+        D0 --> U1["up_samples[1] (32 ch, 1/2 Res)"]
         E3 --> AG1
         U1 --> AG1
         U1 --> D1["Add (g + x_gated) & ResBlock (32 ch)"]
         AG1 --> D1
-        D1 --> Aux3["ds_head3 (aux3, 1/2 Res -> Upsample 96³)<br/>Loss Weight: 0.2"]
+        D1 --> Aux3["ds_heads[1] (aux3, 1/2 Res -> Upsample 96³)<br/>Loss Weight: 0.2"]
 
-        D1 --> U2["UpConv #2 (16 ch, 1x Res)"]
+        D1 --> U2["up_samples[2] (16 ch, 1x Res)"]
         E2 --> AG2
         U2 --> AG2
         U2 --> D2["Add (g + x_gated) & ResBlock (16 ch)"]
@@ -81,7 +81,7 @@ graph TD
 
 ---
 
-## 🔄 Three-Arm Symmetric Evaluation Protocol
+## 🔄 Three-Arm Evaluation Protocol (Supplemented by Symmetric Option A)
 
 To separate **intrinsic architecture + loss calibration** from **test-time augmentation (TTA)** and **connected-component heuristic post-processing**, [`benchmark/run_benchmark.py`](benchmark/run_benchmark.py) evaluates all five 200-epoch models on their exact training-validation preprocessing pipelines (`INFERENCE_SPEC.md`) inverted back onto the native SimpleITK `(Z, Y, X)` physical grid across three pre-registered arms (`BENCHMARK_PREREGISTRATION.md`):
 
@@ -140,7 +140,7 @@ All metrics are computed on the native physical NIfTI grid using `surface-v1` (6
 > **Key Scientific Insight Across Arms A–C (and Symmetric Option A / Epoch-200 Supplements)**:
 > - **Before heuristic post-processing (`Arm A` and `Arm B`, note asymmetric `0.25` constant vs `0.50` Gaussian SW overlap)**, `RASNet` (`4.707M` parameters, `123.39 GFLOPs` per `96³` patch) recorded higher raw Dice, IoU, Precision, and clDice than `nnU-Net V2` (`30.786M` parameters, `1,119.34 GFLOPs` per `96×160×160` patch, or `402.96 GFLOPs` on an equal `96³` grid) and `SegResNet` (`4.701M` parameters, slightly smaller than `RASNet`), while `nnU-Net V2` retained higher Recall and Centerline Recall.
 > - **After symmetric top-2 connected-component pruning (`Arm C`)**, removing isolated false-positive islands boosts high-recall `nnU-Net V2` by `+0.0368` Dice (`0.7687 -> 0.8055`) and `SegResNet` by `+0.0403` Dice (`0.7481 -> 0.7884`), whereas `RASNet` gains `+0.0163` (`0.7736 -> 0.7899`). In Arm C, `RASNet` retains higher observed Precision (`0.8252` vs `0.8207`, Holm `p = 0.160`, n.s.) while using **`6.54×` fewer parameters** (`84.7%` fewer) and **`9.07×` fewer GFLOPs per native patch** (`3.27×` fewer on `96³`) than `nnU-Net V2`, whereas `nnU-Net V2` achieves higher Arm C Dice (`0.8055`) and lower HD95 (`8.26 mm` vs `9.94 mm`).
-> - **Symmetric Option A (`results/optionA_v1_symmetric_sw050/`, 4 SW models) & Val94 Epoch-200 Endpoint (`results/v1_epoch200_comparison_20261117_041500Z/`)**: Under symmetric `0.50` Gaussian SW in Option A primary `R4_tuned_tta8_top2`, `RASNet` (`0.8039 ± 0.0691`) vs `nnU-Net V2` (`0.8059 ± 0.0630`) did not establish Dice non-inferiority (`NI = False` at `−0.005` margin), while `RASNet` won R4 `FA_primary` Precision (`0.8302` vs `0.8084`, Holm `p = 7.23e-17`) and `nnU-Net V2` retained Recall (`0.8104` vs `0.7861`, Holm `p = 2.40e-17`). On `Val94` `final_epoch200`, Dice was comparable (`0.7792` vs `0.7767`, exploratory unadjusted `p = 0.2401`; neither superiority nor equivalence); see `results/v1_reporting_correction_20261117_105000Z/` for verified tables, corrected figures, and provenance errata.
+> - **Symmetric Option A (`results/optionA_v1_symmetric_sw050/`, 4 SW models) & Val94 Epoch-200 Endpoint (`results/v1_epoch200_comparison_20261117_041500Z/`)**: Under symmetric `0.50` Gaussian SW in Option A primary `R4_tuned_tta8_top2`, `RASNet` (`0.8039 ± 0.0691`) achieved comparable Dice to `nnU-Net V2` (`0.8059 ± 0.0630`; `-0.0021`, `95%` CI `[-0.0088, +0.0030]`; not non-inferior at `-0.005`; median `+0.0002`, `76/150` wins) at `6.54×` fewer parameters and `9.07×` fewer GFLOPs/patch, with a precision–recall trade-off: `RASNet` had higher precision in Arms A/B and Option A `R4` (`0.8302` vs `0.8084`, Holm `p = 7.23e-17`) — recipe- and operating-point-dependent (Arm C Holm `p = 0.160` n.s., `R3` precision CI `[-0.0027, +0.0136]` crossed zero, and nnU-Net's R4 Val-94 locked `τ* = 0.20` hit the lower grid edge on a nearly flat Val curve `0.8066–0.8098`, shifting nnU-Net toward higher recall / lower precision) — while `nnU-Net V2` retained Recall (`0.8104` vs `0.7861`, Holm `p = 2.40e-17`). Against `SegResNet` in `R4` (`FB`), `RASNet` outperforms `SegResNet` on most cases (`112/150`, Wilcoxon Holm `p = 4.27e-8`), though the mean Dice gain (`+0.0050`) is small and its `95%` bootstrap CI (`[-0.0024, +0.0121]`) includes `0` (and V1 is confounded by LR, loss, and `α/γ` calibration; v1 ablations are excluded as invalid). On `Val94` `final_epoch200`, Epoch-200 Dice (`0.7792` vs `0.7767`, exploratory unadjusted `p = 0.2401`) was not significantly different and establishes neither superiority nor equivalence; see `results/v1_reporting_correction_20261117_105000Z/` for verified tables, corrected figures, and provenance errata.
 
 ---
 
@@ -166,7 +166,7 @@ Full 32-test exploratory tables comparing `RASNet` against all four baselines ac
 
 ## 🚀 Reproducing the Benchmark & Running Tests
 
-### 1. Run the Complete Synthetic Unit & Integration Test Suite (`72/72` passing on `2026-11-17`)
+### 1. Run the Complete Synthetic Unit & Integration Test Suite (`94/94` passing on `2026-11-22`)
 ```powershell
 C:\Thesis_RASNET_env\bench\Scripts\python.exe -B -m pytest -v -p no:cacheprovider tests
 ```
@@ -200,7 +200,7 @@ C:\Thesis_RASNET\
 ├── AUDIT_FINDINGS.md                  # Read-only code audit & 2026-11-10 resolution addendum
 ├── LAB_CHECKS.md                      # Forensic provenance diagnostics & post-archival update
 ├── Answers-thesis-def.md              # Defense Q&A reference
-├── config.yaml / config.lab.yaml      # Portable & lab workstation benchmark configurations
+├── config.lab.yaml                    # Lab workstation benchmark configuration
 ├── benchmark/                         # Fail-closed 5-model evaluation & statistical package
 │   ├── run_benchmark.py               # Main CLI runner with manifest & source_tree_sha256 logging
 │   ├── metrics.py                     # 6-connected surface-v1 HD95/ASD, clDice, overlap metrics
@@ -208,7 +208,7 @@ C:\Thesis_RASNET\
 │   ├── stats.py                       # Paired Wilcoxon, Holm-Bonferroni & paired diff bootstrap 95% CIs
 │   ├── thresholds.py                  # Validation-only threshold grid sweep & tie-breaking
 │   └── adapters/                      # Native MONAI (infer_monai_both_passes) & nnU-Net V2 adapters
-├── tests/                             # 72 unit, synthetic end-to-end, Option A, Epoch-200 & reporting tests
+├── tests/                             # 94 unit, synthetic end-to-end, Option A, Epoch-200 & reporting tests
 ├── Phase3_Local_Integration/
 │   ├── rasnet_model.py                # RASNet & AttentionGate3D implementation
 │   ├── rasnet_loss.py                 # StenosisAwareLoss (0.4 Dice + 0.6 Focal, γ=2.5)
@@ -224,5 +224,6 @@ C:\Thesis_RASNET\
 │   ├── v1_reporting_correction_20261117_105000Z/ # Verified tables, corrected fig3/endpoint figures, errata & defense package
 │   └── thesis_outputs/                # Protected original publication tables, figures & thesis narrative
 └── _Archive_Historical_Experiments_and_Logs/
-    └── thesis_cleanup_2026-11-10/     # 306 archived historical/outside-scope files + ARCHIVE_INDEX.csv
+    ├── thesis_cleanup_2026-11-10/     # 306 archived historical/outside-scope files + ARCHIVE_INDEX.csv
+    └── thesis_cleanup_2026-11-19/     # 17 quarantined legacy evaluators/logs + ARCHIVE_INDEX.csv
 ```

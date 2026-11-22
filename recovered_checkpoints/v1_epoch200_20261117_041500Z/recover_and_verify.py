@@ -1153,7 +1153,7 @@ def render_provenance_report(payload: dict[str, Any]) -> str:
             "## 5. Reproducibility Command",
             "",
             "```powershell",
-            f"C:\\Thesis_RASNET_env\\bench\\Scripts\\python.exe {Path(__file__).resolve()}",
+            f"{sys.executable} {Path(__file__).resolve()}",
             "```",
             "",
         ]
@@ -1163,7 +1163,7 @@ def render_provenance_report(payload: dict[str, Any]) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Recover and verify V1 epoch-200 final checkpoints.")
-    parser.add_argument("--repo-root", type=Path, default=Path(r"C:\Thesis_RASNET"))
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
 

@@ -207,6 +207,7 @@ def test_lock_write_is_immutable_and_load_detects_tampering(tmp_path):
     bad["grid"] = [0.3, 0.5]
     p2 = tmp_path / "tampered.json"
     p2.write_text(json.dumps(bad))
+    p2.with_suffix(".sha256").write_text(se.sha256_file(p2))   # valid sidecar -> the grid check is reached
     with pytest.raises(ValueError, match="grid"):
         se.load_lock(p2, _splits(), se.MODELS)
 
@@ -404,6 +405,7 @@ from __future__ import annotations
 import hashlib
 import itertools
 import json
+import os
 import platform
 import subprocess
 from collections import deque
@@ -426,6 +428,8 @@ CONNECTIVITY = 26
 TAU_GRID = tuple(round(0.20 + 0.05 * i, 2) for i in range(11))
 LOCKED_TEST_RANGE = range(851, 1001)
 NI_MARGIN = -0.005
+PRIMARY_RECIPE = "R4_tuned_tta8_top2"   # pre-registered primary (BENCHMARK_PREREGISTRATION.md §6)
+FINGERPRINT_FILE = "run_fingerprint.json"
 
 # From CHECKPOINTS.md (verified 2026-11-10). A mismatch aborts the run.
 EXPECTED_CHECKPOINT_SHA256 = {
@@ -478,11 +482,95 @@ def git_info(repo: Path, code_paths=CODE_PATHS) -> dict:
             "code_paths": list(code_paths)}
 
 
-def env_info() -> dict:
-    info = {"python": platform.python_version(), "platform": platform.platform()}
-    for mod in ("torch", "monai", "nnunetv2", "SimpleITK", "numpy", "cc3d"):
+# Files whose content defines the numbers an Option A run produces. The hash is LF-normalised so the
+# home PC (LF) and the lab PC checkout (CRLF) give the same digest.
+FINGERPRINT_PATHS = ("benchmark", "scripts/run_optionA_symmetric_v1_eval.py",
+                     "Phase3_Local_Integration/rasnet_model.py", "config.lab.yaml",
+                     "Phase3_Local_Integration/splits_final.json")
+
+
+def code_digest(repo: Path, paths=FINGERPRINT_PATHS) -> str:
+    """sha256 over (relative path, LF-normalised content) of every .py/.yaml/.json under `paths`."""
+    repo = Path(repo)
+    files = []
+    for rel in paths:
+        p = repo / rel
+        if p.is_file():
+            files.append(p)
+        elif p.is_dir():
+            files.extend(q for q in p.rglob("*")
+                         if q.is_file() and q.suffix in (".py", ".yaml", ".json") and "__pycache__" not in q.parts)
+    h = hashlib.sha256()
+    for f in sorted(set(files)):
+        h.update(f.relative_to(repo).as_posix().encode())
+        h.update(b"\0")
+        h.update(f.read_bytes().replace(b"\r\n", b"\n"))
+        h.update(b"\0")
+    return h.hexdigest()
+
+
+def run_fingerprint(repo: Path, sw_batch_size: int, device: str) -> dict:
+    env = env_info()
+    return {"protocol_version": PROTOCOL_VERSION, "code_digest": code_digest(repo),
+            "sw_batch_size": int(sw_batch_size), "device": str(device),
+            "torch": env.get("torch"), "monai": env.get("monai")}
+
+
+def check_or_write_fingerprint(out_dir: Path, fp: dict) -> dict:
+    """The first probability-producing stage writes the fingerprint; every later one must match it.
+
+    Guarantees that val, lock and test rows in one folder come from identical code and settings.
+    """
+    p = Path(out_dir) / FINGERPRINT_FILE
+    if not p.is_file():
+        p.write_text(json.dumps(fp, indent=2, sort_keys=True), encoding="utf-8", newline="\n")
+        return fp
+    saved = json.loads(p.read_text(encoding="utf-8"))
+    diff = {k: (saved.get(k), fp.get(k)) for k in sorted(set(saved) | set(fp)) if saved.get(k) != fp.get(k)}
+    if diff:
+        raise RuntimeError(
+            f"Run fingerprint mismatch in {out_dir} (saved -> now): {diff}. Results in one folder must come "
+            "from identical code and settings: rerun with the original settings, or start a new --out folder "
+            "and record why.")
+    return saved
+
+
+def assert_lock_committed(repo: Path, lock_path: Path) -> None:
+    """The Val-94 lock and its sidecar must be tracked and unmodified in git before any test inference."""
+    repo, lock_path = Path(repo), Path(lock_path)
+    for f in (lock_path, lock_path.with_suffix(".sha256")):
         try:
-            info[mod] = __import__(mod).__version__
+            rel = f.resolve().relative_to(repo.resolve()).as_posix()
+        except ValueError:
+            raise RuntimeError(f"Lock file {f} is outside the repository and cannot be committed.")
+        tracked = subprocess.run(["git", "ls-files", "--error-unmatch", "--", rel], cwd=repo,
+                                 capture_output=True, text=True)
+        if tracked.returncode != 0:
+            raise RuntimeError(f"{rel} is not committed. Commit the Val-94 lock (manual step E7) "
+                               "before test inference.")
+        status = subprocess.run(["git", "status", "--porcelain", "--", rel], cwd=repo,
+                                capture_output=True, text=True, check=True).stdout.strip()
+        if status:
+            raise RuntimeError(f"{rel} was modified after it was committed: {status}")
+
+
+def env_info() -> dict:
+    import importlib.metadata
+
+    info = {"python": platform.python_version(), "platform": platform.platform()}
+    for mod, dist in (
+        ("torch", "torch"),
+        ("monai", "monai"),
+        ("nnunetv2", "nnunetv2"),
+        ("SimpleITK", "SimpleITK"),
+        ("numpy", "numpy"),
+        ("cc3d", "connected-components-3d"),
+    ):
+        try:
+            ver = getattr(__import__(mod), "__version__", None)
+            if not ver:
+                ver = importlib.metadata.version(dist)
+            info[mod] = str(ver)
         except Exception:
             info[mod] = "missing"
     try:
@@ -725,9 +813,9 @@ def write_lock(path: Path, payload: dict) -> str:
     path = Path(path)
     if path.exists():
         raise FileExistsError(f"Lock already exists and is immutable: {path}")
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8", newline="\n")
     sha = sha256_file(path)
-    path.with_suffix(".sha256").write_text(sha, encoding="utf-8")
+    path.with_suffix(".sha256").write_text(sha, encoding="utf-8", newline="\n")
     return sha
 
 
@@ -738,7 +826,9 @@ def load_lock(path: Path, splits: dict, models, allow_smoke=False) -> tuple[dict
     data = json.loads(path.read_text(encoding="utf-8"))
     sha = sha256_file(path)
     side = path.with_suffix(".sha256")
-    if side.is_file() and side.read_text(encoding="utf-8").strip() != sha:
+    if not side.is_file():
+        raise ValueError(f"Lock sidecar {side.name} is missing; the lock's integrity cannot be checked.")
+    if side.read_text(encoding="utf-8").strip() != sha:
         raise ValueError("Lock file hash does not match its .sha256 sidecar (modified after locking)")
     if data.get("split") != "val":
         raise ValueError("Lock must be selected on the validation split")
@@ -757,20 +847,63 @@ def load_lock(path: Path, splits: dict, models, allow_smoke=False) -> tuple[dict
 
 
 # ============================================================ CSV resume helpers
-def done_keys(csv_path: Path, rows_per_case: int, key_cols=("model", "case_id")) -> set:
+def repair_csv_tail(csv_path: Path) -> None:
+    """Drop a partially written last line (crash or power loss mid-append). Every append ends in a newline."""
     p = Path(csv_path)
     if not p.is_file() or p.stat().st_size == 0:
+        return
+    data = p.read_bytes()
+    if data.endswith(b"\n"):
+        return
+    cut = data.rfind(b"\n")
+    with open(p, "r+b") as f:
+        f.truncate(cut + 1 if cut >= 0 else 0)
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def read_rows(csv_path: Path) -> pd.DataFrame:
+    """Read an append-only results CSV after repairing a truncated tail."""
+    p = Path(csv_path)
+    repair_csv_tail(p)
+    if not p.is_file() or p.stat().st_size == 0:
+        return pd.DataFrame()
+    return pd.read_csv(p)
+
+
+def done_keys(csv_path: Path, rows_per_case: int, key_cols=("model", "case_id")) -> set:
+    df = read_rows(csv_path)
+    if df.empty:
         return set()
-    df = pd.read_csv(p)
+    # Deduplicate on per-row identity before counting so repeated retries of the same recipe,
+    # (mode, tau), or mode cannot inflate the completed-row count.
+    if "recipe" in df.columns:
+        dedup_cols = list(dict.fromkeys([*key_cols, "recipe"]))
+        df = df.drop_duplicates(subset=dedup_cols, keep="last")
+    elif {"mode", "tau"} <= set(df.columns):
+        df = df.copy()
+        df["_tau_key"] = pd.to_numeric(df["tau"], errors="coerce").round(6)
+        dedup_cols = list(dict.fromkeys([*key_cols, "mode", "_tau_key"]))
+        df = df.drop_duplicates(subset=dedup_cols, keep="last")
+    elif "mode" in df.columns:
+        dedup_cols = list(dict.fromkeys([*key_cols, "mode"]))
+        df = df.drop_duplicates(subset=dedup_cols, keep="last")
     counts = df.groupby(list(key_cols)).size()
     return {(str(m), int(c)) for (m, c), n in counts.items() if n >= rows_per_case}
 
 
 def append_rows(csv_path: Path, rows: list[dict]) -> None:
+    """Append one case's rows in a single write + fsync (crash-safe together with repair_csv_tail)."""
     if not rows:
         return
     p = Path(csv_path)
-    pd.DataFrame(rows).to_csv(p, mode="a", header=not p.exists(), index=False)
+    repair_csv_tail(p)
+    header = not p.is_file() or p.stat().st_size == 0
+    text = pd.DataFrame(rows).to_csv(index=False, header=header, lineterminator="\n")
+    with open(p, "a", encoding="utf-8", newline="") as f:
+        f.write(text)
+        f.flush()
+        os.fsync(f.fileno())
 
 
 # ============================================================ statistics
@@ -804,8 +937,12 @@ SUMMARY_METRICS = ("dice", "iou", "precision", "recall", "hd95", "asd", "cldice"
 def summarize(df: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for (model, recipe), g in df.groupby(["model", "recipe"]):
+        empty = g["status"] == "prediction_empty"
         r = {"model": model, "recipe": recipe, "n": int(len(g)),
-             "n_ok": int((g["status"] == "ok").sum()), "tau": float(g["tau"].iloc[0])}
+             "n_ok": int((g["status"] == "ok").sum()), "n_empty_pred": int(empty.sum()),
+             "tau": float(g["tau"].iloc[0]),
+             # precision with an empty prediction counted as 0: NaN-dropping must never help a model
+             "precision_strict_mean": float(g["precision"].where(~empty, 0.0).mean())}
         for m in SUMMARY_METRICS:
             v = g[m].dropna().to_numpy(float)
             r[f"{m}_mean"] = float(v.mean()) if len(v) else np.nan
@@ -827,7 +964,8 @@ def run_families(df: pd.DataFrame, recipe: str) -> pd.DataFrame:
         if not hyps:
             continue
         for r in analyze_family(tables, hyps, allow_nan_filtering=True):
-            out.append({"family": fam, "recipe": recipe, **r})
+            out.append({"family": fam, "recipe": recipe,
+                        "role": "primary" if recipe == PRIMARY_RECIPE else "secondary", **r})
     return pd.DataFrame(out)
 
 
@@ -1119,7 +1257,18 @@ def write_manifest(out_dir, stage, args, prov, extra=None):
         **(extra or {}),
     }
     stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime())
-    (out_dir / f"manifest_{stage}_{stamp}.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    (out_dir / f"manifest_{stage}_{stamp}.json").write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
+
+
+def configure_torch(stage: str) -> None:
+    """Locked v1 runs used PyTorch defaults (TF32 matmul off, cuDNN TF32 on, cudnn.benchmark off).
+    Keep those numerics everywhere; only enable cuDNN autotuning (speed only) outside parity."""
+    import torch
+    torch.backends.cudnn.benchmark = stage != "parity"
+
+
+def _fingerprint(args, out_dir):
+    return se.check_or_write_fingerprint(out_dir, se.run_fingerprint(ROOT, args.sw_batch_size, args.device))
 
 
 def _bounded_pipeline(gen, fn, max_inflight=2, workers=2):
@@ -1194,6 +1343,7 @@ def stage_parity(args, cfg, splits, out_dir):
 
 
 def stage_val(args, cfg, splits, out_dir):
+    fp = _fingerprint(args, out_dir)
     ids = sorted(splits["val"])[: args.smoke or None]
     pairs = resolve_case_pairs(cfg["dataset_root"], ids, check_headers=False)
     csv = out_dir / "val_grid_scores.csv"
@@ -1217,10 +1367,13 @@ def stage_val(args, cfg, splits, out_dir):
             se.append_rows(csv, rows)
             if i % 10 == 0 or i == len(todo):
                 print(f"  [{model}] {i}/{len(todo)} ({time.time() - t0:.0f}s)", flush=True)
+    return {"run_fingerprint": fp}
 
 
 def stage_lock(args, cfg, splits, out_dir):
-    df = pd.read_csv(out_dir / "val_grid_scores.csv")
+    if not (out_dir / se.FINGERPRINT_FILE).is_file():
+        raise SystemExit("No run_fingerprint.json: run the val stage in this folder first.")
+    df = se.read_rows(out_dir / "val_grid_scores.csv")
     payload = se.build_lock(df, splits, args.models, allow_partial=bool(args.smoke))
     sha = se.write_lock(out_dir / "locked_recipes.json", payload)
     print(json.dumps(payload["thresholds"], indent=2))
@@ -1229,7 +1382,11 @@ def stage_lock(args, cfg, splits, out_dir):
 
 
 def stage_test(args, cfg, splits, out_dir):
-    lock, sha = se.load_lock(out_dir / "locked_recipes.json", splits, args.models, allow_smoke=bool(args.smoke))
+    fp = _fingerprint(args, out_dir)
+    lock_path = out_dir / "locked_recipes.json"
+    lock, sha = se.load_lock(lock_path, splits, args.models, allow_smoke=bool(args.smoke))
+    if not args.smoke:
+        se.assert_lock_committed(ROOT, lock_path)
     ids = sorted(splits["test"])[: args.smoke or None]
     pairs = resolve_case_pairs(cfg["dataset_root"], ids, check_headers=False)
     csv = out_dir / "test_per_case.csv"
@@ -1252,11 +1409,11 @@ def stage_test(args, cfg, splits, out_dir):
             se.append_rows(csv, rows)
             if i % 10 == 0 or i == len(todo):
                 print(f"  [{model}] {i}/{len(todo)} ({time.time() - t0:.0f}s)", flush=True)
-    return {"locked_recipes_sha256": sha}
+    return {"locked_recipes_sha256": sha, "run_fingerprint": fp}
 
 
 def stage_stats(args, cfg, splits, out_dir):
-    df = pd.read_csv(out_dir / "test_per_case.csv").drop_duplicates(
+    df = se.read_rows(out_dir / "test_per_case.csv").drop_duplicates(
         subset=["model", "case_id", "recipe"], keep="last")
     expected = len(splits["test"]) if not args.smoke else args.smoke
     counts = df.groupby(["model", "recipe"]).size()
@@ -1279,6 +1436,7 @@ def stage_stats(args, cfg, splits, out_dir):
 
 def stage_timing(args, cfg, splits, out_dir):
     """Validation cases only; never test. Run with nothing else on the GPU."""
+    _fingerprint(args, out_dir)
     ids = sorted(splits["val"])[: args.timing_cases + 1]          # +1 warm-up case
     pairs = resolve_case_pairs(cfg["dataset_root"], ids, check_headers=False)
     rows = []
@@ -1296,7 +1454,7 @@ def stage_timing(args, cfg, splits, out_dir):
 
 def stage_figures(args, cfg, splits, out_dir):
     summ = pd.read_csv(out_dir / "summary_test.csv")
-    per_case = pd.read_csv(out_dir / "test_per_case.csv").drop_duplicates(
+    per_case = se.read_rows(out_dir / "test_per_case.csv").drop_duplicates(
         subset=["model", "case_id", "recipe"], keep="last")
     eff = pd.read_csv(ROOT / "results/thesis_outputs/Table4_computational_efficiency_rtx4080super.csv")
     for p in se.make_figures(summ, per_case, eff, out_dir):
@@ -1304,39 +1462,67 @@ def stage_figures(args, cfg, splits, out_dir):
 
 
 def write_report(out_dir, summ, fam, ni, timing=None):
-    """Markdown generated only from the CSVs above (every number traceable to a file)."""
+    """Markdown generated only from the CSVs (every number traceable to a file).
+
+    The pre-registered primary recipe (R4) comes first; R1-R3 are secondary and descriptive.
+    Empty predictions and NaN-excluded cases are always shown.
+    """
     def fmt(r, m):
         return f"{r[f'{m}_mean']:.4f} ± {r[f'{m}_sd']:.4f}"
+
+    def model_table(recipe):
+        out = [f"| Model | τ | Dice | Precision | Precision (empty=0) | Recall | HD95 (mm) | ASD (mm) | clDice | n empty |",
+               "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"]
+        for _, r in summ[summ["recipe"] == recipe].sort_values("dice_mean", ascending=False).iterrows():
+            out.append(f"| {r['model']} | {r['tau']:.2f} | {fmt(r, 'dice')} | {fmt(r, 'precision')} | "
+                       f"{r['precision_strict_mean']:.4f} | {fmt(r, 'recall')} | {fmt(r, 'hd95')} | "
+                       f"{fmt(r, 'asd')} | {fmt(r, 'cldice')} | {int(r['n_empty_pred'])} |")
+        return out
+
+    def fam_table(rows):
+        out = ["| Family | a vs b | Metric | Mean diff (a−b) | 95% CI | p | Holm p | W/T/L | n excl. |",
+               "| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"]
+        for _, r in rows.iterrows():
+            out.append(f"| {r['family']} | {r['a']} vs {r['b']} | {r['metric']} | {r['mean_difference']:+.4f} | "
+                       f"[{r['diff_ci95_lo']:+.4f}, {r['diff_ci95_hi']:+.4f}] | {r['p']:.3g} | {r['holm_p']:.3g} | "
+                       f"{r['wins']}/{r['ties']}/{r['losses']} | {int(r['n_excluded_nan'])} |")
+        return out
+
+    def ni_table(rows):
+        out = ["| Recipe | Mean diff | 95% CI | Non-inferior | Superior |", "| :--- | :---: | :---: | :---: | :---: |"]
+        for _, r in rows.iterrows():
+            out.append(f"| {r['recipe']} | {r['mean_diff']:+.4f} | [{r['ci95_lo']:+.4f}, {r['ci95_hi']:+.4f}] | "
+                       f"{r['non_inferior']} | {r['superior']} |")
+        return out
+
+    primary = se.PRIMARY_RECIPE
     lines = ["# Option A results (generated; do not hand-edit)", "",
              "Source files: `summary_test.csv`, `paired_stats_families.csv`, "
-             "`noninferiority_rasnet_vs_nnunet_dice.csv`.", ""]
-    for recipe in sorted(summ["recipe"].unique()):
-        lines += [f"## {recipe}", "", "| Model | τ | Dice | Precision | Recall | HD95 (mm) | ASD (mm) | clDice |",
-                  "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"]
-        for _, r in summ[summ["recipe"] == recipe].sort_values("dice_mean", ascending=False).iterrows():
-            lines.append(f"| {r['model']} | {r['tau']:.2f} | {fmt(r, 'dice')} | {fmt(r, 'precision')} | "
-                         f"{fmt(r, 'recall')} | {fmt(r, 'hd95')} | {fmt(r, 'asd')} | {fmt(r, 'cldice')} |")
-        lines.append("")
-    lines += ["## Pre-declared families (Holm within family)", "",
-              "| Recipe | Family | a vs b | Metric | Mean diff (a−b) | 95% CI | p | Holm p | W/T/L |",
-              "| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |"]
-    for _, r in fam.iterrows():
-        lines.append(f"| {r['recipe']} | {r['family']} | {r['a']} vs {r['b']} | {r['metric']} | "
-                     f"{r['mean_difference']:+.4f} | [{r['diff_ci95_lo']:+.4f}, {r['diff_ci95_hi']:+.4f}] | "
-                     f"{r['p']:.3g} | {r['holm_p']:.3g} | {r['wins']}/{r['ties']}/{r['losses']} |")
-    lines += ["", "## Dice non-inferiority RASNet vs nnU-Net (margin −0.005)", "",
-              "| Recipe | Mean diff | 95% CI | Non-inferior | Superior |", "| :--- | :---: | :---: | :---: | :---: |"]
-    for _, r in ni.iterrows():
-        lines.append(f"| {r['recipe']} | {r['mean_diff']:+.4f} | [{r['ci95_lo']:+.4f}, {r['ci95_hi']:+.4f}] | "
-                     f"{r['non_inferior']} | {r['superior']} |")
+             "`noninferiority_rasnet_vs_nnunet_dice.csv`, `timing_summary.csv`.", ""]
+    n_empty = int(summ["n_empty_pred"].sum())
+    n_excl = int(fam["n_excluded_nan"].fillna(0).sum()) if len(fam) else 0
+    if n_empty or n_excl:
+        lines += [f"> **WARNING:** {n_empty} empty prediction(s) across models/recipes; {n_excl} case-comparison(s) "
+                  "were excluded from paired tests because a metric was NaN. Report these counts with every "
+                  "claim (CLAUDE.md §6).", ""]
+    lines += [f"## PRIMARY result (pre-registered): {primary}", "",
+              "Use only this section for confirmatory claims; choose the wording from doc 01 §7.", ""]
+    lines += model_table(primary) + [""]
+    lines += ["### Pre-declared families (Holm within family)", ""] + fam_table(fam[fam["role"] == "primary"]) + [""]
+    lines += ["### Dice non-inferiority RASNet vs nnU-Net (margin −0.005)", ""] + ni_table(ni[ni["recipe"] == primary]) + [""]
+    lines += ["## Secondary recipes (descriptive; not for confirmatory claims)", ""]
+    for recipe in sorted(r for r in summ["recipe"].unique() if r != primary):
+        lines += [f"### {recipe}", ""] + model_table(recipe) + [""]
+    lines += ["### Secondary families", ""] + fam_table(fam[fam["role"] == "secondary"]) + [""]
+    lines += ["### Secondary non-inferiority", ""] + ni_table(ni[ni["recipe"] != primary]) + [""]
     if timing is not None and len(timing):
-        lines += ["", "## End-to-end inference time per case (Val cases, RTX 4080 SUPER; `timing_summary.csv`)", "",
+        lines += ["## End-to-end inference time per case (Val cases, RTX 4080 SUPER; `timing_summary.csv`)", "",
                   "| Model | Mode | n | Median s/case [IQR] | Peak allocated VRAM (MB) |",
                   "| :--- | :--- | :---: | :---: | :---: |"]
         for _, r in timing.iterrows():
             lines.append(f"| {r['model']} | {r['mode']} | {int(r['n'])} | {r['seconds_median']:.1f} "
                          f"[{r['seconds_q25']:.1f}, {r['seconds_q75']:.1f}] | {r['peak_vram_mb']:.0f} |")
-    (out_dir / "OPTION_A_RESULTS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (Path(out_dir) / "OPTION_A_RESULTS.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def main():
@@ -1358,11 +1544,7 @@ def main():
     if args.stage in ("lock", "test", "stats", "figures", "timing") and args.models != list(se.MODELS):
         raise SystemExit("lock/test/stats/figures/timing must cover all four models (symmetry).")
 
-    import torch
-    torch.backends.cuda.matmul.allow_tf32 = True
-    torch.backends.cudnn.allow_tf32 = True
-    # Parity must reproduce locked numbers -> no autotuned (possibly different) conv algorithms.
-    torch.backends.cudnn.benchmark = args.stage != "parity"
+    configure_torch(args.stage)
 
     cfg, splits, prov = load_cfg_and_splits()
     out_dir = se.check_out_dir(args.out, ROOT, resume=args.resume or args.stage != "parity")

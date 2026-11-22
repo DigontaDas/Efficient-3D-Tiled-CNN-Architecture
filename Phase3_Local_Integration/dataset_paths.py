@@ -19,15 +19,48 @@ never gets duplicated.
 
 from __future__ import annotations
 import os
+import re
+from pathlib import Path
 
-# ── Root of the ImageCAS dataset candidate locations ──────────────────────────
-CANDIDATE_BASES = [
-    r"H:\3D CT Images for Coronary Artery Segmentation (200 Samples)",
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "archive")),
-    r"C:\Thesis_RASNET\archive",
-    r"H:\archive",
-]
-IMGCAS_BASE = next((b for b in CANDIDATE_BASES if os.path.exists(b)), r"C:\Thesis_RASNET\archive")
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _load_dataset_root_from_config(config_path: Path) -> str | None:
+    """Read `dataset_root` from config.lab.yaml without requiring hardcoded paths in code."""
+    if not config_path.is_file():
+        return None
+    text = config_path.read_text(encoding="utf-8")
+    try:
+        import yaml
+
+        cfg = yaml.safe_load(text) or {}
+        val = cfg.get("dataset_root")
+        if val:
+            return str(val)
+    except Exception:
+        pass
+    m = re.search(r"^\s*dataset_root\s*:\s*['\"]?([^'\"#\r\n]+?)['\"]?\s*(?:#.*)?$", text, re.M)
+    return m.group(1).strip() if m else None
+
+
+def _resolve_candidate_bases() -> list[str]:
+    """Resolve dataset root(s) from IMAGECAS_DATA_ROOT env var or config.lab.yaml (Rule 1)."""
+    bases: list[str] = []
+    env_root = os.environ.get("IMAGECAS_DATA_ROOT", "").strip()
+    if env_root:
+        bases.append(env_root)
+    cfg_root = _load_dataset_root_from_config(_REPO_ROOT / "config.lab.yaml")
+    if cfg_root and cfg_root not in bases:
+        bases.append(cfg_root)
+    return bases
+
+
+# ── Root of the ImageCAS dataset (configured via IMAGECAS_DATA_ROOT or config.lab.yaml) ──
+CANDIDATE_BASES = _resolve_candidate_bases()
+IMGCAS_BASE = next(
+    (b for b in CANDIDATE_BASES if os.path.exists(b)),
+    CANDIDATE_BASES[0] if CANDIDATE_BASES else "",
+)
 
 # Range-subdir mapping for format B (inclusive ranges)
 _RANGE_SUBDIRS: list[tuple[int, int, str]] = [
@@ -50,10 +83,16 @@ def find_image(case_id: int) -> str | None:
             if os.path.exists(p):
                 return p
 
-        # Format B — flat .nii.gz in range subdirectory
+        # Format B — flat .nii.gz in root, range subdirectory, or nested range/range subdirectory
         subdir = _subdir_for(case_id)
-        if subdir:
-            p = os.path.join(base, subdir, f"{case_id}.img.nii.gz")
+        for rel in (
+            (f"{case_id}.img.nii.gz",),
+            (subdir, f"{case_id}.img.nii.gz") if subdir else (),
+            (subdir, subdir, f"{case_id}.img.nii.gz") if subdir else (),
+        ):
+            if not rel:
+                continue
+            p = os.path.join(base, *rel)
             if os.path.exists(p):
                 return p
 
@@ -71,10 +110,16 @@ def find_label(case_id: int) -> str | None:
             if os.path.exists(p):
                 return p
 
-        # Format B — flat .nii.gz in range subdirectory
+        # Format B — flat .nii.gz in root, range subdirectory, or nested range/range subdirectory
         subdir = _subdir_for(case_id)
-        if subdir:
-            p = os.path.join(base, subdir, f"{case_id}.label.nii.gz")
+        for rel in (
+            (f"{case_id}.label.nii.gz",),
+            (subdir, f"{case_id}.label.nii.gz") if subdir else (),
+            (subdir, subdir, f"{case_id}.label.nii.gz") if subdir else (),
+        ):
+            if not rel:
+                continue
+            p = os.path.join(base, *rel)
             if os.path.exists(p):
                 return p
 

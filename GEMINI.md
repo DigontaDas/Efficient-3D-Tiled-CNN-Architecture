@@ -26,7 +26,7 @@
 | Allowed work | Code reading, synthetic CPU tests | Training, evaluation, GPU runs |
 | Python env | Varies (MONAI may differ, no `nnunetv2`) | `C:\Thesis_RASNET_env\bench` (Python 3.12, torch cu126, MONAI 1.6.1, nnunetv2 2.8.1) |
 
-Everything that runs for real runs on the lab PC. All commands, settings and performance tuning target it: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`. The synthetic & reporting test suite (`tests/`) collects `72` tests, all passing on the lab PC on `2026-11-17` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
+Everything that runs for real runs on the lab PC. All commands, settings and performance tuning target it: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`. The synthetic & reporting test suite (`tests/`) collects `94` tests (plus `46` in `Rasnet-v2/tests/`), all passing on the lab PC on `2026-11-22` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
 
 Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 
@@ -37,26 +37,29 @@ Anything only verifiable on the lab PC is marked **LAB-CHECK**.
 1. **Data paths:** the dataset root lives only in config (`config.lab.yaml`, `Rasnet-v2/configs/fair_v2.yaml`), never in code.
 2. **Frozen science:** do not change model architectures, losses, hyperparameters, epoch counts or checkpoints.
    - The only exception is a **dated pre-registration amendment the user has explicitly approved**, committed before any affected result exists.
-3. **Locked test set:** test cases 851–1000 are locked. Every selection (threshold, recipe, LR, seed, design, checkpoint) uses Val-94 only.
-   - Test inference runs once per frozen recipe, after the validation lock is written and committed.
+   - The amendment goes in `BENCHMARK_PREREGISTRATION.md` (v1) or `Rasnet-v2/PREREGISTRATION_V2.md` (v2).
+3. **Locked test set:** test cases 851–1000 are locked. No threshold, recipe, LR, seed, design or checkpoint selection may use them; select on validation (Val-94) only.
+   - Test inference happens once per frozen recipe, after the validation lock file is written and committed.
+   - Because v1 Arms A/B/C and Phase H already inspected 851–1000, every v1 test result is reported as **retrospective**.
 4. **Symmetry for every comparison:**
-   - Every model gets the same inference (overlap, blending), the same TTA definition, the same threshold grid and the same selection rule.
-   - Symmetric TTA means 8-pass mirroring: identity + 7 flip-axis combinations, logits averaged before softmax, as in nnU-Net's predictor.
-   - Never tune RASNet alone and compare it with untuned baselines.
+   - Every compared model gets the same inference (overlap, blending), the same TTA definition, the same threshold grid and the same selection rule.
+   - Symmetric TTA means 8-pass mirroring: identity + all 7 flip-axis combinations, logits averaged before softmax. This is what nnU-Net's predictor does.
+   - Never tune RASNet alone and then compare it with untuned baselines.
 5. **Evidence:**
-   - Every reported number comes from a file produced by a run with a manifest.
-   - Stage 2A pilot numbers (`val20_dice`, 50 epochs, one seed) are for LR selection only and must never be cited as results.
+   - Every reported number must come from a file produced by a run with a manifest (git commit, source hashes, checkpoint SHA-256, env).
+   - Pilot numbers (Stage 2A `val20_dice`, 50-epoch, single seed) are for LR selection only and must never be cited as results.
    - Do not quote numbers from chat transcripts; quote the file.
-6. **Tests first:** write the test, show it failing, then implement and show it passing.
+6. **Tests first:** write the test, run it and show it failing, then implement and show it passing.
 7. **Git:**
    - Never commit data or checkpoints. Record checkpoint SHA-256 in `CHECKPOINTS.md`.
-   - Commit only when the user asks. Never push without explicit authorisation.
-8. **GPU:** one GPU job at a time. Before launching, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`. Another agent may own the GPU.
-9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`.
+   - Commit only when the user asks.
+   - Never push without explicit authorisation.
+8. **GPU:** one GPU job at a time on the lab PC. Before launching anything, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`. Another agent may own the GPU.
+9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`. New analyses write to new folders.
 10. **Claims:**
-    - Thesis wording is chosen from the pre-written outcome tables (`docs-for-next-v2-gen/01_…` §7, `docs-for-next-v2-gen/02_…` §5) that match the numbers. Never write a stronger claim.
-    - "Not significant" ≠ "equal".
-    - Phase H (RASNet-only tuning) is not a fair comparison with nnU-Net.
+    - Choose thesis wording from the pre-written outcome tables (`docs-for-next-v2-gen/01_…` §7, `docs-for-next-v2-gen/02_…` §5) that match the numbers. Never write a stronger claim.
+    - "Not significant" is not "equal".
+    - A Phase H RASNet-only result is not a fair comparison with nnU-Net.
 11. **Status polling:** do not post repeated status-only messages. Report when a milestone changes (epoch with validation, job finished, error).
 
 ---
@@ -199,7 +202,7 @@ Source: `results/v1_epoch200_comparison_20261117_041500Z/` & `results/v1_reporti
 | Evidence index | `CURRENT_EVIDENCE_INDEX.md` |
 | Checkpoints | `CHECKPOINTS.md` |
 | Inference spec | `INFERENCE_SPEC.md` |
-| v1 benchmark | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `endpoint_eval.py`, `symmetric_eval.py`, `adapters/`); tests in `tests/` (`72` passing) |
+| v1 benchmark | `benchmark/` (`run_benchmark.py`, `metrics.py` surface-v1, `postprocess.py`, `thresholds.py`, `stats.py`, `endpoint_eval.py`, `symmetric_eval.py`, `adapters/`); tests in `tests/` (`94` passing) |
 | RASNet model + loss | `Phase3_Local_Integration/rasnet_model.py`, `rasnet_loss.py` |
 | Splits | `Phase3_Local_Integration/splits_final.json` (690 / 94 / 150) |
 | v1 trainers | `Q1_Publication_Package/matched_200ep_benchmark/train_*_200ep.py`, `prepare_and_run_nnunet_200ep.py` |

@@ -20,7 +20,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 - Paths such as `C:\Thesis_RASNET\...` in transcripts and configs map to the same repo-relative path here.
 - `Rasnet-v2/configs/fair_v2.yaml` and the `Rasnet-v2/tests/*` files hard-code `C:/Thesis_RASNET`. On the home PC those tests fail for environment reasons only; say so, do not "fix" the paths.
 - **Everything that runs for real runs on the lab PC.** Write all commands, settings and performance tuning for the lab PC: PowerShell, `$PY = "C:\Thesis_RASNET_env\bench\Scripts\python.exe"`, repo root `C:\Thesis_RASNET`, RTX 4080 SUPER 16 GB. Never tune for the home PC's hardware.
-- v1 synthetic suite status: `tests/` collects `72` tests, all passing on the lab PC on `2026-11-17` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
+- v1 synthetic suite status: `tests/` collects `94` tests (plus `46` in `Rasnet-v2/tests/`), all passing on the lab PC on `2026-11-22` via `C:\Thesis_RASNET_env\bench\Scripts\python.exe -m pytest tests/`.
 
 ## 3. Hard rules
 
@@ -35,19 +35,22 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
    - Every compared model gets the same inference (overlap, blending), the same TTA definition, the same threshold grid and the same selection rule.
    - Symmetric TTA means 8-pass mirroring: identity + all 7 flip-axis combinations, logits averaged before softmax. This is what nnU-Net's predictor does.
    - Never tune RASNet alone and then compare it with untuned baselines.
-5. **Evidence:** every reported number must come from a file produced by a run with a manifest (git commit, source hashes, checkpoint SHA-256, env).
+5. **Evidence:**
+   - Every reported number must come from a file produced by a run with a manifest (git commit, source hashes, checkpoint SHA-256, env).
    - Pilot numbers (Stage 2A `val20_dice`, 50-epoch, single seed) are for LR selection only and must never be cited as results.
+   - Do not quote numbers from chat transcripts; quote the file.
 6. **Tests first:** write the test, run it and show it failing, then implement and show it passing.
 7. **Git:**
    - Never commit data or checkpoints. Record checkpoint SHA-256 in `CHECKPOINTS.md`.
    - Commit only when the user asks.
    - Never push without explicit authorisation.
-8. **GPU:** one GPU job at a time on the lab PC. Before launching anything, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`.
+8. **GPU:** one GPU job at a time on the lab PC. Before launching anything, check `Rasnet-v2/logs/queue_status.json` and `Rasnet-v2/STATE_HANDOFF.md`. Another agent may own the GPU.
 9. **Protected results:** never overwrite `results/benchmark_runs/val_full_94/`, `results/benchmark_runs/test_retrospective_150/`, `results/rasnet_fixed_weight_optimization/` or `results/thesis_outputs/`. New analyses write to new folders.
 10. **Claims:**
     - Choose thesis wording from the pre-written outcome tables (`docs-for-next-v2-gen/01_…` §7, `docs-for-next-v2-gen/02_…` §5) that match the numbers. Never write a stronger claim.
     - "Not significant" is not "equal".
     - A Phase H RASNet-only result is not a fair comparison with nnU-Net.
+11. **Status polling:** do not post repeated status-only messages. Report when a milestone changes (epoch with validation, job finished, error).
 
 ## 4. Where things are
 
@@ -65,7 +68,7 @@ The goal is to show RASNet is an accurate **and** efficient alternative. The aim
 | Rasnet-v2 (controlled multi-seed study) | `Rasnet-v2/` (`PREREGISTRATION_V2.md`, `configs/fair_v2.yaml`, `src/run_queue.py`) |
 | **Lab PC manual — start here** | `docs-for-next-v2-gen/00_LAB_PC_OPERATOR_MANUAL.md` (step-by-step for the lab PC, including instructions for the IDE agent) |
 | Next-step plans (2026-11-12) | `docs-for-next-v2-gen/01_OPTION_A_SYMMETRIC_V1_EVAL.md`, `docs-for-next-v2-gen/02_RASNET_V2_FAIRNESS_FIXES_AND_WIN_STRATEGY.md`, `docs-for-next-v2-gen/03_NEXT_STEPS_RUNBOOK.md` |
-| Archived / superseded material | `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` (`ARCHIVE_INDEX.csv`) |
+| Archived / superseded material | `_Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/` & `thesis_cleanup_2026-11-19/` (`ARCHIVE_INDEX.csv`) |
 
 ## 5. Current state (update this section when it changes)
 

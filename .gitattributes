@@ -1,0 +1,22 @@
+* text=auto
+*.json text eol=lf
+*.csv text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Frozen pre-.gitattributes v1 artifacts whose CRLF SHA-256 digests are locked
+# in immutable sidecars, manifests, and CURRENT_EVIDENCE_INDEX.md (Rule 9):
+Phase3_Local_Integration/splits_final.json text eol=crlf
+results/thresholds.json text eol=crlf
+results/optionA_v1_symmetric_sw050/*.json text eol=crlf
+results/optionA_v1_symmetric_sw050/*.csv text eol=crlf
+results/optionA_v1_symmetric_sw050/*.md text eol=crlf
+results/benchmark_runs/**/*.json text eol=crlf
+results/benchmark_runs/**/*.csv text eol=crlf
+results/thesis_outputs/*.csv text eol=crlf
+results/thesis_outputs/*.md text eol=crlf
+results/rasnet_fixed_weight_optimization/*.json text eol=crlf
+results/rasnet_fixed_weight_optimization/*.csv text eol=crlf
+results/rasnet_fixed_weight_optimization/*.md text eol=crlf

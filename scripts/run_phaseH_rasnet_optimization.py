@@ -40,7 +40,7 @@ import yaml
 from scipy.ndimage import binary_erosion, distance_transform_edt
 from skimage.morphology import skeletonize
 
-ROOT = Path(r"C:\Thesis_RASNET")
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from benchmark.adapters.monai_models import (

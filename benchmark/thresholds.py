@@ -14,7 +14,7 @@ def _fast_dice(pred_u8: np.ndarray, gt_bool: np.ndarray) -> float:
     ps = int(p.sum())
     gs = int(gt_bool.sum())
     if ps + gs == 0:
-        return 1.0
+        return np.nan
     inter = int((p & gt_bool).sum())
     return float(2.0 * inter / (ps + gs))
 

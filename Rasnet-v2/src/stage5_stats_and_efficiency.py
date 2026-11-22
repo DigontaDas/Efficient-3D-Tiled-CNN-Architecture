@@ -98,6 +98,7 @@ def _load_family_tables(
 def _run_family1(
     fam_tables: dict[tuple[str, str], dict[str, Any]],
     arms: tuple[str, ...],
+    lead_gate_mode: str | None = None,
 ) -> pd.DataFrame:
     contrasts = [
         ("rasnet_v2_f16", "segresnet_f16_v2loss", "F16_RASNetV2_vs_SegResNetV2"),
@@ -183,7 +184,16 @@ def _run_family1(
                         r["significant_holm_005"] = bool(hp < 0.05)
                         rows.append(r)
 
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        # These contrasts compare against rasnet_v2_f16, whose gate is the Stage 2B lead gate. Their labels
+        # ("gate effect", "DS effect") are only valid when that lead gate is conv_bias, the gate of the
+        # fixed ablation runs; otherwise they measure gate mode and DS together.
+        gate_dependent = {"Abl_Gate_ConvBias_vs_OrigGN", "Abl_DS_Full_vs_NoDS", "Abl_DS_Full_vs_NoDS_3seed"}
+        df["lead_gate_mode"] = lead_gate_mode if lead_gate_mode is not None else "unknown"
+        confounded = lead_gate_mode not in (None, "conv_bias")
+        df["ablation_label_valid"] = ~(df["contrast"].isin(gate_dependent) & confounded)
+    return df
 
 
 def _run_family2(
@@ -474,7 +484,10 @@ def run_stage5_analysis(
     fam_tables = _load_family_tables(test_dir, jobs)
     arms_present = tuple(a for a in ("A", "B", "C_top2", "C_seeded") if any(k[1] == a for k in fam_tables))
 
-    df_f1 = _run_family1(fam_tables, arms_present)
+    _plp = pilot_dir / "pilot_lock_decision.json"
+    lead_gate_mode = (json.loads(_plp.read_text(encoding="utf-8")).get("locked_design", {}).get("gate_mode")
+                      if _plp.is_file() else None)
+    df_f1 = _run_family1(fam_tables, arms_present, lead_gate_mode=lead_gate_mode)
     df_f2 = _run_family2(fam_tables, arms_present, ni_margin=-0.0050)
     atomic_write_csv(df_f1, out_dir / "family1_causal_stats.csv")
     atomic_write_csv(df_f2, out_dir / "family2_vs_nnunet_stats.csv")

@@ -1,0 +1,57 @@
+LAB-CHECK: Archived V1 Ablation Cache Inspection
+Audit UTC: 2026-11-22T04:51:52Z
+==============================================================================
+
+1. On-Disk Cache Directory Inspection (C:\Thesis_RASNET):
+   - Q1_Publication_Package/matched_200ep_benchmark/cache exists on disk today: False
+   - Q1_Publication_Package/matched_200ep_benchmark/cache/segresnet exists on disk today: False
+   Finding: The gitignored PersistentDataset cache directory `cache/segresnet`
+   is NO LONGER present on disk today (previously deleted/cleaned up after training),
+   so cached .pt tensor files cannot be inspected directly on disk.
+
+2. Code, MONAI Runtime & Log Forensics (Corroborating Cache Reuse):
+   - Archived script: _Archive_Historical_Experiments_and_Logs/thesis_cleanup_2026-11-10/Q1_Publication_Package/ablation/train_ablation_models_200ep.py
+     * Line 89:  cache_dir = os.path.join(base_dir, 'cache', 'segresnet')
+     * Line 149: train_transforms adds Orientationd(keys=['image', 'label'], axcodes='RAS')
+     * Line 155: RandCropByPosNegLabeld(..., num_samples=1)  [halved vs RASNet/SegResNet num_samples=2]
+     * Line 167: val_transforms adds Orientationd(..., axcodes='RAS') and omits CropForegroundd
+     * Line 174: train_ds = PersistentDataset(data=train_files, transform=train_transforms, cache_dir=cache_dir)
+     * Line 183: val_ds = Dataset(data=val_files, transform=val_transforms)  [NOT cached]
+     * Line 196: criterion = DiceCELoss(to_onehot_y=True, softmax=True)  [switched loss]
+   - MONAI 1.6.1 PersistentDataset.__init__ signature:
+     (self, data: 'Sequence', transform: 'Sequence[Callable] | Callable', cache_dir: 'Path | str | None', hash_func: 'Callable[..., bytes]' = <function pickle_hashing at 0x000001BBD38CE160>, pickle_module: 'str' = 'pickle', pickle_protocol: 'int' = 2, hash_transform: 'Callable[..., bytes] | None' = None, reset_ops_id: 'bool' = True, track_meta: 'bool' = False, weights_only: 'bool' = True) -> 'None'
+     Default `hash_func=pickle_hashing` hashes only the input data dict paths; `hash_transform=None`
+     ignores the transform pipeline completely. Therefore any pre-existing LAS tensor cached in
+     `cache/segresnet` by train_segresnet_200ep.py / train_rasnet_200ep.py / train_vnet_200ep.py
+     is served directly without applying Orientationd('RAS').
+
+3. Git Chronology & Epoch-1 Timing Evidence:
+   Git commits (main 200-ep benchmark preceded ablations by 1 day):
+   3aed3ed 2026-09-10 10:03:42 +0600 feat(ablation): add 200-epoch trained checkpoints and training logs for intermediate ablation models
+   52b1800 2026-09-09 10:12:24 +0600 feat(benchmark): matched 200-epoch benchmark results, telemetry, and 8-metric test evaluation suite
+
+   Epoch 1..3 wall-clock times (all 690 ImageCAS CT volumes):
+  - segresnet_200ep_log.csv: ep1=75.85s, ep2=74.86s, ep3=76.08s | max val_dice=0.75212 at ep 190
+  - rasnet_200ep_log.csv: ep1=76.43s, ep2=76.73s, ep3=77.49s | max val_dice=0.77696 at ep 160
+  - vnet_200ep_log.csv: ep1=76.41s, ep2=75.18s, ep3=74.69s | max val_dice=0.74905 at ep 180
+  - ablation_attngate_200ep_log.csv: ep1=73.88s, ep2=72.96s, ep3=74.34s | max val_dice=0.74798 at ep 200
+  - ablation_deepsup_200ep_log.csv: ep1=73.49s, ep2=44.63s, ep3=45.34s | max val_dice=0.75697 at ep 200
+   Interpretation: Building 690 512x512x~275 3D CT volumes from raw .nii.gz through
+   LoadImaged + Orientationd + Spacingd(0.5mm) + CropForegroundd + disk serialization
+   takes many minutes on Epoch 1, whereas ablation_attngate_200ep_log.csv ran Epoch 1
+   in 73.88s (matching Epoch 2: 72.96s and matching the already-cached segresnet/rasnet/vnet
+   Epoch 1 times of 75.85s / 76.43s / 76.41s), and ablation_deepsup_200ep_log.csv ran Epoch 1
+   in 73.49s (vs 44.63s Epoch 2). This strongly corroborates a cache hit on the pre-existing
+   LAS tensors in `cache/segresnet`.
+
+4. Ablation Checkpoints Present on Disk:
+  - Q1_Publication_Package/matched_200ep_benchmark/checkpoints/ablation_attngate_best.pth: exists=True, size_bytes=18873080
+  - Q1_Publication_Package/matched_200ep_benchmark/checkpoints/ablation_deepsup_best.pth: exists=True, size_bytes=18872898
+
+5. Scientific Verdict:
+   - Direct on-disk inspection of `cache/segresnet` .pt files: NOT POSSIBLE (directory absent today).
+   - Combined code + MONAI hash_transform=None + git chronology + Epoch-1 timing (~73.5s) evidence
+     strongly corroborates LAS-train / RAS-val cache mismatch; independently, train_ablation_models_200ep.py
+     also dropped CropForegroundd in val_transforms, switched loss to DiceCELoss, and halved num_samples=1.
+   - Conclusion: Legacy v1 ablation checkpoints (`ablation_attngate_best.pth`, `ablation_deepsup_best.pth`)
+     remain SCIENTIFICALLY INVALID and MUST NOT be cited in the thesis or defense.

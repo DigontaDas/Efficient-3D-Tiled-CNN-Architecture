@@ -337,6 +337,8 @@ def evaluate_stage2b_pilots(
             "w_cldice": float(winner["w_cldice"]),
             "val94_dice": float(winner["dice_mean"]),
             "val94_precision": float(winner["precision_mean"]),
+            "val94_precision_strict": float(winner["precision_mean_strict"]),
+            "val94_n_empty_pred": int(winner["n_empty_pred"]),
             "val94_hd95": float(winner["hd95_mean"]),
             "val94_components_total": float(winner["components_total_mean"]),
             "segresnet_ref_components_total": float(winner["segresnet_ref_components_total"]),

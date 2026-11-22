@@ -17,13 +17,16 @@ class AttentionGate3D(nn.Module):
         are mapped, added, activated, and multiplied to filter spatial noise.
         """
         super().__init__()
+        num_groups = min(8, F_int)
+        while num_groups > 1 and (F_int % num_groups) != 0:
+            num_groups -= 1
         self.W_g = nn.Sequential(
             nn.Conv3d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.GroupNorm(8, F_int)
+            nn.GroupNorm(num_groups, F_int)
         )
         self.W_x = nn.Sequential(
             nn.Conv3d(F_l, F_int, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.GroupNorm(8, F_int)
+            nn.GroupNorm(num_groups, F_int)
         )
         self.psi = nn.Sequential(
             nn.Conv3d(F_int, 1, kernel_size=1, stride=1, padding=0, bias=False),
@@ -61,19 +64,20 @@ class RASNet(SegResNet):
         self.out_channels = kwargs["out_channels"]
         super().__init__(*args, **kwargs)
 
+        f = int(kwargs["init_filters"])
         # 3 Attention Gates matching the channels at each skip connection level
-        # up_samples output channels for SegResNet (init_filters=16) are: [64, 32, 16]
+        # up_samples output channels for SegResNet are: [4*f, 2*f, f] ([64, 32, 16] for init_filters=16)
+        gate_channels = (4 * f, 2 * f, f)
         self.attention_gates = nn.ModuleList([
-            AttentionGate3D(F_g=64, F_l=64, F_int=32),
-            AttentionGate3D(F_g=32, F_l=32, F_int=16),
-            AttentionGate3D(F_g=16, F_l=16, F_int=8)
+            AttentionGate3D(F_g=c, F_l=c, F_int=max(c // 2, 1))
+            for c in gate_channels
         ])
 
         # Deep Supervision heads to predict output channels at intermediate resolutions
-        # Level 0 (1/2 size): 64 channels, Level 1 (1/4 size): 32 channels
+        # Level 0 (1/4 size): 64 ch (4*f), Level 1 (1/2 size): 32 ch (2*f)
         self.ds_heads = nn.ModuleList([
-            nn.Conv3d(64, self.out_channels, kernel_size=1, bias=True),
-            nn.Conv3d(32, self.out_channels, kernel_size=1, bias=True)
+            nn.Conv3d(4 * f, self.out_channels, kernel_size=1, bias=True),
+            nn.Conv3d(2 * f, self.out_channels, kernel_size=1, bias=True),
         ])
 
     def decode(self, x: torch.Tensor, down_x: list[torch.Tensor]) -> tuple[torch.Tensor, list[torch.Tensor]] or torch.Tensor:

@@ -7,7 +7,7 @@ Sequentially executes all five models to their matched 200-epoch budget:
   Stage 2: nnU-Net V2 (Epoch 0 -> 200, nnUNetTrainer_200epochs)
   Stage 3: 3D U-Net (Epoch 0 -> 200)
   Stage 4: V-Net (Epoch 0 -> 200, Stabilized)
-  Stage 5: RASNet (Epoch 71 -> 200, Continued from Champion Checkpoint)
+  Stage 5: RASNet (Epoch 0 -> 200, From Scratch via train_rasnet_200ep.py)
 
 After each stage, checkpoints and per-epoch CSV telemetry are verified.
 """

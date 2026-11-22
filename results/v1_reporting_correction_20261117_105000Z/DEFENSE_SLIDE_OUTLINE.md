@@ -27,7 +27,7 @@
 
 ### Slide 4 — RASNet Architecture & Loss Formulation
 - **Key Points (`rasnet_model.py`, `rasnet_loss.py`):**
-  - MONAI `SegResNet` backbone (`init_filters = 16`, `4.701M` params) + 3D additive `AttentionGate3D` at 3 decoder levels + multi-scale deep supervision (`aux2` `0.4`, `aux3` `0.2`) = **`4,706,772` params (`4.707M`, only `+5,858` params over SegResNet)**.
+  - MONAI `SegResNet` backbone (`init_filters = 16`, `4.701M` params) + 3D additive `AttentionGate3D` at 3 decoder levels (soft per-patch spatial re-weighting, not background suppression: `GroupNorm(1,1)` leaves `38.5–59.3%` of pure-background voxels with `ψ > 0.50` on real `rasnet_best.pth`) + multi-scale deep supervision (`aux2` `0.4`, `aux3` `0.2`) = **`4,706,772` params (`4.707M`, only `+5,858` params over SegResNet)**.
   - `StenosisAwareLoss`: `0.4 * Dice + 0.6 * Focal (γ = 2.5)` (`α = 0.4`, NOT `0.30`).
   - Exact 5-model verified parameter order: `SegResNet (4.701M) < RASNet (4.707M) < 3D U-Net (4.806M) < nnU-Net (30.786M, 6.54×) < V-Net (45.599M)`.
 
@@ -76,9 +76,9 @@
 - **Figures / Source:** `results/optionA_v1_symmetric_sw050/fig_optionA_dice_distributions.png`, `fig_optionA_paired_diff_rasnet_vs_nnunet.png`, `OPTION_A_RESULTS.md`.
 - **Key Points:**
   - **Preregistered Primary `R4_tuned_tta8_top2`** (8-pass logit-avg TTA, `0.50` Gauss, Val-locked `τ*`, Top-2 CC):
-    - Dice: nnU-Net `0.8059 ± 0.0630` vs. RASNet `0.8039 ± 0.0691` (diff `-0.0021`, `95%` CI `[-0.0088, +0.0030]`, **Non-inferiority `False` at `-0.005` margin**).
-    - Primary `FA`: RASNet wins **Precision** (`+0.0218`, Holm `p = 7.23e-17`, `132W/0T/18L`); HD95/ASD n.s.
-    - Secondary `FB/FC`: RASNet beats `SegResNet` (`+0.0050` Dice, `p = 4.27e-8`) and `V-Net` (`+0.0124` Dice, `p = 3.58e-12`).
+    - Dice: Comparable Dice to `nnU-Net V2` (`0.8039 ± 0.0691` vs. `0.8059 ± 0.0630`; diff `-0.0021`, `95%` CI `[-0.0088, +0.0030]`; **not non-inferior at `-0.005` margin**; median `+0.0002`, `76/150` wins) at `6.54×` fewer parameters and `9.07×` fewer GFLOPs/patch, with a precision–recall trade-off.
+    - Primary `FA`: Higher **Precision** in `R4` (`0.8302` vs. `0.8084`, `+0.0218`, Holm `p = 7.23e-17`, `132W/0T/18L`; HD95/ASD n.s.) — **recipe- and operating-point-dependent**: explicitly disclose that nnU-Net's Val-94 locked `τ* = 0.20` hit the lower grid edge (nearly flat Val curve `0.8066–0.8098`, shifting nnU-Net toward higher recall / lower precision), Arm C was non-significant (Holm `p = 0.160`), and `R3` precision CI `[-0.0027, +0.0136]` crossed zero.
+    - Secondary `FB/FC`: `RASNet` outperforms `SegResNet` on most cases (`112/150`, Wilcoxon Holm `p = 4.27e-8`), though the mean Dice gain (`+0.0050`) is small and its `95%` bootstrap CI (`[-0.0024, +0.0121]`) includes `0` (and V1 `RASNet vs SegResNet` is confounded by LR `2e-4` vs `1e-4`, loss function, and historical `α/γ` calibration); against `V-Net`, `RASNet` gained `+0.0124` Dice (`95%` CI `[+0.0056, +0.0183]`, Holm `p = 3.58e-12`).
     - Secondary `FD`: nnU-Net retains **Recall** (`+0.0244`, Holm `p = 2.40e-17`).
   - `R1–R3` kept strictly secondary (`R1`/`R2` favor RASNet, `R3` `NI = False`).
 
@@ -93,12 +93,13 @@
 - **Key Points:**
   - `Test150` is retrospective (prior development inspection); `Val94` is a development split.
   - Non-inferiority not established under Option A `R4`; epoch-200 `p = 0.2401` is neither superiority nor equivalence.
-  - V1 training differences (patch/spacing/normalization/LR) prevent causal attribution to attention gates or capacity across frameworks.
+  - V1 training differences (patch/spacing/normalization/LR/loss/historical `α/γ` calibration) prevent causal attribution to attention gates, deep supervision, `StenosisAwareLoss`, or capacity across models; `AttentionGate3D` acts as soft per-patch spatial re-weighting, not background suppression.
+  - **V1 ablations excluded as invalid:** Legacy `ablation_attngate_best.pth` and `ablation_deepsup_best.pth` suffered a `PersistentDataset` LAS-train / RAS-val cache mismatch (`train_ablation_models_200ep.py` reused `cache/segresnet` LAS tensors during training vs. `Orientationd("RAS")` during validation, plus switched loss to `DiceCELoss` and `num_samples = 1`) and must not be cited.
   - No untouched external multi-center cohort (`unseen_66` & hospital `N = 21/32` excluded); no clinical stenosis or `FFR_CT` / HeartFlow claims.
 
 ### Slide 14 — Conclusions & Future Work (`Rasnet-v2` & External Validation)
 - **Key Points:**
-  - **V1 Takeaway:** RASNet offers a compact `4.707M`-parameter architecture with verified Precision advantages at `τ = 0.50` / Option A `R4`, faster end-to-end inference under Option A, and higher Dice/Precision than matched MONAI `SegResNet`/`V-Net`, while `nnU-Net V2` retains Recall advantages and slightly higher post-processed `R4` Dice (`0.8059` vs. `0.8039`).
+  - **V1 Takeaway:** Comparable Dice to `nnU-Net V2` (`-0.0021`, `95%` CI `[-0.0088, +0.0030]`; not non-inferior at `-0.005`; median `+0.0002`, `76/150` wins) at `6.54×` fewer parameters (`4.707M`) and `9.07×` fewer GFLOPs/patch (faster end-to-end Option A inference), with a precision–recall trade-off: higher precision in Arms A/B, Epoch-200 `Val94`, and Option A `R4` (recipe- and operating-point-dependent; Arm C Holm `p = 0.160` n.s., `R3` CI `[-0.0027, +0.0136]` crosses zero, and nnU-Net's R4 `τ* = 0.20` hit the lower grid edge on a nearly flat Val curve `0.8066–0.8098`), while `nnU-Net V2` retains Recall advantages. Epoch-200 (`p = 0.2401`) was not significantly different and establishes neither superiority nor equivalence. Against `SegResNet` in `R4`, `RASNet` wins most cases (`112/150`, Wilcoxon Holm `p = 4.27e-8`; small mean gain `+0.0050`, `95%` CI `[-0.0024, +0.0121]` includes `0`; confounded in V1, with v1 ablations excluded as invalid).
   - **Next Steps:** Controlled multi-seed symmetric training (`Rasnet-v2`; note Stage 2A/2B pilots ended in `FALLBACK` on `2026-11-16`, requiring careful pre-registered resolution before Stage 3) and prospective independent multi-center external evaluation.
 
 ---

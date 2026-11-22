@@ -28,7 +28,7 @@ import pandas as pd
 import torch
 import yaml
 
-ROOT = Path(r"C:\Thesis_RASNET")
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from benchmark.adapters.monai_models import build_model, build_transform, infer_monai_both_passes

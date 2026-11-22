@@ -95,6 +95,7 @@ def test_lock_write_is_immutable_and_load_detects_tampering(tmp_path):
     bad["grid"] = [0.3, 0.5]
     p2 = tmp_path / "tampered.json"
     p2.write_text(json.dumps(bad))
+    p2.with_suffix(".sha256").write_text(se.sha256_file(p2))   # valid sidecar -> the grid check is reached
     with pytest.raises(ValueError, match="grid"):
         se.load_lock(p2, _splits(), se.MODELS)
 

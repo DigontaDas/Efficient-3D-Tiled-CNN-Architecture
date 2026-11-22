@@ -381,6 +381,7 @@ def test_stages_2_4_5_6_end_to_end_synthetic_cpu(tmp_path: Path):
         cfg_p, case_ids_override=val_ids, precomputed_probs_by_run=s2b_probs, pairs_override=pairs_dset
     )
     assert dec["all_gates_passed"] is True
+    assert {"val94_precision_strict", "val94_n_empty_pred"} <= set(dec["locked_design"])
     assert (v2_root / "results" / "pilots_val94" / "pilot_lock_decision.md").is_file()
 
     # Stage 4A + 4B + 4C across all 20 Stage 3 runs using synthetic probs

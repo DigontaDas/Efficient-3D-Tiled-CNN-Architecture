@@ -1,0 +1,62 @@
+{
+  "audit_utc": "2026-11-22T04:59:07Z",
+  "dataset_root": "C:\\Thesis_RASNET\\secondary-imagcas-dataset",
+  "splits_file": "Phase3_Local_Integration/splits_final.json",
+  "splits_sha256": "efe3f06cfe9c7dff646224378ad4d0ea5ce50fb4bf920807b17054af4bdf953c",
+  "transform_audited": "MONAI CropForegroundd(keys=['image','label'], source_key='image', select_fn=is_positive (raw HU > 0), margin=0)",
+  "n_cases_audited": 934,
+  "n_cases_cropped_any_axis": 238,
+  "n_cases_with_gt_clipped": 0,
+  "total_gt_voxels_all_934": 104710387,
+  "total_gt_voxels_clipped_all_934": 0,
+  "min_gt_to_crop_bbox_margin_vox": 0,
+  "min_margin_case": {
+    "case_id": 415,
+    "split": "val",
+    "orig_shape": [
+      512,
+      512,
+      223
+    ],
+    "crop_shape": [
+      512,
+      512,
+      223
+    ],
+    "min_margin_vox": 0
+  },
+  "diagnostic_gt_voxels_with_raw_hu_le_0": {
+    "note": "GT voxels with raw HU <= 0 inside the bounding box are NOT clipped by CropForegroundd; reported for completeness.",
+    "n_cases_with_any": 934,
+    "total_voxels": 21206018,
+    "fraction_of_all_gt_voxels": 0.20252067256708736
+  },
+  "per_split": {
+    "train": {
+      "n_cases": 690,
+      "n_cropped_any_axis": 178,
+      "n_cases_with_clipped_gt": 0,
+      "total_gt_voxels": 77916415,
+      "total_gt_voxels_clipped": 0,
+      "min_margin_vox": 0
+    },
+    "val": {
+      "n_cases": 94,
+      "n_cropped_any_axis": 23,
+      "n_cases_with_clipped_gt": 0,
+      "total_gt_voxels": 10248581,
+      "total_gt_voxels_clipped": 0,
+      "min_margin_vox": 0
+    },
+    "test": {
+      "n_cases": 150,
+      "n_cropped_any_axis": 37,
+      "n_cases_with_clipped_gt": 0,
+      "total_gt_voxels": 16545391,
+      "total_gt_voxels_clipped": 0,
+      "min_margin_vox": 0
+    }
+  },
+  "clipped_cases": [],
+  "elapsed_seconds": 493.42
+}
