@@ -420,3 +420,21 @@ def test_eval_pipeline_widened_grid_lock_and_10k_bootstrap_stats(tmp_path: Path)
     assert "FA_primary_rasnet_vs_nnunet" in set(fam["family"])
     assert "FB_rasnet_vs_segresnet" in set(fam["family"])
     assert "FE_ablations_vs_rasnet" in set(fam["family"])
+
+
+def test_restore_rng_state_handles_cuda_mapped_tensors():
+    """torch.load(..., map_location='cuda') moves ByteTensors to GPU; _restore_rng_state must restore on CPU."""
+    from retrain_v1_1.src.train import _capture_rng_state, _restore_rng_state
+
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+    state = _capture_rng_state()
+    # Simulate torch.load(path, map_location=torch.device('cuda')) moving every tensor to GPU
+    gpu_state = {
+        "python": state["python"],
+        "numpy": state["numpy"],
+        "torch_cpu": state["torch_cpu"].to("cuda"),
+        "torch_cuda": [t.to("cuda") for t in state["torch_cuda"]],
+    }
+    _restore_rng_state(gpu_state)
+
