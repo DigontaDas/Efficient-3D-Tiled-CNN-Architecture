@@ -1,0 +1,48 @@
+{
+  "amp_dtype": "torch.bfloat16",
+  "best_epoch": 200,
+  "best_model_path": "C:\\Thesis_RASNET\\retrain_v1_1\\checkpoints\\rasnet_v1_1\\best_model.pth",
+  "best_model_sha256": "efa090871fa0ec6bd4b6f57cddb1d343f374488c8e0c14a9481b5efc6e092ab8",
+  "best_val_dice": 0.7940380863944002,
+  "completed_utc": "2026-11-22T12:57:30Z",
+  "config_sha256": "b2cf0c41609d1af042c2ddce2505d20d02f8c60abb398b19afd72d0a89263c4d",
+  "elapsed_sec": 18366.8,
+  "env": {
+    "SimpleITK": "2.5.7",
+    "cc3d": "4.1.1",
+    "cuda": "12.6",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "numpy": "2.5.4",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.3",
+    "torch": "2.14.1+cu126"
+  },
+  "epochs_completed": 200,
+  "final_model_path": "C:\\Thesis_RASNET\\retrain_v1_1\\checkpoints\\rasnet_v1_1\\final_epoch200.pth",
+  "final_model_sha256": "efa090871fa0ec6bd4b6f57cddb1d343f374488c8e0c14a9481b5efc6e092ab8",
+  "git": {
+    "code_paths": [
+      "retrain_v1_1/src",
+      "retrain_v1_1/configs",
+      "benchmark"
+    ],
+    "commit": "9d108e2183a75105966db1a03189257fc3add893",
+    "dirty_any": true,
+    "dirty_code": false
+  },
+  "model_name": "rasnet_v1_1",
+  "model_spec": {
+    "arch": "rasnet_v1_1",
+    "dropout_prob": 0.1,
+    "enable_attention": true,
+    "enable_ds": true,
+    "init_filters": 16,
+    "name": "rasnet_v1_1",
+    "train": true
+  },
+  "n_params": 4706657,
+  "seed": 42,
+  "transform_sha256": "ac5dfd145db81bfa701d78517bcd46251097c37298ee7ac0a275a44306d8307a"
+}

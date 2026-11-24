@@ -1,0 +1,45 @@
+{
+  "args": {
+    "allow_dirty": "False",
+    "cache_workers": "4",
+    "config": "C:\\Thesis_RASNET\\retrain_v1_1\\configs\\strategy_a.yaml",
+    "device": "cuda",
+    "models": "None",
+    "smoke": "0",
+    "stage": "cache"
+  },
+  "cache_summary": {
+    "already_cached": 0,
+    "built_now": 784,
+    "cache_dir": "C:\\Thesis_RASNET\\retrain_v1_1\\cache\\tf_ac5dfd145db81bfa",
+    "cache_size_gb": 51.24,
+    "free_disk_gb": 270.78,
+    "n_target": 784,
+    "transform_sha256": "ac5dfd145db81bfa701d78517bcd46251097c37298ee7ac0a275a44306d8307a",
+    "updated_utc": "2026-11-22T07:50:33Z"
+  },
+  "env": {
+    "SimpleITK": "2.5.7",
+    "cc3d": "4.1.1",
+    "cuda": "12.6",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "numpy": "2.5.4",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.3",
+    "torch": "2.14.1+cu126"
+  },
+  "git": {
+    "code_paths": [
+      "retrain_v1_1/src",
+      "retrain_v1_1/configs",
+      "benchmark"
+    ],
+    "commit": "9d108e2183a75105966db1a03189257fc3add893",
+    "dirty_any": false,
+    "dirty_code": false
+  },
+  "stage": "cache",
+  "timestamp_utc": "2026-11-22T07:50:33Z"
+}

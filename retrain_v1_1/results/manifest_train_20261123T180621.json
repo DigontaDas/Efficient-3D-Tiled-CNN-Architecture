@@ -1,0 +1,42 @@
+{
+  "args": {
+    "allow_dirty": "False",
+    "cache_workers": "4",
+    "config": "C:\\Thesis_RASNET\\retrain_v1_1\\configs\\strategy_a.yaml",
+    "device": "cuda",
+    "models": "None",
+    "smoke": "0",
+    "stage": "train"
+  },
+  "env": {
+    "SimpleITK": "2.5.7",
+    "cc3d": "4.1.1",
+    "cuda": "12.6",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "numpy": "2.5.4",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.3",
+    "torch": "2.14.1+cu126"
+  },
+  "git": {
+    "code_paths": [
+      "retrain_v1_1/src",
+      "retrain_v1_1/configs",
+      "benchmark"
+    ],
+    "commit": "e3e8cd4dc97b41f3ccbc480b51f37644e16abf0c",
+    "dirty_any": true,
+    "dirty_code": false
+  },
+  "stage": "train",
+  "timestamp_utc": "2026-11-23T18:06:21Z",
+  "trained_models": [
+    "rasnet_v1_1",
+    "segresnet_v1_1",
+    "vnet_v1_1",
+    "ablation_no_attn_v1_1",
+    "ablation_no_ds_v1_1"
+  ]
+}

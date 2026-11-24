@@ -1,0 +1,11 @@
+{
+  "best_epoch": 200,
+  "best_val_dice": 0.7907752943595354,
+  "current_model": "ablation_no_ds_v1_1",
+  "epoch": 200,
+  "free_disk_gb": 259.46,
+  "last_train_loss": 0.286248,
+  "state": "model_done",
+  "total_epochs": 200,
+  "updated_utc": "2026-11-23T18:06:19Z"
+}

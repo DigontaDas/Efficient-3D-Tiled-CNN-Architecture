@@ -1,0 +1,36 @@
+{
+  "args": {
+    "allow_dirty": "False",
+    "cache_workers": "4",
+    "config": "C:\\Thesis_RASNET\\retrain_v1_1\\configs\\strategy_a.yaml",
+    "device": "cuda",
+    "models": "None",
+    "smoke": "0",
+    "stage": "val"
+  },
+  "env": {
+    "SimpleITK": "2.5.7",
+    "cc3d": "4.1.1",
+    "cuda": "12.6",
+    "gpu": "NVIDIA GeForce RTX 4080 SUPER",
+    "monai": "1.6.1",
+    "nnunetv2": "2.8.1",
+    "numpy": "2.5.4",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.3",
+    "torch": "2.14.1+cu126"
+  },
+  "git": {
+    "code_paths": [
+      "retrain_v1_1/src",
+      "retrain_v1_1/configs",
+      "benchmark"
+    ],
+    "commit": "e3e8cd4dc97b41f3ccbc480b51f37644e16abf0c",
+    "dirty_any": true,
+    "dirty_code": false
+  },
+  "stage": "val",
+  "timestamp_utc": "2026-11-24T08:20:58Z",
+  "val_grid_csv": "C:\\Thesis_RASNET\\retrain_v1_1\\results\\val_grid_scores.csv"
+}

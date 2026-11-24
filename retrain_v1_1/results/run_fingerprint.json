@@ -1,0 +1,8 @@
+{
+  "code_digest": "a86c4ad798a01768337a39ee408d634115ef24ffa3167bd267bdea2058165d2c",
+  "device": "cuda",
+  "monai": "1.6.1",
+  "protocol_version": "strategy-a-retrain-v1.1",
+  "sw_batch_size": 4,
+  "torch": "2.14.1+cu126"
+}
