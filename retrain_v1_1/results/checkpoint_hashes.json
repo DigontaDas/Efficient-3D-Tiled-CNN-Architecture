@@ -1,0 +1,65 @@
+{
+  "models": [
+    {
+      "best_epoch": 200,
+      "best_model_path": "retrain_v1_1/checkpoints/rasnet_v1_1/best_model.pth",
+      "best_sha256": "efa090871fa0ec6bd4b6f57cddb1d343f374488c8e0c14a9481b5efc6e092ab8",
+      "best_size_bytes": 18867245,
+      "best_val94_dice": 0.7940380863944002,
+      "final_model_path": "retrain_v1_1/checkpoints/rasnet_v1_1/final_epoch200.pth",
+      "final_sha256": "efa090871fa0ec6bd4b6f57cddb1d343f374488c8e0c14a9481b5efc6e092ab8",
+      "final_size_bytes": 18867245,
+      "model": "rasnet_v1_1",
+      "n_params": 4706657
+    },
+    {
+      "best_epoch": 200,
+      "best_model_path": "retrain_v1_1/checkpoints/segresnet_v1_1/best_model.pth",
+      "best_sha256": "a512e2f72567f4f3a18a1b3072fdb5e3a48023081200873633a26e5b88d39f48",
+      "best_size_bytes": 18836138,
+      "best_val94_dice": 0.7871602559901636,
+      "final_model_path": "retrain_v1_1/checkpoints/segresnet_v1_1/final_epoch200.pth",
+      "final_sha256": "a512e2f72567f4f3a18a1b3072fdb5e3a48023081200873633a26e5b88d39f48",
+      "final_size_bytes": 18836138,
+      "model": "segresnet_v1_1",
+      "n_params": 4700914
+    },
+    {
+      "best_epoch": 200,
+      "best_model_path": "retrain_v1_1/checkpoints/vnet_v1_1/best_model.pth",
+      "best_sha256": "f7f8577274d4deb74e989f6352bfc729b9f235e0bf0cc002d60d27520592ceea",
+      "best_size_bytes": 182478839,
+      "best_val94_dice": 0.7782805441930754,
+      "final_model_path": "retrain_v1_1/checkpoints/vnet_v1_1/final_epoch200.pth",
+      "final_sha256": "f7f8577274d4deb74e989f6352bfc729b9f235e0bf0cc002d60d27520592ceea",
+      "final_size_bytes": 182478839,
+      "model": "vnet_v1_1",
+      "n_params": 45599452
+    },
+    {
+      "best_epoch": 200,
+      "best_model_path": "retrain_v1_1/checkpoints/ablation_no_attn_v1_1/best_model.pth",
+      "best_sha256": "a146dda1ed79b97e798d58969b8ee26e3e331df61526fb8b7bf493a90b0b84d5",
+      "best_size_bytes": 18838302,
+      "best_val94_dice": 0.7916652918474072,
+      "final_model_path": "retrain_v1_1/checkpoints/ablation_no_attn_v1_1/final_epoch200.pth",
+      "final_sha256": "a146dda1ed79b97e798d58969b8ee26e3e331df61526fb8b7bf493a90b0b84d5",
+      "final_size_bytes": 18838302,
+      "model": "ablation_no_attn_v1_1",
+      "n_params": 4701110
+    },
+    {
+      "best_epoch": 200,
+      "best_model_path": "retrain_v1_1/checkpoints/ablation_no_ds_v1_1/best_model.pth",
+      "best_sha256": "819f4035f3c97d79b76d7c89526b0f6a2a4bc1d66e1ca9bd2371eef8dac80ac3",
+      "best_size_bytes": 18865205,
+      "best_val94_dice": 0.7907752943595354,
+      "final_model_path": "retrain_v1_1/checkpoints/ablation_no_ds_v1_1/final_epoch200.pth",
+      "final_sha256": "819f4035f3c97d79b76d7c89526b0f6a2a4bc1d66e1ca9bd2371eef8dac80ac3",
+      "final_size_bytes": 18865205,
+      "model": "ablation_no_ds_v1_1",
+      "n_params": 4706461
+    }
+  ],
+  "recorded_utc": "2026-11-23T18:06:54Z"
+}

@@ -21,6 +21,18 @@ Recovered from `checkpoints_200ep.zip.001`..`.010` into `recovered_checkpoints/v
 | **RASNet** | `recovered_checkpoints/v1_epoch200_20261117_041500Z/rasnet_last.pth` | `18,871,718` | None (`embedded_epoch_metadata_present=False`) | Raw `OrderedDict` (`114` keys, `4,706,772` params; strict `load_state_dict` OK) | Supported by `train_rasnet_200ep.py:268` + contiguous 200-epoch `logs/rasnet_200ep_log.csv` + `CosineAnnealingLR` alignment + archive timestamp alignment (`2026-09-09 03:31:22`, `5120.0 s` delta from ep 160) | `71c9e5ef4a02849686c99ccb2d1544ff78c78187e1c0d53e7b22884c708c1b95` | **VERIFIED** |
 | **nnU-Net V2** | `recovered_checkpoints/v1_epoch200_20261117_041500Z/nnunet_last.pt` (also `nnunet_native_model/.../fold_0/checkpoint_final.pth`) | `246,472,688` | `current_epoch=200` (`logging` len `200`, `_best_ema=0.816239`) | Native `nnUNetv2` checkpoint dict (`network_weights` with `292` keys — `88` shared-storage aliases, `30,785,994` unique params) | Embedded checkpoint metadata (`current_epoch=200`, `trainer_name='nnUNetTrainer_200epochs'`) + `logs/nnunet_200ep_log.csv` | `2105bd7238fff7485f1a8d72622f977f635f441e6d44863920c85709b02ffec2` | **VERIFIED** |
 
+## 1B. Strategy A Upgraded 200-Epoch Checkpoints (`retrain_v1_1`, `BENCHMARK_PREREGISTRATION.md` §7)
+
+Trained on `2026-11-22..23` under Amendment §7 (`seed=42`, `200` epochs, native `[0.349609375, 0.349609375, 0.5] mm` spacing, `160×160×96` patch, `CTNormalization`, full 3D augmentations, `DiceCELoss(include_background=False, softmax=True, batch=True)`, `AdamW(lr=3e-4, wd=1e-5)` + 5-ep warmup cosine, `bfloat16` AMP, `clip_grad_norm_(1.0)`). All stored in gitignored `retrain_v1_1/checkpoints/<model>/` (`best_model.pth` & `final_epoch200.pth` identical since all 5 peaked at epoch `200`); `nnU-Net V2` reuses frozen `nnunet_best.pt` (`9accddf2...`) above.
+
+| Model | Path | Size (Bytes) | Params | Best Epoch | Best Raw `Val-94` Dice (`τ=0.50`, no CC) | SHA-256 Digest (`best_model.pth` / `final_epoch200.pth`) | Status |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| **`rasnet_v1_1`** | `retrain_v1_1/checkpoints/rasnet_v1_1/best_model.pth` | `18,867,245` | `4,706,657` | `200` | `0.794038` | `efa090871fa0ec6bd4b6f57cddb1d343f374488c8e0c14a9481b5efc6e092ab8` | **VERIFIED** |
+| **`segresnet_v1_1`** | `retrain_v1_1/checkpoints/segresnet_v1_1/best_model.pth` | `18,836,138` | `4,700,914` | `200` | `0.787160` | `a512e2f72567f4f3a18a1b3072fdb5e3a48023081200873633a26e5b88d39f48` | **VERIFIED** |
+| **`vnet_v1_1`** | `retrain_v1_1/checkpoints/vnet_v1_1/best_model.pth` | `182,478,839` | `45,599,452` | `200` | `0.778281` | `f7f8577274d4deb74e989f6352bfc729b9f235e0bf0cc002d60d27520592ceea` | **VERIFIED** |
+| **`ablation_no_attn_v1_1`** | `retrain_v1_1/checkpoints/ablation_no_attn_v1_1/best_model.pth` | `18,838,302` | `4,701,110` | `200` | `0.791665` | `a146dda1ed79b97e798d58969b8ee26e3e331df61526fb8b7bf493a90b0b84d5` | **VERIFIED** |
+| **`ablation_no_ds_v1_1`** | `retrain_v1_1/checkpoints/ablation_no_ds_v1_1/best_model.pth` | `18,865,205` | `4,706,461` | `200` | `0.790775` | `819f4035f3c97d79b76d7c89526b0f6a2a4bc1d66e1ca9bd2371eef8dac80ac3` | **VERIFIED** |
+
 ---
 
 ## 2. Training Scripts, Splits & nnU-Net Metadata Provenance
